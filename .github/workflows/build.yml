@@ -1,11 +1,14 @@
 name: Build
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   workflow_dispatch:
   push:
-    branches: [ master ]
+    branches: [ master, dev ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, dev ]
 
 jobs:
   build:
@@ -19,10 +22,33 @@ jobs:
       uses: actions/setup-dotnet@v5
       with:
         dotnet-version: 9.0.x
+        cache: true
+        cache-dependency-path: '**/*.csproj'
     - name: Restore
       run: dotnet restore
+    - name: Restore identity package signing key
+      env:
+        LLT_CERT_PFX: ${{ secrets.LLT_CERT_PFX }}
+      run: |
+        if (-not $env:LLT_CERT_PFX) {
+          Write-Error "Missing LLT_CERT_PFX secret. The identity MSIX package cannot be signed."
+          exit 1
+        }
+
+        [IO.File]::WriteAllBytes("LenovoLegionToolkit.pfx", [Convert]::FromBase64String($env:LLT_CERT_PFX))
+      shell: powershell
     - name: Build
+      env:
+        LLT_CERT_PASSWORD: ${{ secrets.LLT_CERT_PASSWORD }}
       run: .\make_action.bat
+    - name: Verify installer
+      run: |
+        $installerPath = "build_installer\LenovoLegionToolkitSetup.exe"
+        if (-not (Test-Path $installerPath)) {
+          Write-Error "Installer file not found at $installerPath"
+          exit 1
+        }
+      shell: powershell
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:

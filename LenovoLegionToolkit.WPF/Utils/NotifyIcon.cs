@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -8,11 +8,11 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Forms;
 using System.Windows.Interop;
-using LenovoLegionToolkit.Lib.Utils;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.Shell;
 using Windows.Win32.UI.WindowsAndMessaging;
+using LenovoLegionToolkit.Lib.Utils;
 using Wpf.Ui.Controls;
 
 namespace LenovoLegionToolkit.WPF.Utils;
@@ -174,7 +174,7 @@ public class NotifyIcon : NativeWindow, IDisposable
 
         _showToolTipCancellationTokenSource?.Cancel();
 
-        _currentToolTipWindow?.Hide();
+        _currentToolTipWindow?.Close();
         _currentToolTipWindow = null;
     }
 
@@ -209,8 +209,7 @@ public class NotifyIcon : NativeWindow, IDisposable
                 cbSize = (uint)Marshal.SizeOf<NOTIFYICONDATAW>(),
                 uID = _id,
                 uCallbackMessage = TRAY_MESSAGE_ID,
-                uFlags = NOTIFY_ICON_DATA_FLAGS.NIF_MESSAGE | NOTIFY_ICON_DATA_FLAGS.NIF_TIP,
-                szTip = " "
+                uFlags = NOTIFY_ICON_DATA_FLAGS.NIF_MESSAGE
             };
 
             if (_visible && Handle == IntPtr.Zero)
@@ -224,10 +223,14 @@ public class NotifyIcon : NativeWindow, IDisposable
                 data.hIcon = new HICON(_icon.Handle);
             }
 
-            if (_text is not null && _toolTipWindow is null)
+            if (_text is not null)
             {
-                data.uFlags |= NOTIFY_ICON_DATA_FLAGS.NIF_SHOWTIP;
+                data.uFlags |= NOTIFY_ICON_DATA_FLAGS.NIF_TIP;
                 data.szTip = _text;
+                if (_toolTipWindow is null)
+                {
+                    data.uFlags |= NOTIFY_ICON_DATA_FLAGS.NIF_SHOWTIP;
+                }
             }
 
             switch (_visible, _added)

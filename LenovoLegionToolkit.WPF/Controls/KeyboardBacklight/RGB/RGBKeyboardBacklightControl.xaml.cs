@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
@@ -28,6 +28,13 @@ public partial class RGBKeyboardBacklightControl
     private readonly RGBKeyboardBacklightListener _listener = IoCContainer.Resolve<RGBKeyboardBacklightListener>();
     private readonly VantageDisabler _vantageDisabler = IoCContainer.Resolve<VantageDisabler>();
 
+
+    private RGBColor[]? _pendingZoneColors;
+    private RGBKeyboardBacklightEffect? _pendingEffect;
+    private RGBKeyboardBacklightSpeed? _pendingSpeed;
+    private RGBKeyboardBacklightBrightness? _pendingBrightness;
+    private bool _hasPendingChanges;
+
     protected override bool DisablesWhileRefreshing => false;
 
     public RGBKeyboardBacklightControl()
@@ -36,7 +43,9 @@ public partial class RGBKeyboardBacklightControl
 
         _listener.Changed += Listener_Changed;
 
+
         SizeChanged += RGBKeyboardBacklightControl_SizeChanged;
+        Unloaded += RGBKeyboardBacklightControl_Unloaded;
 
         MessagingCenter.Subscribe<RGBKeyboardBacklightChangedMessage>(this, () => Dispatcher.InvokeTask(async () =>
         {
@@ -45,6 +54,22 @@ public partial class RGBKeyboardBacklightControl
 
             await RefreshAsync();
         }));
+
+
+    }
+
+    private void RGBKeyboardBacklightControl_Unloaded(object sender, RoutedEventArgs e)
+    {
+
+    }
+
+
+
+
+
+    private void UpdateApplyButtonState()
+    {
+        _applyButton.IsEnabled = _hasPendingChanges;
     }
 
     private void Listener_Changed(object? sender, EventArgs e) => Dispatcher.Invoke(async () =>
@@ -52,8 +77,19 @@ public partial class RGBKeyboardBacklightControl
         if (!IsLoaded || !IsVisible)
             return;
 
+        ClearPendingChanges();
         await RefreshAsync();
     });
+
+    private void ClearPendingChanges()
+    {
+        _pendingZoneColors = null;
+        _pendingEffect = null;
+        _pendingSpeed = null;
+        _pendingBrightness = null;
+        _hasPendingChanges = false;
+        UpdateApplyButtonState();
+    }
 
     private void RGBKeyboardBacklightControl_SizeChanged(object sender, SizeChangedEventArgs e)
     {
@@ -71,6 +107,8 @@ public partial class RGBKeyboardBacklightControl
         if (sender is not Button presetButton || presetButton.Appearance == ControlAppearance.Primary)
             return;
 
+        ClearPendingChanges();
+
         var selectedPreset = (RGBKeyboardBacklightPreset)presetButton.Tag;
         var state = await _controller.GetStateAsync();
         await _controller.SetStateAsync(new(selectedPreset, state.Presets));
@@ -86,20 +124,64 @@ public partial class RGBKeyboardBacklightControl
         foreach (var zone in Zones)
             zone.SelectedColor = pickerControl.SelectedColor;
 
-        await SaveState();
-        await RefreshAsync();
+        UpdatePendingZoneColors();
+
     }
 
-    private async void CardControl_Changed(object? sender, EventArgs e)
+    private async void ApplyButton_Click(object sender, RoutedEventArgs e)
     {
+        await CommitChangesAsync();
+    }
+
+    private async Task CommitChangesAsync()
+    {
+        if (!_hasPendingChanges)
+            return;
+
         await SaveState();
         await RefreshAsync();
+        ClearPendingChanges();
     }
+
+    private void CardControl_Changed(object? sender, EventArgs e)
+    {
+        UpdatePendingState();
+
+    }
+
+    private void UpdatePendingState()
+    {
+        UpdatePendingZoneColors();
+
+        _pendingEffect = _effectControl.SelectedItem;
+        _pendingSpeed = _speedControl.SelectedItem;
+        _pendingBrightness = _brightnessControl.SelectedItem;
+        _hasPendingChanges = true;
+
+        UpdateApplyButtonState();
+    }
+
+    private void UpdatePendingZoneColors()
+    {
+        _pendingZoneColors =
+        [
+            _zone1ColorPicker.SelectedColor.ToRGBColor(),
+            _zone2ColorPicker.SelectedColor.ToRGBColor(),
+            _zone3ColorPicker.SelectedColor.ToRGBColor(),
+            _zone4ColorPicker.SelectedColor.ToRGBColor()
+        ];
+        _hasPendingChanges = true;
+        UpdateApplyButtonState();
+    }
+
+
 
     protected override async Task OnRefreshAsync()
     {
         if (!await _controller.IsSupportedAsync())
             throw new InvalidOperationException("RGB Keyboard does not seem to be supported");
+
+
 
         var vantageStatus = await _vantageDisabler.GetStatusAsync();
         if (vantageStatus == SoftwareStatus.Enabled)
@@ -122,6 +204,8 @@ public partial class RGBKeyboardBacklightControl
             _zone2Control.IsEnabled = false;
             _zone3Control.IsEnabled = false;
             _zone4Control.IsEnabled = false;
+
+            _applyButton.IsEnabled = false;
 
             Visibility = Visibility.Visible;
 
@@ -157,6 +241,8 @@ public partial class RGBKeyboardBacklightControl
             _zone2Control.IsEnabled = false;
             _zone3Control.IsEnabled = false;
             _zone4Control.IsEnabled = false;
+
+            _applyButton.IsEnabled = false;
 
             return;
         }
@@ -199,6 +285,8 @@ public partial class RGBKeyboardBacklightControl
         _zone2Control.IsEnabled = zonesEnabled;
         _zone3Control.IsEnabled = zonesEnabled;
         _zone4Control.IsEnabled = zonesEnabled;
+
+        UpdateApplyButtonState();
     }
 
     protected override void OnFinishedLoading() { }

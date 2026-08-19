@@ -2,7 +2,8 @@
 
 # 拯救者工具箱 Lenovo Legion Toolkit
 
-[![Build](https://github.com/BartoszCichecki/LenovoLegionToolkit/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/BartoszCichecki/LenovoLegionToolkit/actions/workflows/build.yml)
+[![Build](https://img.shields.io/github/actions/workflow/status/LenovoLegionToolkit-Team/LenovoLegionToolkit/build.yml?branch=master&logo=github&logoColor=white)](https://github.com/LenovoLegionToolkit-Team/LenovoLegionToolkit/actions)
+[![Downloads](https://img.shields.io/github/downloads/LenovoLegionToolkit-Team/LenovoLegionToolkit/total?color=brightgreen)](https://github.com/LenovoLegionToolkit-Team/LenovoLegionToolkit/releases)
 [![Crowdin](https://badges.crowdin.net/llt/localized.svg)](https://crowdin.com/project/llt)
 [![Join Discord](https://img.shields.io/discord/761178912230473768?label=Legion%20Series%20Discord)](https://discord.com/invite/legionseries)
 <a href="https://hellogithub.com/repository/dd55be3ac0c146208259f17b29d2162f" target="_blank"><img src="https://abroad.hellogithub.com/v1/widgets/recommend.svg?rid=dd55be3ac0c146208259f17b29d2162f&claim_uid=LBbuUlZqTIm1JAP&theme=small" alt="Featured｜HelloGitHub" /></a>
@@ -19,9 +20,9 @@
 
 ~~**中文用户可加入[拯救者工具箱 QQ 频道](https://pd.qq.com/s/jj0737)，频道内推送正式版/测试版更新并附带国内镜像加速下载链接。**~~
 
-**鉴于原作者已经归档，本仓库不会创建类似渠道。如遇到任何问题请于 [Github Issue](https://github.com/XKaguya/LenovoLegionToolkit/issues) 进行反馈，谢谢。**
+**鉴于原作者已经归档，本仓库不会创建类似渠道。如遇到任何问题请于 [Github Issue](https://github.com/LenovoLegionToolkit-Team/LenovoLegionToolkit/issues) 进行反馈，谢谢。**
 
-<img src="assets/screenshot_zh_hans.png" width="700" />
+<img src="assets/Main_DarkMode.png" width="700" />
 
 &nbsp;
 
@@ -44,7 +45,7 @@
 
 ## 下载
 
-- 你可以在这里下载最新版本：[发行版页面 Releases page](https://github.com/XKaguya/LenovoLegionToolkit/releases/latest)。
+- 你可以在这里下载最新版本：[发行版页面 Releases page](https://github.com/LenovoLegionToolkit-Team/LenovoLegionToolkit/releases/latest)。
 
 > [!TIP]
 > 如果你正在寻找一个 Lenovo Vantage 在 Linux 系统下的替代品，请查看 [LenovoLegionLinux](https://github.com/johnfanv2/LenovoLegionLinux) 项目。
@@ -69,24 +70,24 @@
 
 如果拯救者工具箱安装程序没有正确安装 .NET 依赖，则请按照以下步骤手动安装：
 
-1. 打开 https://dotnet.microsoft.com/zh-cn/download/dotnet/8.0
+1. 打开 https://dotnet.microsoft.com/zh-cn/download/dotnet/9.0
 2. 找到 “.NET 桌面运行时” 一栏；
 3. 点击安装程序下的“X64”一栏下载安装程序；
 4. 运行安装程序并按照指引进行安装。
 
 > [!NOTE]
-> 如果你是使用 Scoop 安装了 LLT，.NET 8 依赖应该已经被自动安装。如果它没有被安装或 LLT 无法正常启动，可以使用 `scoop update` 以更新所有软件包并加上 `--force` 参数以强制重新安装 LLT。
+> 如果你是使用 Scoop 安装了 LLT，.NET 9 依赖应该已经被自动安装。如果它没有被安装或 LLT 无法正常启动，可以使用 `scoop update` 以更新所有软件包并加上 `--force` 参数以强制重新安装 LLT。
 
 
 在完成这些步骤后，你可以打开终端并输入： `dotnet --info`。在输出中寻找 "已安装的 .NET 运行时 "部分，你应该能看到类似的内容：
 
-`Microsoft.NETCore.App 8.0.0 [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]`
+`Microsoft.NETCore.App 9.0.0 [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]`
 
 和
 
-`Microsoft.WindowsDesktop.App 8.0.0 [C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App]`
+`Microsoft.WindowsDesktop.App 9.0.0 [C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App]`
 
-确切的版本号可能不同，但只要是`8.x.x`就应该没问题。如果经过上述步骤确认后，拯救者工具箱在启动时仍然报错提示找不到 .NET 之类的信息，那么就是你的机器或系统的问题，而不是拯救者工具箱的问题。
+确切的版本号可能不同，但只要是`9.x.x`就应该没问题。如果经过上述步骤确认后，拯救者工具箱在启动时仍然报错提示找不到 .NET 之类的信息，那么就是你的机器或系统的问题，而不是拯救者工具箱的问题。
 
 #### 想要帮助我们测试？
 
@@ -98,7 +99,7 @@
 
 拯救者工具箱适配 2020 款及其之后的拯救者机型。
 
-一些功能在 2020 款之前发布的机型和 Ideapad Gaming 3 笔记本可以正常工作（或者说大部分工作），但可能会遇到一些小问题。这里是测试过支持的型号列表 [Compatibility.cs](https://github.com/XKaguya/LenovoLegionToolkit/blob/master/LenovoLegionToolkit.Lib/Utils/Compatibility.cs)。
+一些功能在 2020 款之前发布的机型和 Ideapad Gaming 3 笔记本可以正常工作（或者说大部分工作），但可能会遇到一些小问题。这里是测试过支持的型号列表 [Compatibility.cs](https://github.com/LenovoLegionToolkit-Team/LenovoLegionToolkit/blob/master/LenovoLegionToolkit.Lib/Utils/Compatibility.cs)。
 
 如果你在启动时看到不兼容弹窗，你可以查看底部的*贡献*部分，查看你能否帮助我适配你的机型。谨记我没有那么多的笔记本型号，所以一些功能我无法适配。
 
@@ -351,14 +352,7 @@ LLT 会自动在进程运行环境内添加一些可被访问的环境变量。�
 
 ## 赞助
 
-开发不易，如果你觉得拯救者工具箱不错的话，可以考虑赞助以支持开发。
-
-[使用PayPal赞助](https://www.paypal.com/donate/?hosted_button_id=22AZE2NBP3HTL)
-
-<img src="LenovoLegionToolkit.WPF/Assets/Donate/paypal_qr.png" width="200" alt="PayPal QR code" />
-
-> [!NOTE]
-> 虽然原作者已经归档，但是这部分内容我不会进行修改或删除。
+开发不易，如果你觉得拯救者工具箱不错的话，可以考虑通过 GitHub 赞助按钮来支持开发。
 
 ## 贡献者
 
@@ -395,24 +389,55 @@ LLT 会自动在进程运行环境内添加一些可被访问的环境变量。�
 
 ## FAQ
 
-* [为什么即使我已经卸载了 Vantage，我依然可以看到它正在运行？](#为什么即使我已经卸载了-Vantage，我依然可以看到它正在运行？)
-* [为什么我的杀毒软件报告安装程序含有病毒/木马/恶意软件？](#为什么我的杀毒软件报告安装程序含有病毒/木马/恶意软件？)
-* [我能自定义热键吗？](#我能自定义热键吗？)
-* [我可以自定义节能模式充电阈值吗？](#我可以自定义节能模式充电阈值吗？)
-* [我可以更改安静，均衡及野兽模式的风扇策略吗？](#我可以更改安静，均衡及野兽模式的风扇策略吗？)
-* [更换主板后提示不兼容？](#更换主板后提示不兼容？)
-* [为什么我无法在使用电池供电时切换到野兽与自定义模式？](#为什么我无法在使用电池供电时切换到野兽与自定义模式？)
-* [我可以在使用拯救者工具箱时使用其他RGB软件吗？](#我可以在使用拯救者工具箱时使用其他RGB软件吗？)
-* [支持 iCue RGB 键盘吗？](#支持-iCue-RGB-键盘吗？)
-* [能不能多增加一些 RGB 效果？](#能不能多增加一些-RGB-效果？)
-* [2022 款之前的机器能否自定义调节风扇曲线？](#2022-款之前的机器能否自定义调节风扇曲线？)
-* [为啥在启用 Legion AI 引擎后切换性能模式看起来似乎有些问题？](#为啥在启用-Legion-AI-引擎后切换性能模式看起来似乎有些问题？)
-* [为何即使自动化配置正确，游戏检测仍无法正常触发？](#为何即使自动化配置正确，游戏检测仍无法正常触发？)
-* [为什么将鼠标悬停在拯救者工具箱托盘图标上却看不到自定义工具提示？](#为什么将鼠标悬停在拯救者工具箱托盘图标上却看不到自定义工具提示？)
-* [我在哪里可以找到 CPU 睿频模式的设置？](#我在哪里可以找到-CPU-睿频模式的设置？)
-* [如果我在对 GPU 进行超频时超过了阈值，该怎么办？](#如果我在对-GPU-进行超频时超过了阈值，该怎么办？)
-* [我的开机画面为什么没有生效？](#我的开机画面为什么没有生效？)
-* [为什么使用智能 Fn 锁时会出现卡顿？](#为什么使用智能-Fn-锁时会出现卡顿？)
+- [拯救者工具箱 Lenovo Legion Toolkit](#拯救者工具箱-lenovo-legion-toolkit)
+- [目录](#目录)
+	- [免责声明](#免责声明)
+	- [下载](#下载)
+			- [接下来的步骤](#接下来的步骤)
+			- [驱动依赖](#驱动依赖)
+			- [在安装 .NET 依赖时出现问题？](#在安装-net-依赖时出现问题)
+			- [想要帮助我们测试？](#想要帮助我们测试)
+	- [兼容性](#兼容性)
+		- [联想软件兼容](#联想软件兼容)
+		- [备注](#备注)
+	- [功能介绍](#功能介绍)
+		- [自定义模式](#自定义模式)
+		- [RGB 和灯光控制](#rgb-和灯光控制)
+		- [混合模式和显卡工作模式](#混合模式和显卡工作模式)
+		- [强制休眠英伟达显卡](#强制休眠英伟达显卡)
+		- [超频英伟达独立显卡](#超频英伟达独立显卡)
+		- [Windows 电源计划和 Windows 性能模式](#windows-电源计划和-windows-性能模式)
+		- [开机画面](#开机画面)
+		- [在自动化中运行程序或脚本](#在自动化中运行程序或脚本)
+			- [环境变量](#环境变量)
+			- [程序输出](#程序输出)
+		- [命令行界面](#命令行界面)
+	- [赞助](#赞助)
+	- [贡献者](#贡献者)
+	- [FAQ](#faq)
+			- [为什么即使我已经卸载了 Vantage，我依然可以看到它正在运行？](#为什么即使我已经卸载了-vantage我依然可以看到它正在运行)
+			- [为什么我的杀毒软件报告安装程序含有病毒/木马/恶意软件？](#为什么我的杀毒软件报告安装程序含有病毒木马恶意软件)
+			- [我能自定义热键吗？](#我能自定义热键吗)
+			- [我可以自定义节能模式充电阈值吗？](#我可以自定义节能模式充电阈值吗)
+			- [我可以更改安静，均衡及野兽模式的风扇策略吗？](#我可以更改安静均衡及野兽模式的风扇策略吗)
+			- [更换主板后提示不兼容？](#更换主板后提示不兼容)
+			- [为什么我无法在使用电池供电时切换到野兽与自定义模式？](#为什么我无法在使用电池供电时切换到野兽与自定义模式)
+			- [我可以在使用拯救者工具箱时使用其他RGB软件吗？](#我可以在使用拯救者工具箱时使用其他rgb软件吗)
+			- [支持 iCue RGB 键盘吗？](#支持-icue-rgb-键盘吗)
+			- [能不能多增加一些 RGB 效果？](#能不能多增加一些-rgb-效果)
+			- [2022 款之前的机器能否自定义调节风扇曲线？](#2022-款之前的机器能否自定义调节风扇曲线)
+			- [为啥在启用 Legion AI 引擎后切换性能模式看起来似乎有些问题？](#为啥在启用-legion-ai-引擎后切换性能模式看起来似乎有些问题)
+			- [为何即使自动化配置正确，游戏检测仍无法正常触发？](#为何即使自动化配置正确游戏检测仍无法正常触发)
+			- [为什么将鼠标悬停在拯救者工具箱托盘图标上却看不到自定义工具提示？](#为什么将鼠标悬停在拯救者工具箱托盘图标上却看不到自定义工具提示)
+			- [我在哪里可以找到 CPU 睿频模式的设置？](#我在哪里可以找到-cpu-睿频模式的设置)
+			- [如果我在对 GPU 进行超频时超过了阈值，该怎么办？](#如果我在对-gpu-进行超频时超过了阈值该怎么办)
+			- [我的开机画面为什么没有生效？](#我的开机画面为什么没有生效)
+			- [为什么使用智能 Fn 锁时会出现卡顿？](#为什么使用智能-fn-锁时会出现卡顿)
+			- [为什么我无法在设备信息中找到保修信息？](#为什么我无法在设备信息中找到保修信息)
+	- [命令行参数](#命令行参数)
+	- [如何开启记录Log](#如何开启记录log)
+	- [贡献此项目](#贡献此项目)
+			- [适配](#适配)
 
 #### 为什么即使我已经卸载了 Vantage，我依然可以看到它正在运行？
 

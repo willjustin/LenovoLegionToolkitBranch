@@ -2,7 +2,8 @@
 
 # レノボ・レギオン・ツールキット
 
-[![Build](https://github.com/BartoszCichecki/LenovoLegionToolkit/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/BartoszCichecki/LenovoLegionToolkit/actions/workflows/build.yml)
+[![Build](https://img.shields.io/github/actions/workflow/status/LenovoLegionToolkit-Team/LenovoLegionToolkit/build.yml?branch=master&logo=github&logoColor=white)](https://github.com/LenovoLegionToolkit-Team/LenovoLegionToolkit/actions)
+[![Downloads](https://img.shields.io/github/downloads/LenovoLegionToolkit-Team/LenovoLegionToolkit/total?color=brightgreen)](https://github.com/LenovoLegionToolkit-Team/LenovoLegionToolkit/releases)
 [![Crowdin](https://badges.crowdin.net/llt/localized.svg)](https://crowdin.com/project/llt)
 [![Join Discord](https://img.shields.io/discord/761178912230473768?label=Legion%20Series%20Discord)](https://discord.com/invite/legionseries)
 <a href="https://hellogithub.com/repository/dd55be3ac0c146208259f17b29d2162f" target="_blank"><img src="https://abroad.hellogithub.com/v1/widgets/recommend.svg?rid=dd55be3ac0c146208259f17b29d2162f&claim_uid=LBbuUlZqTIm1JAP&theme=small" alt="Featured｜HelloGitHub" /></a>
@@ -23,7 +24,7 @@
 
 _レギオンシリーズのDiscordに参加してください：https://discord.com/invite/legionseries!_
 
-<img src="assets/screenshot_main.png" width="700" />
+<img src="assets/Main_DarkMode.png" width="700" />
 
 &nbsp;
 
@@ -49,7 +50,7 @@ _レギオンシリーズのDiscordに参加してください：https://discord
 
 次の方法でプログラムをダウンロードできます：
 
-- [リリースページ](https://github.com/BartoszCichecki/LenovoLegionToolkit/releases/latest)から手動でダウンロード
+- [リリースページ](https://github.com/LenovoLegionToolkit-Team/LenovoLegionToolkit/releases/latest)から手動でダウンロード
 - [winget](https://github.com/microsoft/winget-cli)を使用：
 
   ```sh
@@ -89,23 +90,23 @@ LLTはバックグラウンドで実行されているときに最適に動作�
 #### .NETの問題？
 
 何らかの理由でLLTインストーラーが.NETを正しく設定しなかった場合：
-1. https://dotnet.microsoft.com/en-us/download/dotnet/8.0にアクセスします
+1. https://dotnet.microsoft.com/en-us/download/dotnet/9.0にアクセスします
 2. ".NET Desktop Runtime"セクションを見つけます
 3. x64 Windowsインストーラーをダウンロードします
 4. インストーラーを実行します
 
 > [!NOTE]
-> ScoopからLLTをインストールした場合、.NET 8は依存関係として自動的にインストールされるはずです。何かが失敗した場合、`scoop update`を使用してすべてのパッケージを更新し、`--force`引数を使用してLLTを再インストールしてみてください。
+> ScoopからLLTをインストールした場合、.NET 9は依存関係として自動的にインストールされるはずです。何かが失敗した場合、`scoop update`を使用してすべてのパッケージを更新し、`--force`引数を使用してLLTを再インストールしてみてください。
 
 これらの手順を実行した後、ターミナルを開いて`dotnet --info`と入力できます。出力で`.NET runtimes installed`セクションを探し、このセクションに次のようなものが表示されるはずです：
 
-`Microsoft.NETCore.App 8.0.0 [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]`
+`Microsoft.NETCore.App 9.0.0 [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]`
 
 および
 
-`Microsoft.WindowsDesktop.App 8.0.0 [C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App]`
+`Microsoft.WindowsDesktop.App 9.0.0 [C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App]`
 
-正確なバージョン番号は異なる場合がありますが、`8.x.x`であれば問題ありません。これらの手順を実行した後でも、LLTが起動時に.NETが見つからないなどのエラーを表示する場合、問題はLLTではなく、あなたのマシンにあります。
+正確なバージョン番号は異なる場合がありますが、`9.x.x`であれば問題ありません。これらの手順を実行した後でも、LLTが起動時に.NETが見つからないなどのエラーを表示する場合、問題はLLTではなく、あなたのマシンにあります。
 
 #### テストに協力したいですか？
 
@@ -115,7 +116,7 @@ LLTはバックグラウンドで実行されているときに最適に動作�
 
 Lenovo Legion Toolkitは、Lenovo LegionノートパソコンおよびIdeapad Gaming、LOQなどの類似のノートパソコン向けに作成されています。
 
-第6世代（MY2021）、第7世代（MY2022）、第8世代（MY2023）がサポートされていますが、一部の機能は第5世代（MY2020）でも動作します。第6世代以前のデバイスやLegion以外のデバイスに関連する問題は、このプロジェクトの範囲外です。
+第6世代（2021）、第7世代（2022）、第8世代（2023）、第9世代（2024）、第10世代（2025）がサポートされていますが、一部の機能は第5世代（2020）でも動作します。第6世代以前のデバイスやLegion以外のデバイスに関連する問題は、このプロジェクトの範囲外です。
 
 起動時に互換性のないメッセージが表示される場合は、下部の*貢献*セクションを確認して、どのように支援できるかを確認してください。すべてのハードウェアとすべてのオプションを互換性のあるものにすることはできない場合がありますので、ご了承ください。
 
@@ -365,11 +366,7 @@ CLIは管理者として実行する必要はありません。
 
 ## 寄付
 
-Lenovo Legion Toolkitを楽しんで使用している場合は、寄付を検討してください。
-
-[PayPalで寄付](https://www.paypal.com/donate/?hosted_button_id=22AZE2NBP3HTL)
-
-<img src="LenovoLegionToolkit.WPF/Assets/Donate/paypal_qr.png" width="200" alt="PayPal QR code" />
+Lenovo Legion Toolkitを楽しんで使用している場合は、リポジトリページの上部にある GitHub Sponsors ボタンを使用してプロジェクトを支援することを検討してください。
 
 ## クレジット
 
@@ -441,9 +438,11 @@ Lenovo Legion Toolkitを楽しんで使用している場合は、寄付を検�
 
 #### インストーラーにウイルス/トロイの木馬/マルウェアが含まれているとアンチウイルスが報告するのはなぜですか？
 
-LLTは、多くの低レベルのWindows APIを使用しており、アンチウイルスによって疑わしいと誤ってフラグが立てられることがあります。LLTはオープンソースであり、このソフトウェアが何をしているのか疑問がある人は誰でも簡単に監査できます。すべてのインストーラーはGitHubで直接ビルドされており、GitHub Actionsを使用しているため、含まれているものに疑問の余地はありません。この問題は、すべてのコードに署名することで解決できますが、拡張検証証明書に年間数百ドルを費やす余裕はありません。
+LLTは、多くの低レベルのWindows APIを使用しており、アンチウイルスによって疑わしいと誤ってフラグが立てられることがあります。LLTはオープンソースであり、このソフトウェアが何をしているのか疑問がある人は誰でも簡単に監査できます。すべてのインストーラーはGitHubで直接ビルドされており、GitHub Actionsを使用しているため、含まれているものに疑問の余地はありません。
 
-このプロジェクトのウェブサイトからインストーラーをダウンロードした場合、心配する必要はありません - 警告は誤検知です。問題の解決に協力できる場合は、連絡を取りましょう。
+信頼性を確保するため、インストーラーはプロジェクト証明書で署名されています。この署名により、インストーラーが改ざんされていないことと、公式ビルドプロセスから生成されたことを確認できます。
+
+このプロジェクトのGitHubからインストーラーをダウンロードした場合、心配する必要はありません - 警告は誤検知です。
 
 #### ホットキーをカスタマイズできますか？
 

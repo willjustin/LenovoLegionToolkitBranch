@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using LenovoLegionToolkit.Lib.Extensions;
 using LenovoLegionToolkit.Lib.Listeners;
+using LenovoLegionToolkit.Lib.Settings;
 using LenovoLegionToolkit.Lib.SoftwareDisabler;
 using LenovoLegionToolkit.Lib.System;
 using LenovoLegionToolkit.Lib.Utils;
@@ -21,16 +22,6 @@ public class SpectrumKeyboardBacklightController
     public interface IScreenCapture
     {
         void CaptureScreen(ref RGBColor[,] buffer, int width, int height, CancellationToken token);
-    }
-
-    private readonly struct KeyMap(int width, int height, ushort[,] keyCodes, ushort[] additionalKeyCodes)
-    {
-        public static readonly KeyMap Empty = new(0, 0, new ushort[0, 0], []);
-
-        public readonly int Width = width;
-        public readonly int Height = height;
-        public readonly ushort[,] KeyCodes = keyCodes;
-        public readonly ushort[] AdditionalKeyCodes = additionalKeyCodes;
     }
 
     private readonly TimeSpan _auroraRefreshInterval = TimeSpan.FromMilliseconds(60);
@@ -90,7 +81,20 @@ public class SpectrumKeyboardBacklightController
         }
     }
 
-    public async Task<bool> IsSupportedAsync() => await _deviceFactory.GetHandleAsync().ConfigureAwait(false) is not null;
+    public async Task<bool> IsSupportedAsync()
+    {
+        if (AppFlags.Instance.Debug)
+        {
+            return true;
+        }
+
+        if (AppFlags.Instance.EnableLampArray || AppFlags.Instance.ForceDisableSpectrumKeyboardSupport)
+        {
+            return false;
+        }
+
+        return await _deviceFactory.GetHandleAsync().ConfigureAwait(false) is not null;
+    }
 
     public async Task<(SpectrumLayout, KeyboardLayout, HashSet<ushort>)> GetKeyboardLayoutAsync()
     {
@@ -99,9 +103,15 @@ public class SpectrumKeyboardBacklightController
         var (width, height, keys) = await ReadAllKeyCodesAsync().ConfigureAwait(false);
         var mi = await Compatibility.GetMachineInformationAsync().ConfigureAwait(false);
 
+        Log.Instance.Trace($"Width: {width} Height: {height} Keys: {string.Join(", ", keys)}");
+
+        if (mi.Properties.HasSpectrumProfileSwitchingBug)
+        {
+            return (SpectrumLayout.KeyboardOnly, KeyboardLayout.Keyboard24Zone, keys);
+        }
+
         var spectrumLayout = (width, height) switch
         {
-            _ when mi.Properties.HasSpectrumProfileSwitchingBug => SpectrumLayout.KeyboardOnly,
             (22, 9) when mi.Properties.HasAlternativeFullSpectrumLayout => SpectrumLayout.FullAlternative,
             (22, 9) => SpectrumLayout.Full,
             (20, 8) => SpectrumLayout.KeyboardAndFront,
@@ -109,9 +119,7 @@ public class SpectrumKeyboardBacklightController
         };
 
         KeyboardLayout keyboardLayout;
-        if (keys.Count == 0x18)
-            keyboardLayout = KeyboardLayout.Keyboard24Zone;
-        else if (keys.Contains(0xA9))
+        if (keys.Contains(0xA9))
             keyboardLayout = KeyboardLayout.Jis;
         else if (keys.Contains(0xA8))
             keyboardLayout = KeyboardLayout.Iso;
@@ -406,6 +414,8 @@ public class SpectrumKeyboardBacklightController
     {
         try
         {
+            var settings = IoCContainer.Resolve<SpectrumKeyboardSettings>();
+
             await ThrowIfVantageEnabled().ConfigureAwait(false);
 
             var handle = await GetHandleOrThrow().ConfigureAwait(false);
@@ -419,6 +429,8 @@ public class SpectrumKeyboardBacklightController
 
             await SetFeatureAsync(handle, new LENOVO_SPECTRUM_AURORA_START_STOP_REQUEST(true, (byte)profile)).ConfigureAwait(false);
 
+            var useBoost = settings.Store.AuroraVantageColorBoost;
+            
             while (!token.IsCancellationRequested)
             {
                 var delay = Task.Delay(_auroraRefreshInterval, token);
@@ -451,6 +463,10 @@ public class SpectrumKeyboardBacklightController
                             continue;
 
                         var color = colorBuffer[x, y];
+                        
+                        if (useBoost)
+                            color = ApplyVantageColorBoost(color, settings);
+                        
                         avgR += color.R;
                         avgG += color.G;
                         avgB += color.B;
@@ -621,6 +637,9 @@ public class SpectrumKeyboardBacklightController
             LENOVO_SPECTRUM_EFFECT_TYPE.TypeLighting => SpectrumKeyboardBacklightEffectType.Type,
             _ => throw new ArgumentException("Unsupported Lenovo Spectrum Effect Preset.")
         };
+        
+        var useVantageColorBoost = effectType == SpectrumKeyboardBacklightEffectType.AuroraSync 
+                                   && effect.EffectHeader.Speed == LENOVO_SPECTRUM_SPEED.Speed3;
 
         var speed = effect.EffectHeader.Speed switch
         {
@@ -652,7 +671,7 @@ public class SpectrumKeyboardBacklightController
         if (effect.KeyCodes is [0x65])
             keys = [];
 
-        return new(effectType, speed, direction, clockwiseDirection, colors, keys);
+        return new(effectType, speed, direction, clockwiseDirection, colors, keys, useVantageColorBoost);
     }
 
     private static LENOVO_SPECTRUM_EFFECT_DESCRIPTION Convert(int profile, SpectrumKeyboardBacklightEffect[] effects)
@@ -708,6 +727,9 @@ public class SpectrumKeyboardBacklightController
             SpectrumKeyboardBacklightSpeed.Speed3 => LENOVO_SPECTRUM_SPEED.Speed3,
             _ => LENOVO_SPECTRUM_SPEED.None
         };
+        
+        if (effect is { Type: SpectrumKeyboardBacklightEffectType.AuroraSync, UseVantageColorBoost: true })
+            speed = LENOVO_SPECTRUM_SPEED.Speed3;
 
         var direction = effect.Direction switch
         {
@@ -750,5 +772,85 @@ public class SpectrumKeyboardBacklightController
         var keys = effect.Type.IsAllLightsEffect() ? [0x65] : effect.Keys;
         var result = new LENOVO_SPECTRUM_EFFECT(header, index + 1, colors, keys);
         return result;
+    }
+    
+    private static RGBColor ApplyVantageColorBoost(RGBColor color, SpectrumKeyboardSettings settings)
+    {
+        var vWhite = settings.Store.AuroraVantageColorBoostWhite;
+        var boostFloor = settings.Store.AuroraVantageColorBoostFloor;
+        var boostTarget = settings.Store.AuroraVantageColorBoostTarget;
+        var brightnessBoostFactor = settings.Store.AuroraVantageColorBoostBrightnessFactor;
+
+        int r = color.R;
+        int g = color.G;
+        int b = color.B;
+
+        var maxC = Math.Max(r, Math.Max(g, b));
+        var minC = Math.Min(r, Math.Min(g, b));
+
+        if (maxC < boostFloor)
+        {
+            return new RGBColor(0, 0, 0);
+        }
+        
+        var originalMaxC = maxC;
+
+        if (maxC < boostTarget)
+        {
+            var scale = (double)boostTarget / maxC;
+            r = Math.Min(255, (int)Math.Round(r * scale));
+            g = Math.Min(255, (int)Math.Round(g * scale));
+            b = Math.Min(255, (int)Math.Round(b * scale));
+
+            maxC = Math.Max(r, Math.Max(g, b));
+            minC = Math.Min(r, Math.Min(g, b));
+        }
+
+        var delta = maxC - minC;
+
+        if (delta * 8 < maxC)
+        {
+            var grayValue = Math.Max(originalMaxC, boostFloor);
+            return grayValue >= vWhite 
+                ? new RGBColor(255, 255, 255) 
+                : new RGBColor((byte)grayValue, (byte)grayValue, (byte)grayValue);
+        }
+
+        double h;
+        if (maxC == r)
+        {
+            h = (g - b) * 60.0 / delta;
+            if (h < 0) h += 360;
+        }
+        else if (maxC == g)
+        {
+            h = (b - r) * 60.0 / delta + 120;
+        }
+        else
+        {
+            h = (r - g) * 60.0 / delta + 240;
+        }
+
+        var hIdx = (int)Math.Clamp(Math.Round(h), 0, 360);
+        var saturatedColor = AuroraColorUtils.HueToRGBLut[hIdx];
+        
+        double outputBrightness;
+        if (originalMaxC >= boostTarget)
+        {
+            outputBrightness = 255.0;
+        }
+        else
+        {
+            var minOutput = boostFloor + (255 - boostFloor) * brightnessBoostFactor;
+            var t = (double)(originalMaxC - boostFloor) / (boostTarget - boostFloor);
+            outputBrightness = minOutput + t * (255 - minOutput);
+        }
+        
+        var scaleFactor = outputBrightness / 255.0;
+        return new RGBColor(
+            (byte)Math.Round(saturatedColor.R * scaleFactor),
+            (byte)Math.Round(saturatedColor.G * scaleFactor),
+            (byte)Math.Round(saturatedColor.B * scaleFactor)
+        );
     }
 }

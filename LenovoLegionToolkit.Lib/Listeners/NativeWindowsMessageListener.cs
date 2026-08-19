@@ -3,6 +3,11 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Power;
+using Windows.Win32.UI.Input.KeyboardAndMouse;
+using Windows.Win32.UI.WindowsAndMessaging;
 using LenovoLegionToolkit.Lib.Controllers;
 using LenovoLegionToolkit.Lib.Extensions;
 using LenovoLegionToolkit.Lib.Features;
@@ -11,16 +16,14 @@ using LenovoLegionToolkit.Lib.Messaging;
 using LenovoLegionToolkit.Lib.Messaging.Messages;
 using LenovoLegionToolkit.Lib.System;
 using LenovoLegionToolkit.Lib.Utils;
-using Windows.Win32;
-using Windows.Win32.Foundation;
-using Windows.Win32.System.Power;
-using Windows.Win32.UI.Input.KeyboardAndMouse;
-using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace LenovoLegionToolkit.Lib.Listeners;
 
 public class NativeWindowsMessageListener : NativeWindow, IListener<NativeWindowsMessageListener.ChangedEventArgs>
 {
+    private const uint WM_APP_CHECK_CAPS = PInvoke.WM_APP + 0;
+    private const uint WM_APP_CHECK_NUMLOCK = PInvoke.WM_APP + 1;
+
     public class ChangedEventArgs(NativeWindowsMessage message, object? data = null) : EventArgs
     {
         public NativeWindowsMessage Message { get; } = message;
@@ -43,6 +46,9 @@ public class NativeWindowsMessageListener : NativeWindow, IListener<NativeWindow
     private HPOWERNOTIFY _powerSavingStateChangeNotificationHandle;
     private HHOOK _kbHook;
 
+    private bool _lastCapslockState;
+    private bool _lastNumlockState;
+
     public bool IsMonitorOn { get; private set; }
     public bool IsLidOpen { get; private set; }
 
@@ -55,6 +61,8 @@ public class NativeWindowsMessageListener : NativeWindow, IListener<NativeWindow
         _smartFnLockController = smartFnLockController;
         _powerModeFeature = powerModeFeature;
 
+        _lastCapslockState = (PInvoke.GetKeyState((int)VIRTUAL_KEY.VK_CAPITAL) & 0x1) != 0;
+        _lastNumlockState = (PInvoke.GetKeyState((int)VIRTUAL_KEY.VK_NUMLOCK) & 0x1) != 0;
         _kbProc = LowLevelKeyboardProc;
     }
 
@@ -83,7 +91,7 @@ public class NativeWindowsMessageListener : NativeWindow, IListener<NativeWindow
         _lidSwitchStateChangeNotificationHandle = RegisterPowerNotification(PInvoke.GUID_LIDSWITCH_STATE_CHANGE);
         _powerSavingStateChangeNotificationHandle = RegisterPowerNotification(PInvoke.GUID_POWER_SAVING_STATUS);
 
-        return WaitForInit();
+        return EnsureInitializedAsync();
     });
 
     public Task StopAsync() => _mainThreadDispatcher.DispatchAsync(() =>
@@ -199,10 +207,32 @@ public class NativeWindowsMessageListener : NativeWindow, IListener<NativeWindow
             }
         }
 
+        if (m.Msg == WM_APP_CHECK_CAPS)
+        {
+            var isOn = (PInvoke.GetKeyState((int)VIRTUAL_KEY.VK_CAPITAL) & 0x1) != 0;
+            if (isOn != _lastCapslockState)
+            {
+                _lastCapslockState = isOn;
+                var type = isOn ? NotificationType.CapsLockOn : NotificationType.CapsLockOff;
+                MessagingCenter.Publish(new NotificationMessage(type));
+            }
+        }
+
+        if (m.Msg == WM_APP_CHECK_NUMLOCK)
+        {
+            var isOn = (PInvoke.GetKeyState((int)VIRTUAL_KEY.VK_NUMLOCK) & 0x1) != 0;
+            if (isOn != _lastNumlockState)
+            {
+                _lastNumlockState = isOn;
+                var type = isOn ? NotificationType.NumLockOn : NotificationType.NumLockOff;
+                MessagingCenter.Publish(new NotificationMessage(type));
+            }
+        }
+
         base.WndProc(ref m);
     }
 
-    private async Task WaitForInit()
+    public async Task EnsureInitializedAsync()
     {
         var delayTask = Task.Delay(TimeSpan.FromSeconds(3));
         var task = Task.WhenAll(
@@ -291,6 +321,15 @@ public class NativeWindowsMessageListener : NativeWindow, IListener<NativeWindow
 
     private void OnDeviceConnected(string name)
     {
+        if (!string.IsNullOrEmpty(name) &&
+            name.Contains("VEN_10DE", StringComparison.OrdinalIgnoreCase))
+        {
+            if (Log.Instance.IsTraceEnabled)
+                Log.Instance.Trace($"NVIDIA GPU device arrival detected. Resetting NVAPI cache. [device={name}]");
+            NVAPI.SetCache(null);
+            NVAPI.IsInitialized = false;
+        }
+
         RaiseChanged(NativeWindowsMessage.DeviceConnected, ConvertDeviceNameToDeviceInstanceId(name));
     }
 
@@ -341,18 +380,10 @@ public class NativeWindowsMessageListener : NativeWindow, IListener<NativeWindow
             return PInvoke.CallNextHookEx(HHOOK.Null, nCode, wParam, lParam);
 
         if (kbStruct.vkCode == (ulong)VIRTUAL_KEY.VK_CAPITAL)
-        {
-            var isOn = (PInvoke.GetKeyState((int)VIRTUAL_KEY.VK_CAPITAL) & 0x1) != 0;
-            var type = isOn ? NotificationType.CapsLockOn : NotificationType.CapsLockOff;
-            MessagingCenter.Publish(new NotificationMessage(type));
-        }
+            PInvoke.PostMessage(new HWND(Handle), WM_APP_CHECK_CAPS, 0, 0);
 
         if (kbStruct.vkCode == (ulong)VIRTUAL_KEY.VK_NUMLOCK)
-        {
-            var isOn = (PInvoke.GetKeyState((int)VIRTUAL_KEY.VK_NUMLOCK) & 0x1) != 0;
-            var type = isOn ? NotificationType.NumLockOn : NotificationType.NumLockOff;
-            MessagingCenter.Publish(new NotificationMessage(type));
-        }
+            PInvoke.PostMessage(new HWND(Handle), WM_APP_CHECK_NUMLOCK, 0, 0);
 
         return PInvoke.CallNextHookEx(HHOOK.Null, nCode, wParam, lParam);
     }
@@ -382,8 +413,11 @@ public class NativeWindowsMessageListener : NativeWindow, IListener<NativeWindow
         return PInvoke.RegisterPowerSettingNotification(new HANDLE(Handle), &guid, 0);
     }
 
-    private static string? ConvertDeviceNameToDeviceInstanceId(string name)
+    private static string? ConvertDeviceNameToDeviceInstanceId(string? name)
     {
+        if (string.IsNullOrEmpty(name))
+            return null;
+
         var parts = name.Split('#');
         if (parts.Length < 3)
             return null;

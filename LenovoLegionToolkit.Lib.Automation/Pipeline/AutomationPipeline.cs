@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using LenovoLegionToolkit.Lib.Automation.Pipeline.Triggers;
+using LenovoLegionToolkit.Lib.Automation.Resources;
 using LenovoLegionToolkit.Lib.Automation.Steps;
 using LenovoLegionToolkit.Lib.Extensions;
 using LenovoLegionToolkit.Lib.Utils;
@@ -23,7 +24,9 @@ public class AutomationPipeline
 
     public List<IAutomationStep> Steps { get; init; } = [];
 
-    public bool IsExclusive { get; init; } = true;
+    public bool IsExclusive { get; set; } = true;
+
+    public bool RunOnStartup { get; set; }
 
     [JsonIgnore]
     public IEnumerable<IAutomationPipelineTrigger> AllTriggers
@@ -65,6 +68,12 @@ public class AutomationPipeline
             {
                 Log.Instance.Trace($"Pipeline interrupted.");
                 break;
+            }
+
+            if (environment.Startup && step.IsDangerousOnStartup)
+            {
+                Log.Instance.Trace($"Skipping dangerous step on startup. [type={step.GetType().Name}]");
+                continue;
             }
 
             Log.Instance.Trace($"Running step... [type={step.GetType().Name}]");
@@ -113,5 +122,75 @@ public class AutomationPipeline
         Trigger = Trigger?.DeepCopy(),
         Steps = Steps.Select(s => s.DeepCopy()).ToList(),
         IsExclusive = IsExclusive,
+        RunOnStartup = RunOnStartup,
     };
+
+    public IEnumerable<string> GetValidationWarnings(IEnumerable<AutomationPipeline>? pipelines = null)
+    {
+        var steps = GetAllSteps(pipelines?.ToList() ?? []).ToList();
+
+        if (RunOnStartup)
+        {
+            var dangerousSteps = steps.Where(s => s.IsDangerousOnStartup).ToList();
+            if (dangerousSteps.Count > 0)
+            {
+                var stepNames = dangerousSteps
+                    .Select(s => AutomationTranslator.Translate(s.GetType().Name))
+                    .ToList();
+
+                var stepList = string.Join(", ", stepNames);
+                yield return string.Format(Lib.Resources.Resource.Automation_Warning_Startup, stepList);
+            }
+        }
+
+        var powerModeStepIndex = steps.FindLastIndex(s => s is PowerModeAutomationStep);
+
+        if (powerModeStepIndex == -1)
+            yield break;
+
+        for (int i = 0; i < powerModeStepIndex; i++)
+        {
+            var step = steps[i];
+            if (step is DisplayBrightnessAutomationStep or RefreshRateAutomationStep)
+            {
+                yield return Resource.AutomationPipeline_Warning_Power_Mode_Visual;
+                break;
+            }
+
+            if (step is not FanMaxSpeedAutomationStep)
+            {
+                continue;
+            }
+
+            yield return Resource.AutomationPipeline_Warning_Power_Mode_Fan;
+            break;
+        }
+
+        var hybridModeStepIndex = steps.FindIndex(s => s is HybridModeAutomationStep);
+        if (hybridModeStepIndex != -1 && hybridModeStepIndex != steps.Count - 1)
+        {
+             yield return Resource.AutomationPipeline_Warning_Hybrid_Mode;
+        }
+
+        var deactivateGPUIndex = steps.FindIndex(s => s is DeactivateGPUAutomationStep);
+        var overclockIndex = steps.FindIndex(s => s is OverclockDiscreteGPUAutomationStep);
+        if (deactivateGPUIndex != -1 && overclockIndex != -1 && overclockIndex > deactivateGPUIndex)
+        {
+            yield return Resource.AutomationPipeline_Warning_GPU_OC;
+        }
+
+        var hdrStepIndex = steps.FindIndex(s => s is HDRAutomationStep);
+        var brightnessStepIndex = steps.FindLastIndex(s => s is DisplayBrightnessAutomationStep);
+        if (hdrStepIndex != -1 && brightnessStepIndex != -1 && brightnessStepIndex > hdrStepIndex)
+        {
+             yield return Resource.AutomationPipeline_Warning_HDR;
+        }
+
+        var resolutionIndex = steps.FindLastIndex(s => s is ResolutionAutomationStep);
+        var refreshRateIndex = steps.FindIndex(s => s is RefreshRateAutomationStep);
+        if (resolutionIndex != -1 && refreshRateIndex != -1 && refreshRateIndex < resolutionIndex)
+        {
+             yield return Resource.AutomationPipeline_Warning_Resolution;
+        }
+    }
 }

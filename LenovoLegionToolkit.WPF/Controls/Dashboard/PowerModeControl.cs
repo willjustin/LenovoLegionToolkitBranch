@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Automation;
@@ -7,6 +7,7 @@ using LenovoLegionToolkit.Lib;
 using LenovoLegionToolkit.Lib.Extensions;
 using LenovoLegionToolkit.Lib.Features;
 using LenovoLegionToolkit.Lib.Listeners;
+using LenovoLegionToolkit.Lib.Settings;
 using LenovoLegionToolkit.Lib.System;
 using LenovoLegionToolkit.Lib.Utils;
 using LenovoLegionToolkit.WPF.Resources;
@@ -19,6 +20,7 @@ namespace LenovoLegionToolkit.WPF.Controls.Dashboard;
 
 public class PowerModeControl : AbstractComboBoxFeatureCardControl<PowerModeState>
 {
+    private readonly ApplicationSettings _settings = IoCContainer.Resolve<ApplicationSettings>();
     private readonly ThermalModeListener _thermalModeListener = IoCContainer.Resolve<ThermalModeListener>();
     private readonly PowerModeListener _powerModeListener = IoCContainer.Resolve<PowerModeListener>();
 
@@ -123,25 +125,82 @@ public class PowerModeControl : AbstractComboBoxFeatureCardControl<PowerModeStat
         return stackPanel;
     }
 
-    private void ConfigButton_Click(object sender, RoutedEventArgs e)
+    private async void ConfigButton_Click(object sender, RoutedEventArgs e)
     {
         if (!TryGetSelectedItem(out var state))
+        {
             return;
+        }
 
         switch (state)
         {
             case PowerModeState.Balance:
-                {
-                    var window = new BalanceModeSettingsWindow { Owner = Window.GetWindow(this) };
-                    window.ShowDialog();
-                    break;
-                }
+            {
+                var window = new BalanceModeSettingsWindow { Owner = Window.GetWindow(this) };
+                window.ShowDialog();
+                break;
+            }
             case PowerModeState.GodMode:
+            {
+                var result = await CheckCustomModeWarningAsync();
+                if (!result)
                 {
-                    var window = new GodModeSettingsWindow { Owner = Window.GetWindow(this) };
-                    window.ShowDialog();
-                    break;
+                    return;
                 }
+
+                var window = new GodModeSettingsWindow { Owner = Window.GetWindow(this) };
+                window.ShowDialog();
+                break;
+            }
+            default:
+                throw new Exception($"Access to Settings in {state} is denied.");
         }
+    }
+
+    private async Task<bool> CheckCustomModeWarningAsync()
+    {
+        if (_settings.Store.CustomModeWarningDontShowAgain)
+        {
+            return true;
+        }
+
+        try
+        {
+            var result = await ShowDialogAsync();
+
+            if (result is { DontShowAgain: true, Yes: true })
+            {
+                _settings.Store.CustomModeWarningDontShowAgain = true;
+                _settings.SynchronizeStore();
+                return true;
+            }
+
+            if (result.Yes)
+            {
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Instance.Trace($"Failed to load power mode control", ex);
+        }
+
+        return false;
+    }
+
+    private async Task<(bool Yes, bool DontShowAgain)> ShowDialogAsync()
+    {
+        return await await Application.Current.Dispatcher.InvokeAsync(async () =>
+        {
+            var result = await MessageBoxHelper.ShowAsync(
+                this,
+                Resource.Warning,
+                Resource.GodModeSettingsWindow_CustomMode_Warning,
+                true,
+                Resource.Yes,
+                Resource.No);
+
+            return (result.Result, result.DontShowAgain);
+        });
     }
 }

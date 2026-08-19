@@ -1,13 +1,14 @@
-﻿using LenovoLegionToolkit.Lib.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Management;
+using System.Threading.Tasks;
+using LenovoLegionToolkit.Lib;
+using LenovoLegionToolkit.Lib.Extensions;
 using LenovoLegionToolkit.Lib.Settings;
 using LenovoLegionToolkit.Lib.SoftwareDisabler;
 using LenovoLegionToolkit.Lib.System.Management;
 using LenovoLegionToolkit.Lib.Utils;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace LenovoLegionToolkit.Lib.Controllers.GodMode;
 
@@ -20,8 +21,6 @@ public class GodModeControllerV4(
 {
     private const uint CAPABILITY_ID_MASK = 0xFFFF00FF;
     private const int BIOS_OC_MODE_ENABLED = 3;
-    private const string FAN_TABLE_DATA_ERROR = "Bad fan table";
-    private const string APPLYING_STATE = "Applying state";
 
     public override Task<bool> NeedsVantageDisabledAsync() => Task.FromResult(true);
     public override Task<bool> NeedsLegionSpaceDisabledAsync() => Task.FromResult(true);
@@ -47,7 +46,7 @@ public class GodModeControllerV4(
             return;
         }
 
-        Log.Instance.Trace($"{APPLYING_STATE}");
+        Log.Instance.Trace($"Applying state");
 
         var (presetId, preset) = await GetActivePresetAsync().ConfigureAwait(false);
         var isOcEnabled = await IsBiosOcEnabledAsync().ConfigureAwait(false);
@@ -104,7 +103,7 @@ public class GodModeControllerV4(
             Log.Instance.Trace($"Overclocking is disabled.");
         }
 
-        RaisePresetChanged(presetId);
+        await RaisePresetChanged(presetId);
         Log.Instance.Trace($"State applied. [name={preset.Name}, id={presetId}]");
     }
 
@@ -335,8 +334,6 @@ public class GodModeControllerV4(
             new StepperValue(0, 0, 20, 1, [], 0));
     }
 
-
-
     private static CapabilityID AdjustCapabilityIdForPowerMode(CapabilityID id, PowerModeState powerMode)
     {
         var idRaw = (uint)id & CAPABILITY_ID_MASK;
@@ -383,8 +380,15 @@ public class GodModeControllerV4(
 
     private static async Task<bool> IsBiosOcEnabledAsync()
     {
-        var result = await WMI.LenovoGameZoneData.GetBIOSOCMode().ConfigureAwait(false);
-        return result == BIOS_OC_MODE_ENABLED;
+        try
+        {
+            var result = await WMI.LenovoGameZoneData.GetBIOSOCMode().ConfigureAwait(false);
+            return result == BIOS_OC_MODE_ENABLED;
+        }
+        catch (ManagementException)
+        {
+            return false;
+        }
     }
 
     #endregion
@@ -395,7 +399,6 @@ public class GodModeControllerV4(
     {
         Log.Instance.Trace($"Reading fan table data...");
         var data = await WMI.LenovoFanTableData.ReadAsync().ConfigureAwait(false);
-        var mi = await Compatibility.GetMachineInformationAsync().ConfigureAwait(false);
 
         var fanTableData = data
             .Where(d => d.mode == (int)powerModeState + 1)
@@ -403,9 +406,9 @@ public class GodModeControllerV4(
             {
                 var type = (d.fanId, d.sensorId) switch
                 {
-                    (1, 1) => FanTableType.CPU,
+                    (1, 1) or (1, 4) => FanTableType.CPU,
                     (2, 5) => FanTableType.GPU,
-                    (4, 4) => FanTableType.PCH,
+                    (4, 4) or (5, 5) or (4, 1) => FanTableType.PCH,
                     _ => FanTableType.Unknown,
                 };
                 return new FanTableData(type, d.fanId, d.sensorId, d.fanTableData, d.sensorTableData);
@@ -414,7 +417,7 @@ public class GodModeControllerV4(
 
         if (!IsValidFanTableData(fanTableData))
         {
-            Log.Instance.Trace($"{FAN_TABLE_DATA_ERROR}: {string.Join(", ", fanTableData)}");
+            Log.Instance.Trace($"Bad fan table: {string.Join(", ", fanTableData)}");
             return null;
         }
 

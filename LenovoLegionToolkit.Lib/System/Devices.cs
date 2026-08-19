@@ -2,25 +2,27 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
-using LenovoLegionToolkit.Lib.Extensions;
-using LenovoLegionToolkit.Lib.Utils;
-using Microsoft.Win32.SafeHandles;
+using System.Threading;
+using System.Threading.Tasks;
 using Windows.Win32;
 using Windows.Win32.Devices.DeviceAndDriverInstallation;
 using Windows.Win32.Devices.HumanInterfaceDevice;
 using Windows.Win32.Devices.Properties;
 using Windows.Win32.Foundation;
 using Windows.Win32.Storage.FileSystem;
+using LenovoLegionToolkit.Lib.Extensions;
+using LenovoLegionToolkit.Lib.Utils;
+using Microsoft.Win32.SafeHandles;
+
 
 namespace LenovoLegionToolkit.Lib.System;
 
 public static class Devices
 {
-    private static readonly object Lock = new();
+    private static readonly Lock Lock = new();
 
     private static SafeFileHandle? _battery;
     private static SafeFileHandle? _rgbKeyboard;
-    private static SafeFileHandle? _spectrumRgbKeyboard;
     private static List<SafeFileHandle>? _spectrumRgbKeyboards;
 
     #region All devices
@@ -79,17 +81,17 @@ public static class Devices
     private static unsafe string GetClassName(Guid guid)
     {
         var requiredSize = 0u;
-        PInvoke.SetupDiClassNameFromGuid(guid, Array.Empty<char>(), &requiredSize);
+        PInvoke.SetupDiClassNameFromGuid(guid, [], out requiredSize);
 
         var chars = new char[requiredSize];
-        PInvoke.SetupDiClassNameFromGuid(guid, chars, null);
+        PInvoke.SetupDiClassNameFromGuid(guid, chars, out _);
         return chars.ToString() ?? string.Empty;
     }
 
     private static unsafe string GetStringProperty(SetupDiDestroyDeviceInfoListSafeHandle deviceInfoSet, SP_DEVINFO_DATA deviceInfoData, DEVPROPKEY propertyKey)
     {
         var requiredSize = 0u;
-        PInvoke.SetupDiGetDeviceProperty(deviceInfoSet, deviceInfoData, propertyKey, out var propertyType, null, &requiredSize, 0);
+        PInvoke.SetupDiGetDeviceProperty(deviceInfoSet, deviceInfoData, propertyKey, out var propertyType, null, out requiredSize, 0);
 
         if (propertyType == DEVPROPTYPE.DEVPROP_TYPE_EMPTY)
             return string.Empty;
@@ -99,7 +101,7 @@ public static class Devices
 
         var buffer = new byte[requiredSize];
         var propertyBuffer = new Span<byte>(buffer);
-        PInvoke.SetupDiGetDeviceProperty(deviceInfoSet, deviceInfoData, propertyKey, out _, propertyBuffer, null, 0);
+        PInvoke.SetupDiGetDeviceProperty(deviceInfoSet, deviceInfoData, propertyKey, out _, propertyBuffer, out _, 0);
 
         return Encoding.Unicode.GetString(buffer).TrimEnd('\0');
     }
@@ -107,7 +109,7 @@ public static class Devices
     private static unsafe uint GetUInt32Property(SetupDiDestroyDeviceInfoListSafeHandle deviceInfoSet, SP_DEVINFO_DATA deviceInfoData, DEVPROPKEY propertyKey)
     {
         var requiredSize = 0u;
-        PInvoke.SetupDiGetDeviceProperty(deviceInfoSet, deviceInfoData, propertyKey, out var propertyType, null, &requiredSize, 0);
+        PInvoke.SetupDiGetDeviceProperty(deviceInfoSet, deviceInfoData, propertyKey, out var propertyType, null, out requiredSize, 0);
 
         if (propertyType == DEVPROPTYPE.DEVPROP_TYPE_EMPTY)
             return 0;
@@ -117,7 +119,7 @@ public static class Devices
 
         var buffer = new byte[requiredSize];
         var propertyBuffer = new Span<byte>(buffer);
-        PInvoke.SetupDiGetDeviceProperty(deviceInfoSet, deviceInfoData, propertyKey, out _, propertyBuffer, null, 0);
+        PInvoke.SetupDiGetDeviceProperty(deviceInfoSet, deviceInfoData, propertyKey, out _, propertyBuffer, out _, 0);
 
         return BitConverter.ToUInt32(buffer);
     }
@@ -125,7 +127,7 @@ public static class Devices
     private static unsafe Guid GetGuidProperty(SetupDiDestroyDeviceInfoListSafeHandle deviceInfoSet, SP_DEVINFO_DATA deviceInfoData, DEVPROPKEY propertyKey)
     {
         var requiredSize = 0u;
-        PInvoke.SetupDiGetDeviceProperty(deviceInfoSet, deviceInfoData, propertyKey, out var propertyType, null, &requiredSize, 0);
+        PInvoke.SetupDiGetDeviceProperty(deviceInfoSet, deviceInfoData, propertyKey, out var propertyType, null, out requiredSize, 0);
 
         if (propertyType == DEVPROPTYPE.DEVPROP_TYPE_EMPTY)
             return Guid.Empty;
@@ -135,7 +137,7 @@ public static class Devices
 
         var buffer = new byte[requiredSize];
         var propertyBuffer = new Span<byte>(buffer);
-        PInvoke.SetupDiGetDeviceProperty(deviceInfoSet, deviceInfoData, propertyKey, out _, propertyBuffer, null, 0);
+        PInvoke.SetupDiGetDeviceProperty(deviceInfoSet, deviceInfoData, propertyKey, out _, propertyBuffer, out _, 0);
 
         return new Guid(buffer);
     }
@@ -177,7 +179,7 @@ public static class Devices
                 PInvokeExtensions.ThrowIfWin32Error("SetupDiEnumDeviceInterfaces");
 
             var requiredSize = 0u;
-            _ = PInvoke.SetupDiGetDeviceInterfaceDetail(deviceHandle, deviceInterfaceData, null, 0, &requiredSize, null);
+            _ = PInvoke.SetupDiGetDeviceInterfaceDetail(new HDEVINFO(deviceHandle.DangerousGetHandle()), &deviceInterfaceData, null, 0, &requiredSize, null);
 
             string devicePath;
             var output = IntPtr.Zero;
@@ -187,7 +189,7 @@ public static class Devices
                 var deviceDetailData = (SP_DEVICE_INTERFACE_DETAIL_DATA_W*)output.ToPointer();
                 deviceDetailData->cbSize = (uint)Marshal.SizeOf<SP_DEVICE_INTERFACE_DETAIL_DATA_W>();
 
-                var result3 = PInvoke.SetupDiGetDeviceInterfaceDetail(deviceHandle, deviceInterfaceData, deviceDetailData, requiredSize, null, null);
+                var result3 = PInvoke.SetupDiGetDeviceInterfaceDetail(new HDEVINFO(deviceHandle.DangerousGetHandle()), &deviceInterfaceData, deviceDetailData, requiredSize, null, null);
                 if (!result3)
                     PInvokeExtensions.ThrowIfWin32Error("SetupDiEnumDeviceInterfaces");
 
@@ -241,54 +243,14 @@ public static class Devices
         return _rgbKeyboard;
     }
 
-    public static SafeFileHandle? GetSpectrumRGBKeyboard(bool forceRefresh = false)
-    {
-        if (_spectrumRgbKeyboard is not null && !forceRefresh)
-            return _spectrumRgbKeyboard;
-
-        lock (Lock)
-        {
-            if (_spectrumRgbKeyboard is not null && !forceRefresh)
-                return _spectrumRgbKeyboard;
-
-            const ushort vendorId = 0x048D;
-            const ushort productIdMasked = 0xC900;
-            const ushort productIdMask = 0xFF00;
-            const ushort descriptorLength = 0x03C0;
-
-            _spectrumRgbKeyboard = FindHidDevice(vendorId, productIdMask, productIdMasked, descriptorLength);
-        }
-
-        return _spectrumRgbKeyboard;
-    }
-
-    public static SafeFileHandle? GetSpectrumRGBKeyboard2(bool forceRefresh = false)
-    {
-        if (_spectrumRgbKeyboard is not null && !forceRefresh)
-            return _spectrumRgbKeyboard;
-
-        lock (Lock)
-        {
-            if (_spectrumRgbKeyboard is not null && !forceRefresh)
-                return _spectrumRgbKeyboard;
-
-            const ushort vendorId = 0x048D;
-            const ushort productIdMasked = 0xC100;
-            const ushort productIdMask = 0xFF00;
-            const ushort descriptorLength = 0x03C0;
-
-            _spectrumRgbKeyboard = FindHidDevice(vendorId, productIdMask, productIdMasked, descriptorLength);
-        }
-
-        return _spectrumRgbKeyboard;
-    }
-
-    public static List<SafeFileHandle> GetSpectrumRGBKeyboards(bool forceRefresh = false)
+    public static async Task<List<SafeFileHandle>> GetSpectrumRGBKeyboardsAsync(bool forceRefresh = false)
     {
         if (!forceRefresh && _spectrumRgbKeyboards is not null)
         {
             return _spectrumRgbKeyboards;
         }
+
+        var mi = await Compatibility.GetMachineInformationAsync().ConfigureAwait(false);
 
         lock (Lock)
         {
@@ -297,7 +259,6 @@ public static class Devices
                 return _spectrumRgbKeyboards;
             }
 
-            var mi = Compatibility.GetMachineInformationAsync().Result;
             var config = GetKeyboardConfig(mi);
 
             _spectrumRgbKeyboards = FindHidDevices(
@@ -316,22 +277,20 @@ public static class Devices
         const ushort vendor = 0x048D;
         const ushort mask = 0xFF00;
         const ushort len = 0x03C0;
+        const ushort type1 = 0xC100;
+        const ushort type2 = 0xC900;
+        const ushort type3 = 0xC600;
 
         return mi switch
         {
-            { LegionSeries: LegionSeries.Legion_5, Generation: >= 10 }
-                => new(vendor, 0xC100, mask, len),
-
-            { LegionSeries: LegionSeries.Legion_Pro_5, Generation: >= 10 }
-                => new(vendor, 0xC100, mask, len),
-
-            { LegionSeries: LegionSeries.Legion_Pro_7, Generation: >= 10 }
-                => new(vendor, 0xC100, mask, len),
-
-            { LegionSeries: LegionSeries.Legion_9 }
-                => new(vendor, 0xC900, mask, len),
-
-            _ => new(vendor, 0xC900, mask, len)
+            { LegionSeries: LegionSeries.Legion_5, Generation: 11 } => new(vendor, type3, mask, len),
+            { LegionSeries: LegionSeries.Legion_5, Generation: >= 10 } => new(vendor, type1, mask, len),
+            { LegionSeries: LegionSeries.Legion_Pro_5, Generation: >= 10 } => new(vendor, type1, mask, len),
+            { LegionSeries: LegionSeries.Legion_Pro_7, Generation: >= 10 } => new(vendor, type1, mask, len),
+            { LegionSeries: LegionSeries.Legion_7, Generation: >= 10 } => new(vendor, type1, mask, len),
+            { LegionSeries: LegionSeries.LOQ, Generation: >= 10 } => new(vendor, type3, mask, len),
+            { LegionSeries: LegionSeries.Legion_9 } => new(vendor, type2, mask, len),
+            _ => new(vendor, type2, mask, len)
         };
     }
 
@@ -369,7 +328,7 @@ public static class Devices
                 PInvokeExtensions.ThrowIfWin32Error("SetupDiEnumDeviceInterfaces");
 
             var requiredSize = 0u;
-            _ = PInvoke.SetupDiGetDeviceInterfaceDetail(deviceHandle, deviceInterfaceData, null, 0, &requiredSize, null);
+            _ = PInvoke.SetupDiGetDeviceInterfaceDetail(new HDEVINFO(deviceHandle.DangerousGetHandle()), &deviceInterfaceData, null, 0, &requiredSize, null);
 
             string devicePath;
             var output = IntPtr.Zero;
@@ -379,7 +338,7 @@ public static class Devices
                 var deviceDetailData = (SP_DEVICE_INTERFACE_DETAIL_DATA_W*)output.ToPointer();
                 deviceDetailData->cbSize = (uint)Marshal.SizeOf<SP_DEVICE_INTERFACE_DETAIL_DATA_W>();
 
-                var result3 = PInvoke.SetupDiGetDeviceInterfaceDetail(deviceHandle, deviceInterfaceData, deviceDetailData, requiredSize, null, null);
+                var result3 = PInvoke.SetupDiGetDeviceInterfaceDetail(new HDEVINFO(deviceHandle.DangerousGetHandle()), &deviceInterfaceData, deviceDetailData, requiredSize, null, null);
                 if (!result3)
                     PInvokeExtensions.ThrowIfWin32Error("SetupDiEnumDeviceInterfaces");
 
@@ -459,7 +418,7 @@ public static class Devices
                 PInvokeExtensions.ThrowIfWin32Error("SetupDiEnumDeviceInterfaces");
 
             var requiredSize = 0u;
-            _ = PInvoke.SetupDiGetDeviceInterfaceDetail(deviceHandle, deviceInterfaceData, null, 0, &requiredSize, null);
+            _ = PInvoke.SetupDiGetDeviceInterfaceDetail(new HDEVINFO(deviceHandle.DangerousGetHandle()), &deviceInterfaceData, null, 0, &requiredSize, null);
 
             string devicePath;
             var output = IntPtr.Zero;
@@ -469,7 +428,7 @@ public static class Devices
                 var deviceDetailData = (SP_DEVICE_INTERFACE_DETAIL_DATA_W*)output.ToPointer();
                 deviceDetailData->cbSize = (uint)Marshal.SizeOf<SP_DEVICE_INTERFACE_DETAIL_DATA_W>();
 
-                var result3 = PInvoke.SetupDiGetDeviceInterfaceDetail(deviceHandle, deviceInterfaceData, deviceDetailData, requiredSize, null, null);
+                var result3 = PInvoke.SetupDiGetDeviceInterfaceDetail(new HDEVINFO(deviceHandle.DangerousGetHandle()), &deviceInterfaceData, deviceDetailData, requiredSize, null, null);
                 if (!result3)
                     PInvokeExtensions.ThrowIfWin32Error("SetupDiEnumDeviceInterfaces");
 

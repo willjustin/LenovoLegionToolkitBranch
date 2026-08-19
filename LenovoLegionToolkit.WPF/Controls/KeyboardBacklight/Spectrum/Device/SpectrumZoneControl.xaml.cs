@@ -1,4 +1,5 @@
-﻿using System.Windows.Media;
+﻿using System.Windows;
+using System.Windows.Media;
 
 namespace LenovoLegionToolkit.WPF.Controls.KeyboardBacklight.Spectrum.Device;
 
@@ -45,8 +46,16 @@ public partial class SpectrumZoneControl
         set => _button.IsChecked = value;
     }
 
+    private RoutedEventHandler? _clickHandlers;
+    public event RoutedEventHandler Click
+    {
+        add => _clickHandlers += value;
+        remove => _clickHandlers -= value;
+    }
+
     public SpectrumZoneControl()
     {
         InitializeComponent();
+        _button.Click += (s, e) => _clickHandlers?.Invoke(this, e);
     }
 }

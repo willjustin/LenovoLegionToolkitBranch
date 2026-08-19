@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,13 +7,17 @@ using System.Windows.Controls.Primitives;
 using LenovoLegionToolkit.Lib;
 using LenovoLegionToolkit.Lib.Controllers;
 using LenovoLegionToolkit.Lib.Listeners;
+using LenovoLegionToolkit.Lib.Settings;
+using LenovoLegionToolkit.Lib.Utils;
 using LenovoLegionToolkit.WPF.Resources;
+using LenovoLegionToolkit.WPF.Windows.Dashboard;
 
 namespace LenovoLegionToolkit.WPF.Controls.Dashboard;
 
 public partial class DiscreteGPUControl
 {
     private readonly GPUController _gpuController = IoCContainer.Resolve<GPUController>();
+    private readonly ApplicationSettings _settings = IoCContainer.Resolve<ApplicationSettings>();
     private readonly NativeWindowsMessageListener _nativeWindowsMessageListener = IoCContainer.Resolve<NativeWindowsMessageListener>();
 
     public DiscreteGPUControl()
@@ -30,18 +34,22 @@ public partial class DiscreteGPUControl
 
     protected override async Task OnRefreshAsync()
     {
+        if (!IsVisible || Window.GetWindow(this)?.WindowState == WindowState.Minimized)
+            return;
+
         if (!_gpuController.IsSupported())
             throw new InvalidOperationException("Unsupported operation");
 
-        if (!IsVisible)
-            return;
-
+        _gpuController.Interval = _settings.Store.GPUMonitoringInterval;
         await _gpuController.StartAsync();
     }
 
     private async void NativeWindowsMessageListener_Changed(object? sender, NativeWindowsMessageListener.ChangedEventArgs e)
     {
         if (e.Message != NativeWindowsMessage.OnDisplayDeviceArrival)
+            return;
+
+        if (Window.GetWindow(this)?.WindowState == WindowState.Minimized)
             return;
 
         Visibility = Visibility.Visible;
@@ -87,7 +95,7 @@ public partial class DiscreteGPUControl
                 foreach (var p in e.Processes.OrderBy(p => p.ProcessName))
                 {
                     try { processesStringBuilder.AppendLine().Append(" · ").Append(p.ProcessName); }
-                    catch {  /* Ignored. */ }
+                    catch {  /* Ignore */ }
                 }
             }
             else
@@ -159,5 +167,14 @@ public partial class DiscreteGPUControl
     {
         _deactivateGPUButton.IsEnabled = false;
         await _gpuController.RestartGPUAsync();
+    }
+
+    private void GpuInfoButton_Click(object sender, RoutedEventArgs e)
+    {
+        var window = new DiscreteGPUManagementWindow
+        {
+            Owner = Window.GetWindow(this)
+        };
+        window.ShowDialog();
     }
 }

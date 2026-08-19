@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using LenovoLegionToolkit.Lib.Listeners;
 using LenovoLegionToolkit.Lib.Settings;
@@ -43,6 +43,11 @@ public class GPUOverclockController
 
         try
         {
+            if (AppFlags.Instance.Debug)
+            {
+                return true;
+            }
+
             NVAPI.Initialize();
             isSupported = NVAPI.GetGPU() is not null;
         }
@@ -180,21 +185,29 @@ public class GPUOverclockController
 
     private async void NativeWindowsMessageListenerOnChanged(object? sender, NativeWindowsMessageListener.ChangedEventArgs e)
     {
-        if (e.Message != NativeWindowsMessage.OnDisplayDeviceArrival)
+        if (e.Message is not NativeWindowsMessage.OnDisplayDeviceArrival and not NativeWindowsMessage.MonitorOn)
             return;
 
         if (await IsSupportedAsync().ConfigureAwait(false))
             await ApplyStateAsync().ConfigureAwait(false);
     }
 
+    public static int GetMinCoreDeltaMhz() => -500;
+
     public static int GetMaxCoreDeltaMhz() => 500;
 
-    public static int GetMaxMemoryDeltaMhz() => 2000;
+    public static int GetMinMemoryDeltaMhz() => -3000;
+
+    public static int GetMaxMemoryDeltaMhz() => 3000;
+
+    public static int GetMinVoltageLockMv() => 700;
+    
+    public static int GetMaxVoltageLockMv() => 1200;
 
     private static void SetOverclockInfo(PhysicalGPU gpu, GPUOverclockInfo info)
     {
-        var coreDelta = Math.Clamp(info.CoreDeltaMhz, 0, GetMaxCoreDeltaMhz());
-        var memoryDelta = Math.Clamp(info.MemoryDeltaMhz, 0, GetMaxMemoryDeltaMhz());
+        var coreDelta = Math.Clamp(info.CoreDeltaMhz, GetMinCoreDeltaMhz(), GetMaxCoreDeltaMhz());
+        var memoryDelta = Math.Clamp(info.MemoryDeltaMhz, GetMinMemoryDeltaMhz(), GetMaxMemoryDeltaMhz());
 
         var clockEntries = new[]
         {
@@ -204,8 +217,44 @@ public class GPUOverclockController
         var voltageEntries = Array.Empty<PerformanceStates20BaseVoltageEntryV1>();
         var performanceStateInfo = new[] { new PerformanceStates20InfoV1.PerformanceState20(PerformanceStateId.P0_3DPerformance, clockEntries, voltageEntries) };
 
-        var overclock = new PerformanceStates20InfoV1(performanceStateInfo, 2, 0);
-        GPUApi.SetPerformanceStates20(gpu.Handle, overclock);
+        try
+        {
+            var overclock = new PerformanceStates20InfoV1(performanceStateInfo, 2, 0);
+            GPUApi.SetPerformanceStates20(gpu.Handle, overclock);
+        }
+        catch (Exception ex)
+        {
+            Log.Instance.Trace($"Failed to apply performance states.", ex);
+        }
+
+        try
+        {
+            if (info.VoltageLockMv > 0)
+            {
+                var voltageLock = Math.Clamp(info.VoltageLockMv, GetMinVoltageLockMv(), GetMaxVoltageLockMv());
+                var lockEntry = new PrivateClockBoostLockV2.ClockBoostLock(
+                    PublicClockDomain.Graphics,
+                    ClockLockMode.Manual,
+                    (uint)(voltageLock * 1000)
+                );
+                var boostLock = new PrivateClockBoostLockV2(new[] { lockEntry });
+                GPUApi.SetClockBoostLock(gpu.Handle, boostLock);
+            }
+            else
+            {
+                var lockEntry = new PrivateClockBoostLockV2.ClockBoostLock(
+                    PublicClockDomain.Graphics,
+                    ClockLockMode.None,
+                    0
+                );
+                var boostLock = new PrivateClockBoostLockV2(new[] { lockEntry });
+                GPUApi.SetClockBoostLock(gpu.Handle, boostLock);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Instance.Trace($"Failed to apply clock boost lock.", ex);
+        }
     }
 
     private static GPUOverclockInfo GetOverclockInfo(PhysicalGPU gpu)
@@ -213,6 +262,20 @@ public class GPUOverclockController
         var states = GPUApi.GetPerformanceStates20(gpu.Handle);
         var core = states.Clocks[PerformanceStateId.P0_3DPerformance][0].FrequencyDeltaInkHz.DeltaValue / 1000;
         var memory = states.Clocks[PerformanceStateId.P0_3DPerformance][1].FrequencyDeltaInkHz.DeltaValue / 1000;
-        return new(core, memory);
+
+        int voltageLock = 0;
+        try
+        {
+            var clockLock = GPUApi.GetClockBoostLock(gpu.Handle);
+            if (clockLock.ClockBoostLocks.Length > 0 && clockLock.ClockBoostLocks[0].LockMode == ClockLockMode.Manual)
+            {
+                voltageLock = (int)(clockLock.ClockBoostLocks[0].VoltageInMicroV / 1000);
+            }
+        }
+        catch
+        {
+        }
+
+        return new(core, memory, voltageLock);
     }
 }

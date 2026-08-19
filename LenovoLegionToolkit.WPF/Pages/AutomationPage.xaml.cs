@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,7 +10,10 @@ using LenovoLegionToolkit.Lib.Automation.Pipeline;
 using LenovoLegionToolkit.Lib.Automation.Pipeline.Triggers;
 using LenovoLegionToolkit.Lib.Automation.Steps;
 using LenovoLegionToolkit.Lib.Extensions;
+using LenovoLegionToolkit.Lib.Settings;
+using LenovoLegionToolkit.Lib.Utils;
 using LenovoLegionToolkit.WPF.Controls.Automation;
+using LenovoLegionToolkit.Lib.Station.Services;
 using LenovoLegionToolkit.WPF.Extensions;
 using LenovoLegionToolkit.WPF.Resources;
 using LenovoLegionToolkit.WPF.Utils;
@@ -23,11 +26,11 @@ namespace LenovoLegionToolkit.WPF.Pages;
 
 public partial class AutomationPage
 {
-    public static bool EnableHybridModeAutomation;
-
     private readonly AutomationProcessor _automationProcessor = IoCContainer.Resolve<AutomationProcessor>();
+    private readonly ApplicationSettings _settings = IoCContainer.Resolve<ApplicationSettings>();
 
     private IAutomationStep[] _supportedAutomationSteps = [];
+    private int _totalAutomationStepsCount = 0;
 
     public AutomationPage()
     {
@@ -41,11 +44,14 @@ public partial class AutomationPage
         await RefreshAsync();
     }
 
+
     private async void EnableAutomaticPipelinesToggle_Click(object sender, RoutedEventArgs e)
     {
         var isChecked = _enableAutomaticPipelinesToggle.IsChecked;
         if (isChecked.HasValue)
+        {
             await _automationProcessor.SetEnabledAsync(isChecked.Value);
+        }
     }
 
     private void NewAutomaticPipelineButton_Click(object sender, RoutedEventArgs e)
@@ -106,6 +112,7 @@ public partial class AutomationPage
         await SnackbarHelper.ShowAsync(Resource.AutomationPage_Reverted_Title, Resource.AutomationPage_Reverted_Message);
     }
 
+
     private async Task RefreshAsync()
     {
         _scrollViewer.ScrollToTop();
@@ -116,6 +123,8 @@ public partial class AutomationPage
         var initializedTasks = new List<Task> { Task.Delay(TimeSpan.FromSeconds(1)) };
 
         _enableAutomaticPipelinesToggle.IsChecked = _automationProcessor.IsEnabled;
+
+
 
         _automaticPipelinesStackPanel.Children.Clear();
         _manualPipelinesStackPanel.Children.Clear();
@@ -154,7 +163,7 @@ public partial class AutomationPage
         _loaderManual.IsLoading = false;
     }
 
-    private static async Task<IAutomationStep[]> GetSupportedAutomationStepsAsync()
+    private async Task<IAutomationStep[]> GetSupportedAutomationStepsAsync()
     {
         var steps = new List<IAutomationStep>
         {
@@ -167,7 +176,9 @@ public partial class AutomationPage
             new DpiScaleAutomationStep(default),
             new FlipToStartAutomationStep(default),
             new FnLockAutomationStep(default),
+            new CycleGodModePresetAutomationStep(),
             new GodModePresetAutomationStep(default),
+            new HardwareSensorsAutomationStep(default),
             new HDRAutomationStep(default),
             new ITSModeAutomationStep(default),
             new HybridModeAutomationStep(default),
@@ -175,6 +186,7 @@ public partial class AutomationPage
             new MacroAutomationStep(default),
             new MicrophoneAutomationStep(default),
             new SpeakerAutomationStep(default),
+            new SpeakerVolumeAutomationStep(default),
             new NotificationAutomationStep(default),
             new OneLevelWhiteKeyboardBacklightAutomationStep(default),
             new OverclockDiscreteGPUAutomationStep(default),
@@ -187,22 +199,31 @@ public partial class AutomationPage
             new RefreshRateAutomationStep(default),
             new ResolutionAutomationStep(default),
             new RGBKeyboardBacklightAutomationStep(default),
-            new RunAutomationStep(default, default, default, default),
+            new RunAutomationStep(default, default, default, default, default),
             new SpectrumKeyboardBacklightBrightnessAutomationStep(0),
             new SpectrumKeyboardBacklightProfileAutomationStep(1),
             new SpectrumKeyboardBacklightImportProfileAutomationStep(default),
             new TouchpadLockAutomationStep(default),
             new TurnOffMonitorsAutomationStep(),
-            new TurnOffWiFiAutomationStep(),
-            new TurnOnWiFiAutomationStep(),
+            new WiFiAutomationStep(default),
+            new AirplaneModeAutomationStep(default),
             new WhiteKeyboardBacklightAutomationStep(default),
             new WinKeyAutomationStep(default),
-            new CloseAutomationStep(),
-            new FloatingGadgetAutomationStep(default),
+            new CloseAppAutomationStep(),
+            new ShowAppAutomationStep(),
+            new OsdAutomationStep(default),
+            new OsdLockPositionAutomationStep(default),
+            new FanMaxSpeedAutomationStep(default),
         };
 
-        if (EnableHybridModeAutomation)
-            steps.Add(new HybridModeAutomationStep(default));
+        var registry = IoCContainer.Resolve<IAutomationStepRegistry>();
+        foreach (var extInfo in registry.Steps)
+        {
+            if (extInfo.Factory() is IAutomationStep step)
+                steps.Add(step);
+        }
+
+        _totalAutomationStepsCount = steps.Count;
 
         for (var index = steps.Count - 1; index >= 0; index--)
         {
@@ -221,7 +242,7 @@ public partial class AutomationPage
             supportedSteps = Array.FindAll(supportedSteps, s => s is not QuickActionAutomationStep);
         }
 
-        var control = new AutomationPipelineControl(pipeline, supportedSteps);
+        var control = new AutomationPipelineControl(pipeline, supportedSteps, _totalAutomationStepsCount);
         control.MouseRightButtonUp += (_, e) =>
         {
             ShowPipelineContextMenu(control, stackPanel);

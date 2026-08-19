@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LenovoLegionToolkit.Lib.Extensions;
+using LenovoLegionToolkit.Lib.Utils;
 using NAudio.CoreAudioApi;
 
 namespace LenovoLegionToolkit.Lib.Features;
@@ -17,6 +18,8 @@ public class SpeakerFeature : IFeature<SpeakerState>
     {
         try
         {
+
+
             var isSupported = AudioEndpointVolumes.Any();
             return Task.FromResult(isSupported);
         }
@@ -35,10 +38,19 @@ public class SpeakerFeature : IFeature<SpeakerState>
         return Task.FromResult(result);
     }
 
-    public Task SetStateAsync(SpeakerState state)
+    public async Task SetStateAsync(SpeakerState state)
     {
         var mute = SpeakerState.Mute == state;
         AudioEndpointVolumes.ForEach(v => v.Mute = mute);
+
+        await SpecialKeyLedHelper.SetLedAsync(mute ? SpecialKeyLedState.SpeakerOn : SpecialKeyLedState.SpeakerOff).ConfigureAwait(false);
+    }
+
+    public Task SetVolumeAsync(int value)
+    {
+        var scaledVolume = Math.Clamp(value / 100f, 0f, 1f);
+
+        AudioEndpointVolumes.ForEach(v => v.MasterVolumeLevelScalar = scaledVolume);
         return Task.CompletedTask;
     }
 }

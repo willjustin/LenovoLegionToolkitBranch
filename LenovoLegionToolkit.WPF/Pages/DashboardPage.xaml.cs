@@ -1,16 +1,19 @@
-﻿using LenovoLegionToolkit.Lib;
-using LenovoLegionToolkit.Lib.Settings;
-using LenovoLegionToolkit.Lib.Utils;
-using LenovoLegionToolkit.WPF.Controls.Dashboard;
-using LenovoLegionToolkit.WPF.Resources;
-using LenovoLegionToolkit.WPF.Settings;
-using LenovoLegionToolkit.WPF.Windows.Dashboard;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using LenovoLegionToolkit.Lib;
+using LenovoLegionToolkit.Lib.Messaging;
+using LenovoLegionToolkit.Lib.Messaging.Messages;
+using LenovoLegionToolkit.Lib.Settings;
+using LenovoLegionToolkit.Lib.Utils;
+using LenovoLegionToolkit.WPF.Controls.Dashboard;
+using LenovoLegionToolkit.WPF.Resources;
+using LenovoLegionToolkit.WPF.Settings;
+using LenovoLegionToolkit.WPF.Utils;
+using LenovoLegionToolkit.WPF.Windows.Dashboard;
 using Wpf.Ui.Common;
 using Wpf.Ui.Controls;
 
@@ -20,26 +23,71 @@ public partial class DashboardPage
 {
     private readonly ApplicationSettings _settings = IoCContainer.Resolve<ApplicationSettings>();
     private readonly DashboardSettings _dashboardSettings = IoCContainer.Resolve<DashboardSettings>();
+    private readonly SensorsControlSettings _sensorsControlSettings = IoCContainer.Resolve<SensorsControlSettings>();
+    private readonly HardwareSensorSettings _hardwareSensorSettings = IoCContainer.Resolve<HardwareSensorSettings>();
 
     private readonly List<DashboardGroupControl> _dashboardGroupControls = [];
-    private FrameworkElement sensorControl;
+    private FrameworkElement sensorControl = null!;
 
     public DashboardPage()
     {
         InitializeComponent();
 
-        if (!_settings.Store.UseNewSensorDashboard)
+        RefreshSensorControl();
+        EnsureConfigFilesExist();
+
+        MessagingCenter.Subscribe<SensorDashboardSwappedMessage>(this, _ =>
+        {
+            Dispatcher.Invoke(() =>
+            {
+                EnsureConfigFilesExist();
+                RefreshSensorControl();
+            });
+        });
+    }
+
+    private void RefreshSensorControl()
+    {
+        if (sensorControl != null)
+        {
+            _panel.Children.Remove(sensorControl);
+        }
+
+        if (!_settings.Store.EnableHardwareSensors || !_settings.Store.UseNewSensorDashboard)
         {
             sensorControl = new SensorsControl();
         }
-        else
+        else if (PawnIOHelper.IsPawnIOInstalled())
         {
             sensorControl = new SensorsControlV2();
         }
+        else
+        {
+            PawnIOHelper.ShowPawnIONotify();
+            sensorControl = new SensorsControl();
+        }
 
         int contentIndex = _panel.Children.IndexOf(_content);
+        if (contentIndex == -1) contentIndex = 0;
+        
         sensorControl.Margin = new Thickness(0, 16, 16, 0);
         _panel.Children.Insert(contentIndex, sensorControl);
+
+        if (_dashboardSettings != null && _loader != null && !_loader.IsLoading)
+        {
+            sensorControl.Visibility = _dashboardSettings.Store.ShowSensors
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        }
+    }
+
+    private void EnsureConfigFilesExist()
+    {
+        if (_settings.Store.EnableHardwareSensors && _settings.Store.UseNewSensorDashboard)
+        {
+            _sensorsControlSettings.EnsureFileExists();
+            _hardwareSensorSettings.EnsureFileExists();
+        }
     }
 
     private async void DashboardPage_Initialized(object? sender, EventArgs e)

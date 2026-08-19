@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using LenovoLegionToolkit.Lib.Controllers;
 using LenovoLegionToolkit.Lib.Extensions;
 using LenovoLegionToolkit.Lib.GameDetection;
+using LenovoLegionToolkit.Lib.Settings;
 using LenovoLegionToolkit.Lib.Utils;
 
 namespace LenovoLegionToolkit.Lib.AutoListeners;
@@ -30,21 +33,27 @@ public class GameAutoListener : AbstractAutoListener<GameAutoListener.ChangedEve
         public int GetHashCode(Process obj) => obj.Id;
     }
 
-    private static readonly object Lock = new();
+    private static readonly Lock Lock = new();
 
     private readonly InstanceStartedEventAutoAutoListener _instanceStartedEventAutoAutoListener;
 
     private readonly GameConfigStoreDetector _gameConfigStoreDetector;
     private readonly EffectiveGameModeDetector _effectiveGameModeDetector;
+    private readonly GPUController _gpuController;
+    private readonly ApplicationSettings _settings;
 
     private readonly HashSet<ProcessInfo> _detectedGamePathsCache = [];
     private readonly HashSet<Process> _processCache = new(new ProcessEqualityComparer());
 
     private bool _lastState;
+    private bool _preserveStateOnNextStart;
 
-    public GameAutoListener(InstanceStartedEventAutoAutoListener instanceStartedEventAutoAutoListener)
+    public GameAutoListener(InstanceStartedEventAutoAutoListener instanceStartedEventAutoAutoListener,
+        GPUController gpuController, ApplicationSettings settings)
     {
         _instanceStartedEventAutoAutoListener = instanceStartedEventAutoAutoListener;
+        _gpuController = gpuController;
+        _settings = settings;
 
         _gameConfigStoreDetector = new GameConfigStoreDetector();
         _gameConfigStoreDetector.GamesDetected += GameConfigStoreDetectorGamesConfigStoreDetected;
@@ -57,31 +66,141 @@ public class GameAutoListener : AbstractAutoListener<GameAutoListener.ChangedEve
     {
         lock (Lock)
         {
-            foreach (var gamePath in GameConfigStoreDetector.GetDetectedGamePaths())
-                _detectedGamePathsCache.Add(gamePath);
+            if (_preserveStateOnNextStart)
+            {
+                _lastState = true;
+                _preserveStateOnNextStart = false;
+                Log.Instance.Trace($"Preserving game running state during restart.");
+            }
         }
 
-        await _gameConfigStoreDetector.StartAsync().ConfigureAwait(false);
-        await _effectiveGameModeDetector.StartAsync().ConfigureAwait(false);
+        lock (Lock)
+        {
+            if (_settings.Store.GameDetection.UseGameConfigStore)
+            {
+                foreach (var gamePath in GameConfigStoreDetector.GetDetectedGamePaths())
+                    _detectedGamePathsCache.Add(gamePath);
 
-        await _instanceStartedEventAutoAutoListener.SubscribeChangedAsync(InstanceStartedEventAutoAutoListener_Changed).ConfigureAwait(false);
+                foreach (var process in Process.GetProcesses())
+                {
+                    try
+                    {
+                        var processPath = process.GetFileName();
+                        if (string.IsNullOrEmpty(processPath))
+                            continue;
+
+                        var processInfo = ProcessInfo.FromPath(processPath);
+                        if (_detectedGamePathsCache.Contains(processInfo))
+                        {
+                            Log.Instance.Trace($"Found already running game: {processInfo.Name} ({process.Id})");
+                            Attach(process);
+                            _processCache.Add(process);
+                            RaiseChangedIfNeeded(true);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Instance.Trace($"Failed to check process {process.Id}.", ex);
+                    }
+                }
+            }
+        }
+
+        if (_settings.Store.GameDetection.UseDiscreteGPU)
+        {
+            await _gpuController.StartAsync().ConfigureAwait(false);
+            _gpuController.Refreshed += GpuController_Refreshed;
+
+            try
+            {
+                var status = await _gpuController.RefreshNowAsync().ConfigureAwait(false);
+                lock (Lock)
+                {
+                    foreach (var process in status.Processes)
+                    {
+                        try
+                        {
+                            if (process.HasExited)
+                                continue;
+
+                            var processName = process.ProcessName;
+
+                            if (IsBlacklisted(processName))
+                                continue;
+
+                            if (!_processCache.Contains(process))
+                            {
+                                Log.Instance.Trace(
+                                    $"Found already running GPU-accelerated process: {processName} ({process.Id})");
+                                Attach(process);
+                                _processCache.Add(process);
+                                RaiseChangedIfNeeded(true);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Instance.Trace($"Failed to check GPU process {process.Id}.", ex);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Trace($"Failed to check for already running GPU processes.", ex);
+            }
+        }
+
+        if (_settings.Store.GameDetection.UseGameConfigStore)
+            await _gameConfigStoreDetector.StartAsync().ConfigureAwait(false);
+
+        if (_settings.Store.GameDetection.UseEffectiveGameMode)
+        {
+            await _effectiveGameModeDetector.StartAsync().ConfigureAwait(false);
+
+            lock (Lock)
+            {
+                if (_effectiveGameModeDetector.IsActive)
+                {
+                    Log.Instance.Trace($"Game Mode already active on startup, checking foreground process...");
+                    TryPinForegroundProcess();
+                }
+            }
+        }
+
+        await _instanceStartedEventAutoAutoListener.SubscribeChangedAsync(InstanceStartedEventAutoAutoListener_Changed)
+            .ConfigureAwait(false);
     }
 
     protected override async Task StopAsync()
     {
-        await _instanceStartedEventAutoAutoListener.UnsubscribeChangedAsync(InstanceStartedEventAutoAutoListener_Changed).ConfigureAwait(false);
+        await _instanceStartedEventAutoAutoListener
+            .UnsubscribeChangedAsync(InstanceStartedEventAutoAutoListener_Changed).ConfigureAwait(false);
 
         await _gameConfigStoreDetector.StopAsync().ConfigureAwait(false);
         await _effectiveGameModeDetector.StopAsync().ConfigureAwait(false);
 
+        _gpuController.Refreshed -= GpuController_Refreshed;
+
         lock (Lock)
         {
-            foreach (var process in _processCache)
-                Detach(process);
+            if (!_preserveStateOnNextStart)
+            {
+                foreach (var process in _processCache)
+                    Detach(process);
 
-            _processCache.Clear();
-            _detectedGamePathsCache.Clear();
-            _lastState = false;
+                _processCache.Clear();
+                _detectedGamePathsCache.Clear();
+                if (_lastState)
+                {
+                    _lastState = false;
+                    RaiseChanged(new ChangedEventArgs(false));
+                }
+            }
+            else
+            {
+                _detectedGamePathsCache.Clear();
+                Log.Instance.Trace($"Preserving process cache during mode switch: {_processCache.Count} process(es)");
+            }
         }
     }
 
@@ -93,7 +212,45 @@ public class GameAutoListener : AbstractAutoListener<GameAutoListener.ChangedEve
         }
     }
 
-    private void GameConfigStoreDetectorGamesConfigStoreDetected(object? sender, GameConfigStoreDetector.GameDetectedEventArgs e)
+    public void PreserveStateOnRestart()
+    {
+        lock (Lock)
+        {
+            _preserveStateOnNextStart = _lastState;
+            Log.Instance.Trace($"Will preserve state on next start: {_preserveStateOnNextStart}");
+        }
+    }
+
+    private void GpuController_Refreshed(object? sender, GPUStatus e)
+    {
+        lock (Lock)
+        {
+            foreach (var process in e.Processes)
+            {
+                try
+                {
+                    if (process.HasExited)
+                        continue;
+
+                    var processName = process.ProcessName;
+
+                    if (IsBlacklisted(processName))
+                        continue;
+
+                    if (!_processCache.Contains(process))
+                    {
+                        Attach(process);
+                        _processCache.Add(process);
+                        RaiseChangedIfNeeded(true);
+                    }
+                }
+                catch { /* Ignore */ }
+            }
+        }
+    }
+
+    private void GameConfigStoreDetectorGamesConfigStoreDetected(object? sender,
+        GameConfigStoreDetector.GameDetectedEventArgs e)
     {
         lock (Lock)
         {
@@ -107,8 +264,10 @@ public class GameAutoListener : AbstractAutoListener<GameAutoListener.ChangedEve
                 {
                     try
                     {
-                        var processPath = process.MainModule?.FileName;
-                        if (game.ExecutablePath is null || !game.ExecutablePath.Equals(processPath, StringComparison.CurrentCultureIgnoreCase))
+                        var processPath = process.GetFileName();
+
+                        if (processPath is not null && game.ExecutablePath is not null &&
+                            !game.ExecutablePath.Equals(processPath, StringComparison.CurrentCultureIgnoreCase))
                             continue;
 
                         if (!_processCache.Contains(process))
@@ -132,24 +291,122 @@ public class GameAutoListener : AbstractAutoListener<GameAutoListener.ChangedEve
     {
         lock (Lock)
         {
+            if (e)
+            {
+                TryPinForegroundProcess();
+            }
+
             if (_processCache.Count != 0)
             {
                 Log.Instance.Trace($"Ignoring, process cache is not empty.");
                 return;
             }
-
-            RaiseChangedIfNeeded(e);
         }
     }
 
-    private void InstanceStartedEventAutoAutoListener_Changed(object? sender, InstanceStartedEventAutoAutoListener.ChangedEventArgs e)
+    private unsafe void TryPinForegroundProcess()
+    {
+        try
+        {
+            var hWnd = Windows.Win32.PInvoke.GetForegroundWindow();
+            if (hWnd == Windows.Win32.Foundation.HWND.Null)
+            {
+                return;
+            }
+
+            uint processId = 0;
+            Windows.Win32.PInvoke.GetWindowThreadProcessId(hWnd, &processId);
+
+            if (processId == 0)
+            {
+                return;
+            }
+
+            var process = Process.GetProcessById((int)processId);
+            if (_processCache.Contains(process))
+            {
+                return;
+            }
+
+            var processName = process.ProcessName;
+            if (IsBlacklisted(processName))
+            {
+                Log.Instance.Trace($"Ignoring blacklisted process {processName} ({process.Id}).");
+                return;
+            }
+
+            Log.Instance.Trace($"Game Mode detected. Pinning process {process.Id} ({processName}).");
+            Attach(process);
+            _processCache.Add(process);
+            RaiseChangedIfNeeded(true);
+        }
+        catch (Exception ex)
+        {
+            Log.Instance.Trace($"Failed to pin process on Game Mode detection.", ex);
+        }
+    }
+
+    private bool IsBlacklisted(string processName)
+    {
+        if (_settings.Store.ExcludedProcesses.Contains(processName, StringComparer.OrdinalIgnoreCase))
+            return true;
+
+        return processName.Equals("explorer", StringComparison.OrdinalIgnoreCase)
+               || processName.Equals("Lenovo Legion Toolkit", StringComparison.OrdinalIgnoreCase)
+               || processName.Equals("SearchUI", StringComparison.OrdinalIgnoreCase)
+               || processName.Equals("LockApp", StringComparison.OrdinalIgnoreCase)
+               || processName.Equals("TextInputHost", StringComparison.OrdinalIgnoreCase)
+               || processName.Equals("ShellExperienceHost", StringComparison.OrdinalIgnoreCase)
+               || processName.Equals("StartMenuExperienceHost", StringComparison.OrdinalIgnoreCase)
+               || processName.Equals("SearchHost", StringComparison.OrdinalIgnoreCase)
+               || processName.Equals("dwm", StringComparison.OrdinalIgnoreCase)
+               || processName.Equals("csrss", StringComparison.OrdinalIgnoreCase)
+               || processName.Equals("WmiApSrv", StringComparison.OrdinalIgnoreCase)
+               || processName.Equals("HWiNFO64", StringComparison.OrdinalIgnoreCase)
+               || processName.Equals("HWiNFO32", StringComparison.OrdinalIgnoreCase)
+               || processName.Equals("nvidia-smi", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void InstanceStartedEventAutoAutoListener_Changed(object? sender,
+        InstanceStartedEventAutoAutoListener.ChangedEventArgs e)
     {
         lock (Lock)
         {
             if (e.ProcessId < 0)
                 return;
 
-            if (!_detectedGamePathsCache.Any(p => e.ProcessName.Equals(p.Name, StringComparison.CurrentCultureIgnoreCase)))
+            try
+            {
+                if (_processCache.Count > 0 && e.ParentProcessId > 0)
+                {
+                    if (_processCache.Any(p => p.Id == e.ParentProcessId))
+                    {
+                        var process = Process.GetProcessById(e.ProcessId);
+                        if (process != null)
+                        {
+                            var processName = process.ProcessName;
+                            if (!IsBlacklisted(processName))
+                            {
+                                Log.Instance.Trace(
+                                    $"Child process {e.ProcessId} ({processName}) spawned by tracked game {e.ParentProcessId}. Pinning.");
+                                Attach(process);
+                                _processCache.Add(process);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Trace($"Failed to check parent process for {e.ProcessName} ({e.ProcessId}).", ex);
+            }
+
+            if (!_settings.Store.GameDetection.UseGameConfigStore)
+                return;
+
+            if (!_detectedGamePathsCache.Any(p =>
+                    e.ProcessName.Equals(p.Name, StringComparison.CurrentCultureIgnoreCase)))
                 return;
 
             try
@@ -168,7 +425,8 @@ public class GameAutoListener : AbstractAutoListener<GameAutoListener.ChangedEve
                 if (!_detectedGamePathsCache.Contains(processInfo))
                     return;
 
-                Log.Instance.Trace($"Game {processInfo} is running. [processId={e.ProcessId}, processPath={processPath}]");
+                Log.Instance.Trace(
+                    $"Game {processInfo} is running. [processId={e.ProcessId}, processPath={processPath}]");
 
                 Attach(process);
                 _processCache.Add(process);
@@ -222,8 +480,14 @@ public class GameAutoListener : AbstractAutoListener<GameAutoListener.ChangedEve
 
             var staleProcesses = _processCache.RemoveWhere(p =>
             {
-                try { return p.HasExited; }
-                catch { return true; }
+                try
+                {
+                    return p.HasExited;
+                }
+                catch
+                {
+                    return true;
+                }
             });
 
             if (staleProcesses > 1)

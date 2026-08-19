@@ -1,68 +1,200 @@
-#include "InnoDependencies\install_dotnet.iss"
+#include "InnoDependencies\Scripts\install_dotnet.iss"
 
 #define MyAppName "Lenovo Legion Toolkit"
 #define MyAppNameCompact "LenovoLegionToolkit"
-#define MyAppPublisher "XKaguya"
-#define MyAppURL "https://github.com/XKaguya/LenovoLegionToolkit"
+#define MyAppPublisher "LenovoLegionToolkit-Team"
+#define MyAppURL "https://github.com/LenovoLegionToolkit-Team/LenovoLegionToolkit"
 #define MyAppExeName "Lenovo Legion Toolkit.exe"
+#define MyAppGitHub "https://github.com/LenovoLegionToolkit-Team/LenovoLegionToolkit"
+#define MyAppLegionDiscord "https://discord.com/invite/legionseries"
+#define MyAppLOQDiscord "https://discord.gg/3GKzQtwdNf"
+#define MyAppOfficialDiscord "https://discord.gg/TB3ER8ZVdt"
+#define MyAppCopyright "© 2026 Bartosz Cichecki, Kaguya, and Dr. Skinner"
 
 #ifndef MyAppVersion
   #define MyAppVersion "0.0.1"
 #endif
 
 [Setup]
+UsePreviousAppDir=no
 UsedUserAreasWarning=false
 AppId={{0C37B9AC-9C3D-4302-8ABB-125C7C7D83D5}
+AppMutex=LenovoLegionToolkit_Mutex_6efcc882-924c-4cbc-8fec-f45c25696f98
+CloseApplications=force
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
+AppCopyright={#MyAppCopyright}
+VersionInfoVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={userpf}\{#MyAppNameCompact}
+DefaultDirName={commonpf}\{#MyAppNameCompact}
 DisableProgramGroupPage=yes
 LicenseFile=LICENSE
 PrivilegesRequired=admin
 OutputBaseFilename=LenovoLegionToolkitSetup
-Compression=lzma2/ultra64  
+Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
+UninstallDisplayName={#MyAppName}
 UninstallDisplayIcon={app}\{#MyAppExeName}
 OutputDir=build_installer
 ArchitecturesInstallIn64BitMode=x64compatible
+WizardSmallImageFile=InnoDependencies\Images\logo.png
+SetupIconFile=InnoDependencies\Images\setup_icon.ico
+SetupLogging=yes
 
 [Code]
 function InitializeSetup: Boolean;
 begin
-  InstallDotNet6DesktopRuntime;
+  InstallDotNetDesktopRuntime;
   Result := True;
 end;
 
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+var
+  ResultCode: Integer;
+begin
+  if CurUninstallStep = usUninstall then
+  begin
+    // Unregister Package
+    Exec('powershell.exe', '-NoProfile -ExecutionPolicy Bypass -Command "Get-AppxPackage -Name ''eef45acd-2cf3-4d7d-9d33-92f37c74cc31'' | Remove-AppxPackage"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    // Remove Certificate from LocalMachine Root (Required for UIAccess)
+    Exec('powershell.exe', '-NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem Cert:\LocalMachine\Root | Where-Object { $_.Subject -match ''LenovoLegionToolkit'' } | Remove-Item -Force -ErrorAction SilentlyContinue"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    // Remove Certificate from LocalMachine TrustedPeople (Required for MSIX)
+    Exec('powershell.exe', '-NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem Cert:\LocalMachine\TrustedPeople | Where-Object { $_.Subject -match ''LenovoLegionToolkit'' } | Remove-Item -Force -ErrorAction SilentlyContinue"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    // Remove Certificate from CurrentUser (just in case, covers dev BAT installs)
+    Exec('powershell.exe', '-NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem Cert:\CurrentUser\TrustedPeople | Where-Object { $_.Subject -match ''LenovoLegionToolkit'' } | Remove-Item -Force -ErrorAction SilentlyContinue"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Exec('powershell.exe', '-NoProfile -ExecutionPolicy Bypass -Command "Get-ChildItem Cert:\CurrentUser\Root | Where-Object { $_.Subject -match ''LenovoLegionToolkit'' } | Remove-Item -Force -ErrorAction SilentlyContinue"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  end
+  else if CurUninstallStep = usPostUninstall then
+  begin
+    if SuppressibleMsgBox(ExpandConstant('{cm:UninstallKeepSettings}'), mbConfirmation, MB_YESNO, idNo) = idYes then
+    begin
+        DelTree(ExpandConstant('{localappdata}\{#MyAppNameCompact}'), True, True, True);
+    end;
+  end;
+end;
+
+procedure OpenBrowser(Url: string);
+var
+  ResultCode: Integer;
+begin
+  ShellExec('open', Url, '', '', SW_SHOWNORMAL, ewNoWait, ResultCode);
+end;
+
+procedure OfficialDiscordLinkClick(Sender: TObject);
+begin
+  OpenBrowser('{#MyAppOfficialDiscord}');
+end;
+
+procedure GitHubLinkClick(Sender: TObject);
+begin
+  OpenBrowser('{#MyAppGitHub}');
+end;
+
+procedure LegionDiscordLinkClick(Sender: TObject);
+begin
+  OpenBrowser('{#MyAppLegionDiscord}');
+end;
+
+procedure LOQDiscordLinkClick(Sender: TObject);
+begin
+  OpenBrowser('{#MyAppLOQDiscord}');
+end;
+
+procedure CurPageChanged(CurPageID: Integer);
+var
+  OfficialDiscordLink, GitHubLink, LegionDiscordLink, LOQDiscordLink: TNewStaticText;
+  Offset: Integer;
+begin
+  if CurPageID = wpFinished then
+  begin
+    Offset := WizardForm.FinishedLabel.Top + WizardForm.FinishedLabel.Height + ScaleY(4);
+
+    GitHubLink := TNewStaticText.Create(WizardForm);
+    GitHubLink.Parent := WizardForm.FinishedPage;
+    GitHubLink.Top := Offset;
+    GitHubLink.Left := WizardForm.FinishedLabel.Left;
+    GitHubLink.Caption := ExpandConstant('{cm:VisitGitHub}');
+    GitHubLink.Font.Color := clBlue;
+    GitHubLink.Font.Style := [fsUnderline];
+    GitHubLink.Cursor := crHand;
+    GitHubLink.OnClick := @GitHubLinkClick;
+
+    OfficialDiscordLink := TNewStaticText.Create(WizardForm);
+    OfficialDiscordLink.Parent := WizardForm.FinishedPage;
+    OfficialDiscordLink.Top := GitHubLink.Top + GitHubLink.Height + ScaleY(8);
+    OfficialDiscordLink.Left := WizardForm.FinishedLabel.Left;
+    OfficialDiscordLink.Caption := ExpandConstant('{cm:JoinOfficialDiscord}');
+    OfficialDiscordLink.Font.Color := clBlue;
+    OfficialDiscordLink.Font.Style := [fsUnderline];
+    OfficialDiscordLink.Cursor := crHand;
+    OfficialDiscordLink.OnClick := @OfficialDiscordLinkClick;
+
+    LegionDiscordLink := TNewStaticText.Create(WizardForm);
+    LegionDiscordLink.Parent := WizardForm.FinishedPage;
+    LegionDiscordLink.Top := OfficialDiscordLink.Top + OfficialDiscordLink.Height + ScaleY(8);
+    LegionDiscordLink.Left := WizardForm.FinishedLabel.Left;
+    LegionDiscordLink.Caption := ExpandConstant('{cm:JoinLegionDiscord}');
+    LegionDiscordLink.Font.Color := clBlue;
+    LegionDiscordLink.Font.Style := [fsUnderline];
+    LegionDiscordLink.Cursor := crHand;
+    LegionDiscordLink.OnClick := @LegionDiscordLinkClick;
+
+    LOQDiscordLink := TNewStaticText.Create(WizardForm);
+    LOQDiscordLink.Parent := WizardForm.FinishedPage;
+    LOQDiscordLink.Top := LegionDiscordLink.Top + LegionDiscordLink.Height + ScaleY(8);
+    LOQDiscordLink.Left := WizardForm.FinishedLabel.Left;
+    LOQDiscordLink.Caption := ExpandConstant('{cm:JoinLOQDiscord}');
+    LOQDiscordLink.Font.Color := clBlue;
+    LOQDiscordLink.Font.Style := [fsUnderline];
+    LOQDiscordLink.Cursor := crHand;
+    LOQDiscordLink.OnClick := @LOQDiscordLinkClick;
+
+    if WizardForm.RunList.Visible then
+      WizardForm.RunList.Top := LOQDiscordLink.Top + LOQDiscordLink.Height + ScaleY(12);
+  end;
+end;
+
+
+[CustomMessages]
+VisitGitHub=Visit GitHub Repository
+JoinOfficialDiscord=Join Official Discord Community
+JoinLegionDiscord=Join Legion Series Discord Community
+JoinLOQDiscord=Join LOQ Series Discord Community
+UninstallKeepSettings=Do you want to delete all Lenovo Legion Toolkit settings, customizations, and configurations?
+
 [Languages]
 Name: "en";      MessagesFile: "compiler:Default.isl"
-Name: "ptbr";    MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"
-Name: "bg";      MessagesFile: "compiler:Languages\Bulgarian.isl" 
-Name: "cs";      MessagesFile: "compiler:Languages\Czech.isl" 
-Name: "nlnl";    MessagesFile: "compiler:Languages\Dutch.isl"
-Name: "fr";      MessagesFile: "compiler:Languages\French.isl"
-Name: "de";      MessagesFile: "compiler:Languages\German.isl"
-Name: "hu";      MessagesFile: "compiler:Languages\Hungarian.isl"
-Name: "it";      MessagesFile: "compiler:Languages\Italian.isl"
-Name: "ja";      MessagesFile: "compiler:Languages\Japanese.isl"
-Name: "pl";      MessagesFile: "compiler:Languages\Polish.isl"
-Name: "pt";      MessagesFile: "compiler:Languages\Portuguese.isl"
-Name: "ru";      MessagesFile: "compiler:Languages\Russian.isl"
-Name: "sk";      MessagesFile: "compiler:Languages\Slovak.isl"
-Name: "es";      MessagesFile: "compiler:Languages\Spanish.isl"
-Name: "tr";      MessagesFile: "compiler:Languages\Turkish.isl"
-Name: "ukr";     MessagesFile: "compiler:Languages\Ukrainian.isl"
-Name: "ar";      MessagesFile: "InnoDependencies\Arabic.isl"
-Name: "lv";      MessagesFile: "InnoDependencies\Latvian.isl"
-Name: "zhhans";  MessagesFile: "InnoDependencies\ChineseSimplified.isl"
-Name: "zhhant";  MessagesFile: "InnoDependencies\ChineseTraditional.isl"
-Name: "el";      MessagesFile: "InnoDependencies\Greek.isl"
-Name: "ro";      MessagesFile: "InnoDependencies\Romanian.isl"
-Name: "vi";      MessagesFile: "InnoDependencies\Vietnamese.isl"
+Name: "ar";      MessagesFile: "InnoDependencies\Languages\Arabic.isl"
+Name: "bs";      MessagesFile: "InnoDependencies\Languages\Bosnian.isl"
+Name: "bg";      MessagesFile: "InnoDependencies\Languages\Bulgarian.isl"
+Name: "zhhans";  MessagesFile: "InnoDependencies\Languages\ChineseSimplified.isl"
+Name: "zhhant";  MessagesFile: "InnoDependencies\Languages\ChineseTraditional.isl"
+Name: "cs";      MessagesFile: "InnoDependencies\Languages\Czech.isl"
+Name: "nlnl";    MessagesFile: "InnoDependencies\Languages\Dutch.isl"
+Name: "fr";      MessagesFile: "InnoDependencies\Languages\French.isl"
+Name: "de";      MessagesFile: "InnoDependencies\Languages\German.isl"
+Name: "el";      MessagesFile: "InnoDependencies\Languages\Greek.isl"
+Name: "hu";      MessagesFile: "InnoDependencies\Languages\Hungarian.isl"
+Name: "it";      MessagesFile: "InnoDependencies\Languages\Italian.isl"
+Name: "ja";      MessagesFile: "InnoDependencies\Languages\Japanese.isl"
+Name: "ko";      MessagesFile: "InnoDependencies\Languages\Korean.isl"
+Name: "lv";      MessagesFile: "InnoDependencies\Languages\Latvian.isl"
+Name: "no";      MessagesFile: "InnoDependencies\Languages\Norwegian.isl"
+Name: "pl";      MessagesFile: "InnoDependencies\Languages\Polish.isl"
+Name: "pt";      MessagesFile: "InnoDependencies\Languages\Portuguese.isl"
+Name: "ptbr";    MessagesFile: "InnoDependencies\Languages\BrazilianPortuguese.isl"
+Name: "ro";      MessagesFile: "InnoDependencies\Languages\Romanian.isl"
+Name: "ru";      MessagesFile: "InnoDependencies\Languages\Russian.isl"
+Name: "sk";      MessagesFile: "InnoDependencies\Languages\Slovak.isl"
+Name: "es";      MessagesFile: "InnoDependencies\Languages\Spanish.isl"
+Name: "tr";      MessagesFile: "InnoDependencies\Languages\Turkish.isl"
+Name: "ukr";     MessagesFile: "InnoDependencies\Languages\Ukrainian.isl"
+Name: "uz";      MessagesFile: "InnoDependencies\Languages\Uzbek.isl"
+Name: "vi";      MessagesFile: "InnoDependencies\Languages\Vietnamese.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
@@ -71,15 +203,25 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "build\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 
+[InstallDelete]
+; Safely remove legacy installation from %LOCALAPPDATA%\Programs without touching user settings
+Type: filesandordirs; Name: "{userpf}\{#MyAppNameCompact}"
+
 [Icons]
-Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; AppUserModelID: "eef45acd-2cf3-4d7d-9d33-92f37c74cc31_6qs7aha96dxnt!App"
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; AppUserModelID: "eef45acd-2cf3-4d7d-9d33-92f37c74cc31_6qs7aha96dxnt!App"
 
 [Run]
-Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: runascurrentuser nowait postinstall
+; Unregister existing package identity (required for upgrades)
+Filename: "powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -Command ""Get-AppxPackage -Name 'eef45acd-2cf3-4d7d-9d33-92f37c74cc31' | Remove-AppxPackage -ErrorAction SilentlyContinue"""; Flags: runhidden; StatusMsg: "Removing previous identity..."
+; Trust the self-signed certificate in Trusted People (required for registration)
+Filename: "powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -Command ""Import-Certificate -FilePath '{app}\LenovoLegionToolkit.cer' -CertStoreLocation 'Cert:\LocalMachine\TrustedPeople'"""; Flags: runhidden; StatusMsg: "Trusting application identity..."
+; Trust the self-signed certificate in Root (required for UIAccess check)
+Filename: "powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -Command ""Import-Certificate -FilePath '{app}\LenovoLegionToolkit.cer' -CertStoreLocation 'Cert:\LocalMachine\Root'"""; Flags: runhidden; StatusMsg: "Trusting application root certificate..."
+; Register the Sparse Package identity (conditional: use .msix if present, else raw manifest)
+Filename: "powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -Command ""if (Test-Path '{app}\LenovoLegionToolkit.LampArray.msix') {{ Add-AppxPackage -Path '{app}\LenovoLegionToolkit.LampArray.msix' -ExternalLocation '{app}' } else {{ Add-AppxPackage -Register '{app}\AppxManifest.xml' -ExternalLocation '{app}' }"""; Flags: runhidden; StatusMsg: "Registering application identity..."
 
-[UninstallDelete]
-Type: filesandordirs; Name: "{localappdata}\{#MyAppNameCompact}"
+Filename: "rundll32.exe"; Parameters: "shell32.dll,ShellExec_RunDLL ""{app}\{#MyAppExeName}"""; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: runascurrentuser nowait postinstall skipifsilent
 
 [UninstallRun]
-RunOnceId: "DelAutorun"; Filename: "schtasks"; Parameters: "/Delete /TN ""LenovoLegionToolkit_Autorun_6efcc882-924c-4cbc-8fec-f45c25696f98"" /F"; Flags: runhidden 
+RunOnceId: "DelAutorun"; Filename: "schtasks"; Parameters: "/Delete /TN ""LenovoLegionToolkit_Autorun_6efcc882-924c-4cbc-8fec-f45c25696f98"" /F"; Flags: runhidden

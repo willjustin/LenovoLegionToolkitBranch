@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using static LenovoLegionToolkit.Lib.Settings.GodModeSettings;
 
 namespace LenovoLegionToolkit.Lib.Features;
@@ -89,6 +90,9 @@ public class PowerModeFeature(
                 case PowerModeState.Performance:
                     await base.SetStateAsync(PowerModeState.Balance).ConfigureAwait(false);
                     break;
+                case PowerModeState.Extreme:
+                    await base.SetStateAsync(PowerModeState.Extreme).ConfigureAwait(false);
+                    break;
             }
 
             await Task.Delay(TimeSpan.FromMilliseconds(500)).ConfigureAwait(false);
@@ -97,6 +101,9 @@ public class PowerModeFeature(
         thermalModeListener.SuppressNext();
         await base.SetStateAsync(state).ConfigureAwait(false);
         await powerModeListener.NotifyAsync(state).ConfigureAwait(false);
+
+        var thermalMode = await WMI.LenovoGameZoneData.GetThermalModeAsync().ConfigureAwait(false);
+        Log.Instance.Trace($"Thermal Mode: {(ThermalModeState)thermalMode}");
     }
 
     public async Task SuspendMode(PowerModeState state)
@@ -106,18 +113,21 @@ public class PowerModeFeature(
         await SetStateAsync(state).ConfigureAwait(false);
     }
 
-    public async Task EnsureCorrectWindowsPowerSettingsAreSetAsync(GodModeSettingsStore.Preset? preset = null)
+    public async Task EnsureCorrectWindowsPowerSettingsAreSetAsync(GodModeSettingsStore.Preset? preset = null, bool skipThrottle = false)
     {
         var state = await GetStateAsync().ConfigureAwait(false);
-        await windowsPowerModeController.SetPowerModeAsync(state, preset).ConfigureAwait(false);
-        await windowsPowerPlanController.SetPowerPlanAsync(state, true, preset).ConfigureAwait(false);
+        await windowsPowerModeController.SetPowerModeAsync(state, preset, skipThrottle).ConfigureAwait(false);
+        await windowsPowerPlanController.SetPowerPlanAsync(state, true, preset, skipThrottle).ConfigureAwait(false);
     }
 
     public async Task EnsureGodModeStateIsAppliedAsync()
     {
         var state = await GetStateAsync().ConfigureAwait(false);
         if (state != PowerModeState.GodMode)
+        {
+            await EnsureCorrectWindowsPowerSettingsAreSetAsync().ConfigureAwait(false);
             return;
+        }
 
         await godModeController.ApplyStateAsync().ConfigureAwait(false);
     }

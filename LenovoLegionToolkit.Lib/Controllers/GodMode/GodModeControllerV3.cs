@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Management;
 using System.Threading.Tasks;
 using LenovoLegionToolkit.Lib.Extensions;
 using LenovoLegionToolkit.Lib.Settings;
@@ -96,7 +97,7 @@ public class GodModeControllerV3(
             Log.Instance.Trace($"Overclocking is disabled.");
         }
 
-        RaisePresetChanged(presetId);
+        await RaisePresetChanged(presetId);
         Log.Instance.Trace($"State applied. [name={preset.Name}, id={presetId}]");
     }
 
@@ -373,8 +374,15 @@ public class GodModeControllerV3(
 
     private static async Task<bool> IsBiosOcEnabledAsync()
     {
-        var result = await WMI.LenovoGameZoneData.GetBIOSOCMode().ConfigureAwait(false);
-        return result == BIOS_OC_MODE_ENABLED;
+        try
+        {
+            var result = await WMI.LenovoGameZoneData.GetBIOSOCMode().ConfigureAwait(false);
+            return result == BIOS_OC_MODE_ENABLED;
+        }
+        catch (ManagementException)
+        {
+            return false;
+        }
     }
 
     #endregion

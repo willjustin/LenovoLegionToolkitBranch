@@ -1,10 +1,3 @@
-﻿using LenovoLegionToolkit.Lib;
-using LenovoLegionToolkit.Lib.Automation.Pipeline.Triggers;
-using LenovoLegionToolkit.Lib.Extensions;
-using LenovoLegionToolkit.Lib.Utils;
-using LenovoLegionToolkit.WPF.Controls;
-using LenovoLegionToolkit.WPF.Extensions;
-using LenovoLegionToolkit.WPF.Resources;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +5,14 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using LenovoLegionToolkit.Lib;
+using LenovoLegionToolkit.Lib.Automation.Pipeline.Triggers;
+using LenovoLegionToolkit.Lib.Extensions;
+using LenovoLegionToolkit.Lib.Station.Services;
+using LenovoLegionToolkit.Lib.Utils;
+using LenovoLegionToolkit.WPF.Controls;
+using LenovoLegionToolkit.WPF.Extensions;
+using LenovoLegionToolkit.WPF.Resources;
 using Wpf.Ui.Common;
 using Wpf.Ui.Controls;
 using CardControl = LenovoLegionToolkit.WPF.Controls.Custom.CardControl;
@@ -27,7 +28,9 @@ public partial class CreateAutomationPipelineWindow
         new ACAdapterConnectedAutomationPipelineTrigger(),
         new LowWattageACAdapterConnectedAutomationPipelineTrigger(),
         new ACAdapterDisconnectedAutomationPipelineTrigger(),
+        new BatteryPercentageAutomationPipelineTrigger(),
         new PowerModeAutomationPipelineTrigger(PowerModeState.Balance),
+        new ITSModeAutomationPipelineTrigger(ITSMode.ItsAuto),
         new GodModePresetChangedAutomationPipelineTrigger(Guid.Empty),
         new GamesAreRunningAutomationPipelineTrigger(),
         new GamesStopAutomationPipelineTrigger(),
@@ -43,6 +46,7 @@ public partial class CreateAutomationPipelineWindow
         new DisplayOffAutomationPipelineTrigger(),
         new HDROnAutomationPipelineTrigger(),
         new HDROffAutomationPipelineTrigger(),
+        new HybridModeAutomationPipelineTrigger(HybridModeState.On),
         new DeviceConnectedAutomationPipelineTrigger([]),
         new DeviceDisconnectedAutomationPipelineTrigger([]),
         new ExternalDisplayConnectedAutomationPipelineTrigger(),
@@ -58,6 +62,8 @@ public partial class CreateAutomationPipelineWindow
     private readonly HashSet<Type> _existingTriggerTypes;
     private readonly Action<IAutomationPipelineTrigger> _createPipeline;
 
+    private readonly HashSet<IAutomationPipelineTrigger> _selectedTriggers = new();
+
     private bool _multiSelect;
 
     public CreateAutomationPipelineWindow(HashSet<Type> existingTriggerTypes, Action<IAutomationPipelineTrigger> createPipeline)
@@ -67,14 +73,36 @@ public partial class CreateAutomationPipelineWindow
 
         InitializeComponent();
 
+        var totalAvailableTriggers = _triggers.Count;
+
         if (machineInformation.Properties.SupportsITSMode)
         {
-            _triggers.Insert(1, new ITSModeAutomationPipelineTrigger(ITSMode.ItsAuto));
             _triggers.Remove(new PowerModeAutomationPipelineTrigger(PowerModeState.Balance));
             _triggers.Remove(new GodModePresetChangedAutomationPipelineTrigger(Guid.Empty));
         }
+        else
+        {
+            _triggers.Remove(new ITSModeAutomationPipelineTrigger(ITSMode.ItsAuto));
+        }
+
+        if (!machineInformation.Properties.SupportsGSync && !machineInformation.Properties.SupportsIGPUMode)
+        {
+            _triggers.Remove(new HybridModeAutomationPipelineTrigger(HybridModeState.On));
+        }
+
+        var triggerRegistry = IoCContainer.Resolve<IAutomationTriggerRegistry>();
+        totalAvailableTriggers += triggerRegistry.Triggers.Count;
+
+        foreach (var extInfo in triggerRegistry.Triggers)
+        {
+            if (extInfo.Factory() is IAutomationPipelineTrigger trigger)
+                _triggers.Add(trigger);
+        }
+
+        _countsTextBlock.Text = string.Format(Resource.Automation_SupportedAvailableCount, _triggers.Count, totalAvailableTriggers);
 
         IsVisibleChanged += CreateAutomationPipelineWindow_IsVisibleChanged;
+        _logicComboBox.SelectionChanged += (_, _) => _ = RefreshAsync();
     }
 
     private async void CreateAutomationPipelineWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -85,27 +113,44 @@ public partial class CreateAutomationPipelineWindow
 
     private void CreateButton_Click(object sender, RoutedEventArgs e)
     {
-        var triggers = _content.Children.ToArray()
-            .OfType<CardControl>()
-            .Select(c => c.Header)
-            .OfType<CardHeaderControl>()
-            .Select(c => c.Accessory)
-            .OfType<CheckBox>()
-            .Where(c => c.IsChecked ?? false)
-            .Select(c => c.Tag)
-            .OfType<IAutomationPipelineTrigger>()
-            .ToArray();
+        var triggers = _selectedTriggers.ToArray();
 
         if (triggers.IsEmpty())
             return;
 
-        var trigger = triggers.Length == 1 ? triggers[0] : new AndAutomationPipelineTrigger(triggers);
-        _createPipeline(trigger);
+        if (triggers.Length == 1)
+        {
+            _createPipeline(triggers[0]);
+        }
+        else if (_logicComboBox.SelectedIndex == 0)
+        {
+            foreach (var t in triggers)
+                _createPipeline(t);
+        }
+        else
+        {
+            IAutomationPipelineTrigger composite = _logicComboBox.SelectedIndex == 2
+                ? new OrAutomationPipelineTrigger(triggers)
+                : new AndAutomationPipelineTrigger(triggers);
+            _createPipeline(composite);
+        }
 
         Close();
     }
 
     private void CancelButton_Click(object sender, RoutedEventArgs e) => Close();
+
+    private async void BackButton_Click(object sender, RoutedEventArgs e)
+    {
+        _multiSelect = false;
+        _selectedTriggers.Clear();
+        await RefreshAsync();
+    }
+
+    private void _searchBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        _ = RefreshAsync();
+    }
 
     private Task RefreshAsync()
     {
@@ -114,13 +159,22 @@ public partial class CreateAutomationPipelineWindow
         if (!_multiSelect)
             _content.Children.Add(CreateMultipleSelectCardControl());
 
+        var filter = _searchBox.Text?.Trim() ?? string.Empty;
+
         foreach (var trigger in _triggers)
         {
-            _content.Children.Add(CreateCardControl(trigger));
+            if (string.IsNullOrWhiteSpace(filter) ||
+                trigger.DisplayName.Contains(filter, StringComparison.OrdinalIgnoreCase))
+            {
+                _content.Children.Add(CreateCardControl(trigger));
+            }
         }
 
-        _createButton.IsEnabled = false;
+        _backButton.Visibility = _multiSelect ? Visibility.Visible : Visibility.Collapsed;
         _createButton.Visibility = _multiSelect ? Visibility.Visible : Visibility.Collapsed;
+        _logicComboBox.Visibility = _multiSelect ? Visibility.Visible : Visibility.Collapsed;
+        _countsTextBlock.Visibility = _multiSelect ? Visibility.Collapsed : Visibility.Visible;
+        RefreshCreateButton();
 
         return Task.CompletedTask;
     }
@@ -156,10 +210,16 @@ public partial class CreateAutomationPipelineWindow
             var checkbox = new CheckBox
             {
                 Tag = trigger,
-                HorizontalAlignment = HorizontalAlignment.Right
+                HorizontalAlignment = HorizontalAlignment.Right,
+                IsChecked = _selectedTriggers.Contains(trigger)
             };
             checkbox.Click += (_, e) =>
             {
+                if (checkbox.IsChecked == true)
+                    _selectedTriggers.Add(trigger);
+                else
+                    _selectedTriggers.Remove(trigger);
+
                 RefreshCreateButton();
                 e.Handled = true;
             };
@@ -181,7 +241,7 @@ public partial class CreateAutomationPipelineWindow
             Margin = new(0, 8, 0, 0),
         };
 
-        if (!_multiSelect && trigger is IDisallowDuplicatesAutomationPipelineTrigger)
+        if (trigger is IDisallowDuplicatesAutomationPipelineTrigger && (!_multiSelect || _logicComboBox.SelectedIndex == 0))
             control.IsEnabled = !_existingTriggerTypes.Contains(trigger.GetType());
 
         control.Click += (_, _) =>
@@ -191,8 +251,14 @@ public partial class CreateAutomationPipelineWindow
                 if (accessory is not CheckBox checkbox)
                     return;
 
-                var isChecked = checkbox.IsChecked ?? false;
-                checkbox.IsChecked = !isChecked;
+                var isChecked = !checkbox.IsChecked ?? false;
+                checkbox.IsChecked = isChecked;
+
+                if (isChecked)
+                    _selectedTriggers.Add(trigger);
+                else
+                    _selectedTriggers.Remove(trigger);
+
                 RefreshCreateButton();
             }
             else
@@ -213,14 +279,6 @@ public partial class CreateAutomationPipelineWindow
             return;
         }
 
-        var anyChecked = _content.Children.ToArray()
-            .OfType<CardControl>()
-            .Select(c => c.Header)
-            .OfType<CardHeaderControl>()
-            .Select(c => c.Accessory)
-            .OfType<CheckBox>()
-            .Any(c => c.IsChecked ?? false);
-
-        _createButton.IsEnabled = anyChecked;
+        _createButton.IsEnabled = _selectedTriggers.Count > 0;
     }
 }

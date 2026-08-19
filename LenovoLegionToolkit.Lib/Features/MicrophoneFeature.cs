@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LenovoLegionToolkit.Lib.Extensions;
+using LenovoLegionToolkit.Lib.Utils;
 using NAudio.CoreAudioApi;
 
 namespace LenovoLegionToolkit.Lib.Features;
@@ -17,6 +18,11 @@ public class MicrophoneFeature : IFeature<MicrophoneState>
     {
         try
         {
+            if (AppFlags.Instance.Debug)
+            {
+                return Task.FromResult(true);
+            }
+
             var isSupported = AudioEndpointVolumes.Any();
             return Task.FromResult(isSupported);
         }
@@ -35,10 +41,11 @@ public class MicrophoneFeature : IFeature<MicrophoneState>
         return Task.FromResult(result);
     }
 
-    public Task SetStateAsync(MicrophoneState state)
+    public async Task SetStateAsync(MicrophoneState state)
     {
         var mute = MicrophoneState.Off == state;
         AudioEndpointVolumes.ForEach(v => v.Mute = mute);
-        return Task.CompletedTask;
+
+        await SpecialKeyLedHelper.SetLedAsync(mute ? SpecialKeyLedState.MicrophoneOn : SpecialKeyLedState.MicrophoneOff).ConfigureAwait(false);
     }
 }

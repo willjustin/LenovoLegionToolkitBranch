@@ -1,10 +1,12 @@
-﻿using System;
+﻿ using System;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Controls;
 using LenovoLegionToolkit.Lib.Automation.Steps;
 using LenovoLegionToolkit.WPF.Resources;
 using Wpf.Ui.Common;
+using Wpf.Ui.Controls;
 using Button = Wpf.Ui.Controls.Button;
 using CardControl = LenovoLegionToolkit.WPF.Controls.Custom.CardControl;
 
@@ -30,6 +32,22 @@ public abstract class AbstractAutomationStepControl : UserControl
     private readonly StackPanel _stackPanel = new()
     {
         Orientation = Orientation.Horizontal,
+        VerticalAlignment = VerticalAlignment.Center,
+    };
+
+    private readonly SymbolIcon _dragHandle = new()
+    {
+        Symbol = SymbolRegular.ReOrderDotsVertical24,
+        Margin = new(-8, 0, 0, 0),
+        Cursor = Cursors.SizeAll,
+        Opacity = 0.5,
+    };
+
+    private readonly SymbolIcon _iconControl = new()
+    {
+        FontSize = 24,
+        Margin = new(4, 0, 12, 0),
+        VerticalAlignment = VerticalAlignment.Center,
     };
 
     private readonly Button _deleteButton = new()
@@ -39,12 +57,13 @@ public abstract class AbstractAutomationStepControl : UserControl
         MinWidth = 34,
         Height = 34,
         Margin = new(8, 0, 0, 0),
+        VerticalAlignment = VerticalAlignment.Center,
     };
 
     public SymbolRegular Icon
     {
-        get => _cardControl.Icon;
-        set => _cardControl.Icon = value;
+        get => _iconControl.Symbol;
+        set => _iconControl.Symbol = value;
     }
 
     public string Title
@@ -73,6 +92,7 @@ public abstract class AbstractAutomationStepControl : UserControl
 
     public event EventHandler? Changed;
     public event EventHandler? Delete;
+    public event EventHandler? DragEnded;
 
     protected AbstractAutomationStepControl(IAutomationStep automationStep)
     {
@@ -85,15 +105,49 @@ public abstract class AbstractAutomationStepControl : UserControl
 
     private void InitializeComponent()
     {
+        _dragHandle.MouseLeftButtonDown += (_, e) =>
+        {
+            if (e.ClickCount > 1) return;
+            try
+            {
+                DragDrop.DoDragDrop(this, new DataObject("AutomationStep", this), DragDropEffects.Move);
+            }
+            finally
+            {
+                DragEnded?.Invoke(this, EventArgs.Empty);
+            }
+        };
+
         _deleteButton.Click += (_, _) => Delete?.Invoke(this, EventArgs.Empty);
 
         var control = GetCustomControl();
         if (control is not null)
+        {
+            if (control is FrameworkElement fe)
+                fe.VerticalAlignment = VerticalAlignment.Center;
             _stackPanel.Children.Add(control);
+        }
         _stackPanel.Children.Add(_deleteButton);
 
         _cardHeaderControl.Accessory = _stackPanel;
-        _cardControl.Header = _cardHeaderControl;
+        
+        var headerPanel = new Grid();
+        headerPanel.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        headerPanel.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        headerPanel.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+        _dragHandle.VerticalAlignment = VerticalAlignment.Center;
+        Grid.SetColumn(_dragHandle, 0);
+        headerPanel.Children.Add(_dragHandle);
+
+        Grid.SetColumn(_iconControl, 1);
+        headerPanel.Children.Add(_iconControl);
+
+        _cardHeaderControl.VerticalAlignment = VerticalAlignment.Center;
+        Grid.SetColumn(_cardHeaderControl, 2);
+        headerPanel.Children.Add(_cardHeaderControl);
+
+        _cardControl.Header = headerPanel;
 
         Content = _cardControl;
     }

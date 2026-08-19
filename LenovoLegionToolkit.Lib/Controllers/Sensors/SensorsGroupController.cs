@@ -1,21 +1,19 @@
-﻿// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+// This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // Copyright (C) RAMSPDToolkit and Contributors.
 // Partial Copyright (C) Michael Möller <mmoeller@openhardwaremonitor.org> and Contributors.
 // All Rights Reserved.
 
-using LenovoLegionToolkit.Lib.Settings;
-using LenovoLegionToolkit.Lib.Utils;
-using LibreHardwareMonitor.Hardware;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using LenovoLegionToolkit.Lib.Settings;
 using LenovoLegionToolkit.Lib.System;
-using Registry = Microsoft.Win32.Registry;
+using LenovoLegionToolkit.Lib.Utils;
+using LibreHardwareMonitor.Hardware;
 
 namespace LenovoLegionToolkit.Lib.Controllers.Sensors;
 
@@ -28,6 +26,8 @@ public class SensorsGroupController : IDisposable
     private const string UNKNOWN_NAME = "UNKNOWN";
 
     private const string SENSOR_NAME_TOTAL_MEMORY = "Total Memory";
+    private const string SENSOR_NAME_MEMORY_USED = "Memory Used";
+    private const string SENSOR_NAME_MEMORY_AVAILABLE = "Memory Available";
     private const string SENSOR_NAME_PACKAGE = "Package";
     private const string SENSOR_NAME_GPU_HOTSPOT = "GPU Memory Junction";
 
@@ -43,57 +43,144 @@ public class SensorsGroupController : IDisposable
     private const float MIN_VALID_POWER_READING = 0f;
     private const int MAX_CPU_POWER_STUCK_RETRIES = 10;
     private const float MIN_ACTIVE_GPU_POWER = 10f;
-
-    private const string REG_KEY_PAWN_IO = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\PawnIO";
-    private const string REG_VAL_INSTALL_LOC = "InstallLocation";
-    private const string REG_KEY_PAWN_IO_WOW64 = @"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\PawnIO";
-    private const string REG_VAL_INSTALL_DIR = "Install_Dir";
-    private const string FOLDER_PAWN_IO = "PawnIO";
+    private const float MB_PER_GB = 1024f;
 
     #endregion
 
     private bool _initialized;
     public LibreHardwareMonitorInitialState InitialState { get; private set; }
+    public bool IsHybrid { get; private set; }
 
-    private float _lastGpuPower;
     private readonly SemaphoreSlim _initSemaphore = new(1, 1);
-    private readonly List<IHardware> _hardware = [];
 
-    private volatile bool _isResetting;
+    private readonly List<IHardware> _hardware = [];
 
     private Computer? _computer;
     private IHardware? _cpuHardware;
     private IHardware? _amdGpuHardware;
     private IHardware? _gpuHardware;
+    private IHardware? _iGpuHardware;
     private IHardware? _memoryHardware;
 
+    private ISensor? _cpuTempSensor;
+    private ISensor? _cpuUsageSensor;
+    private ISensor? _gpuUsageSensor;
+    private ISensor? _gpuTempSensor;
+    private ISensor? _gpuClockSensor;
+
+    private ISensor? _iGpuUsageSensor;
+    private ISensor? _iGpuTempSensor;
+    private ISensor? _iGpuClockSensor;
+    private ISensor? _iGpuPowerSensor;
+
+    private ISensor? _gpuD3DVramUsedSensor;
+    private ISensor? _gpuVramTotalSensor;
+    private float _cachedGpuVramTotal = INVALID_VALUE_FLOAT;
+
+    private ISensor? _iGpuD3DVramUsedSensor;
+    private ISensor? _iGpuVramTotalSensor;
+    private float _cachedIGpuVramTotal = INVALID_VALUE_FLOAT;
+
+    private readonly List<ISensor> _pCoreClockSensors = [];
+    private readonly List<ISensor> _eCoreClockSensors = [];
+    private ISensor? _cpuPackagePowerSensor;
+    private readonly List<ISensor> _cpuCoreClockSensors = [];
+
+    private ISensor? _gpuPowerSensor;
+    private ISensor? _gpuHotspotSensor;
+
+    private ISensor? _memoryLoadSensor;
+    private ISensor? _memoryUsedSensor;
+    private ISensor? _memoryAvailableSensor;
+    private float _cachedMemoryTotal = INVALID_VALUE_FLOAT;
+    private readonly List<ISensor> _memoryTempSensors = [];
+    private readonly List<ISensor> _storageTempSensors = [];
+
+    private volatile bool _isResetting;
     private bool _needRefreshGpuHardware;
+
+    private bool _selectedGpuIsIgpu;
+    public bool SelectedGpuIsIgpu
+    {
+        get => _selectedGpuIsIgpu;
+        set
+        {
+            lock (_configLock)
+            {
+                if (_selectedGpuIsIgpu != value)
+                {
+                    _selectedGpuIsIgpu = value;
+                    _cachedGpuName = string.Empty;
+                }
+            }
+        }
+    }
+
+    private bool _showAverageCpuFrequency;
+    public bool ShowAverageCpuFrequency
+    {
+        get => _showAverageCpuFrequency;
+        set
+        {
+            lock (_configLock)
+            {
+                _showAverageCpuFrequency = value;
+            }
+        }
+    }
+
+    private bool _isDgpuConnected = true;
+    public bool IsDgpuConnected
+    {
+        get => _isDgpuConnected;
+        set
+        {
+            lock (_configLock)
+            {
+                if (_isDgpuConnected != value)
+                {
+                    _isDgpuConnected = value;
+                    _cachedGpuName = string.Empty;
+                    if (!_isDgpuConnected)
+                    {
+                        _gpuHardware = null;
+                        _amdGpuHardware = null;
+                    }
+                }
+            }
+        }
+    }
+
     private string _cachedCpuName = string.Empty;
     private string _cachedGpuName = string.Empty;
+
     private float _cachedCpuPower;
     private int _cachedCpuPowerTime;
 
     private readonly Lock _hardwareLock = new();
+    private readonly Lock _configLock = new();
+    public HardwareSensorSnapshot Snapshot { get; private set; } = new();
     private volatile bool _hardwareInitialized;
 
+    private long _lastUpdateTick;
+    private const int MIN_UPDATE_INTERVAL_MS = 100;
+
+    private readonly Dictionary<object, TimeSpan> _subscribers = [];
+    private CancellationTokenSource? _producerCts;
+    private Task? _producerTask;
+    public event Action<HardwareSensorSnapshot>? SensorsUpdated;
+
     private readonly GPUController _gpuController = IoCContainer.Resolve<GPUController>();
+
 
     public async Task<LibreHardwareMonitorInitialState> IsSupportedAsync()
     {
         LibreHardwareMonitorInitialState result = await InitializeAsync().ConfigureAwait(false);
-
         try
         {
             bool haveHardware;
-            lock (_hardwareLock)
-            {
-                haveHardware = _hardware.Count != 0;
-            }
-
-            if (haveHardware && result is LibreHardwareMonitorInitialState.Initialized or LibreHardwareMonitorInitialState.Success)
-            {
-                return result;
-            }
+            lock (_hardwareLock) { haveHardware = _hardware.Count != 0; }
+            if (haveHardware && result is LibreHardwareMonitorInitialState.Initialized or LibreHardwareMonitorInitialState.Success) return result;
         }
         catch (Exception ex)
         {
@@ -109,11 +196,7 @@ public class SensorsGroupController : IDisposable
         lock (_hardwareLock)
         {
             if (_hardwareInitialized) return;
-
-            if (!IsPawnIOInnstalled())
-            {
-                return;
-            }
+            if (!PawnIOHelper.IsPawnIOInstalled()) return;
 
             try
             {
@@ -131,16 +214,16 @@ public class SensorsGroupController : IDisposable
                 _computer.Open();
                 _computer.Accept(new UpdateVisitor());
 
-                foreach (var hardware in _computer.Hardware)
+                foreach (var h in _computer.Hardware)
                 {
-                    Log.Instance.Trace($"Detected hardware: {hardware.HardwareType} - {hardware.Name}");
+                    try
+                    {
+                        h.Update();
+                        _hardware.Add(h);
+                    }
+                    catch { /* Ignore */ }
                 }
-
-                _hardware.AddRange(_computer.Hardware);
-                _cpuHardware = _hardware.FirstOrDefault(h => h.HardwareType == HardwareType.Cpu);
-                _amdGpuHardware = _hardware.FirstOrDefault(h => h.HardwareType == HardwareType.GpuAmd && !Regex.IsMatch(h.Name, REGEX_AMD_GPU_INTEGRATED, RegexOptions.IgnoreCase));
-                _gpuHardware = _hardware.FirstOrDefault(h => h.HardwareType == HardwareType.GpuNvidia);
-                _memoryHardware = _hardware.FirstOrDefault(h => h.HardwareType == HardwareType.Memory && h.Name == SENSOR_NAME_TOTAL_MEMORY);
+                RefreshSensorCache();
             }
             catch (Exception ex)
             {
@@ -150,503 +233,617 @@ public class SensorsGroupController : IDisposable
                 _hardware.Clear();
                 throw;
             }
-            finally
-            {
-                _hardwareInitialized = true;
-            }
+            finally { _hardwareInitialized = true; }
         }
     }
 
+    private void RefreshSensorCache()
+    {
+        _cpuHardware = null;
+        _amdGpuHardware = null;
+        _gpuHardware = null;
+        _memoryHardware = null;
+        _cpuTempSensor = null;
+        _cpuUsageSensor = null;
+        _gpuUsageSensor = null;
+        _gpuTempSensor = null;
+        _gpuClockSensor = null;
+
+        _iGpuUsageSensor = null;
+        _iGpuTempSensor = null;
+        _iGpuClockSensor = null;
+        _iGpuPowerSensor = null;
+
+        _gpuD3DVramUsedSensor = null;
+        _gpuVramTotalSensor = null;
+        _cachedGpuVramTotal = INVALID_VALUE_FLOAT;
+
+        _iGpuD3DVramUsedSensor = null;
+        _iGpuVramTotalSensor = null;
+        _cachedIGpuVramTotal = INVALID_VALUE_FLOAT;
+
+        _pCoreClockSensors.Clear();
+        _eCoreClockSensors.Clear();
+        _cpuCoreClockSensors.Clear();
+        _memoryTempSensors.Clear();
+        _storageTempSensors.Clear();
+
+        _cpuPackagePowerSensor = null;
+        _gpuPowerSensor = null;
+        _gpuHotspotSensor = null;
+        _memoryLoadSensor = null;
+        _memoryUsedSensor = null;
+        _memoryAvailableSensor = null;
+        _cachedMemoryTotal = INVALID_VALUE_FLOAT;
+
+        IsHybrid = false;
+
+        _cpuHardware = _hardware.FirstOrDefault(h => h.HardwareType == HardwareType.Cpu);
+        _amdGpuHardware = _hardware.FirstOrDefault(h => h.HardwareType == HardwareType.GpuAmd && !Regex.IsMatch(h.Name, REGEX_AMD_GPU_INTEGRATED, RegexOptions.IgnoreCase));
+        _iGpuHardware = _hardware.FirstOrDefault(h => h.HardwareType == HardwareType.GpuIntel || (h.HardwareType == HardwareType.GpuAmd && Regex.IsMatch(h.Name, REGEX_AMD_GPU_INTEGRATED, RegexOptions.IgnoreCase)));
+        _gpuHardware = _hardware.FirstOrDefault(h => h.HardwareType == HardwareType.GpuNvidia);
+        _memoryHardware = _hardware.FirstOrDefault(h => h is { HardwareType: HardwareType.Memory, Name: SENSOR_NAME_TOTAL_MEMORY });
+
+        if (_cpuHardware?.Sensors != null)
+        {
+            foreach (var s in _cpuHardware.Sensors)
+            {
+                switch (s.SensorType)
+                {
+                    case SensorType.Temperature when s.Name.Contains(SENSOR_NAME_PACKAGE):
+                        _cpuTempSensor = s;
+                        break;
+                    case SensorType.Load when s.Name.Contains("Total"):
+                        _cpuUsageSensor = s;
+                        break;
+                    case SensorType.Clock when s.Name.Contains("P-Core"):
+                        _pCoreClockSensors.Add(s);
+                        break;
+                    case SensorType.Clock when s.Name.Contains("E-Core"):
+                        _eCoreClockSensors.Add(s);
+                        break;
+                    case SensorType.Clock when s.Name.Contains("Core", StringComparison.OrdinalIgnoreCase) && !s.Name.Contains("Average") && !s.Name.Contains("Effective"):
+                        _cpuCoreClockSensors.Add(s);
+                        break;
+                    case SensorType.Power when s.Name.Contains(SENSOR_NAME_PACKAGE):
+                        _cpuPackagePowerSensor = s;
+                        break;
+                }
+            }
+            IsHybrid = _pCoreClockSensors.Count > 0;
+            _cpuTempSensor ??= _cpuHardware.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Temperature);
+            _cpuUsageSensor ??= _cpuHardware.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Load);
+        }
+
+        var mainGpu = _gpuHardware ?? _amdGpuHardware;
+        if (mainGpu?.Sensors != null)
+        {
+            foreach (var s in mainGpu.Sensors)
+            {
+                switch (s.SensorType)
+                {
+                    case SensorType.Load when s.Name.Contains("Core") || s.Name.Contains("Utilization"):
+                        _gpuUsageSensor = s;
+                        break;
+                    case SensorType.Temperature when s.Name.Contains("Core"):
+                        _gpuTempSensor = s;
+                        break;
+                    case SensorType.Clock when s.Name.Contains("Core"):
+                        _gpuClockSensor = s;
+                        break;
+                    case SensorType.Power:
+                        _gpuPowerSensor = s;
+                        break;
+                    case SensorType.Temperature when s.Name.Contains(SENSOR_NAME_GPU_HOTSPOT, StringComparison.OrdinalIgnoreCase):
+                        _gpuHotspotSensor = s;
+                        break;
+                    case SensorType.SmallData when s.Name.Contains("D3D Dedicated Memory Used", StringComparison.OrdinalIgnoreCase):
+                        _gpuD3DVramUsedSensor = s;
+                        break;
+                    case SensorType.SmallData when s.Name.Contains("GPU Memory Total", StringComparison.OrdinalIgnoreCase):
+                        _gpuVramTotalSensor = s;
+                        break;
+                }
+            }
+            _gpuUsageSensor ??= mainGpu.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Load);
+            _gpuTempSensor ??= mainGpu.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Temperature);
+            _gpuClockSensor ??= mainGpu.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Clock);
+            _gpuD3DVramUsedSensor ??= mainGpu.Sensors.FirstOrDefault(s => s.SensorType == SensorType.SmallData && s.Name.Contains("Used", StringComparison.OrdinalIgnoreCase));
+            _gpuVramTotalSensor ??= mainGpu.Sensors.FirstOrDefault(s => s.SensorType == SensorType.SmallData && s.Name.Contains("Total", StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (_iGpuHardware?.Sensors != null)
+        {
+            foreach (var s in _iGpuHardware.Sensors)
+            {
+                switch (s.SensorType)
+                {
+                    case SensorType.Load when s.Name.Contains("Core") || s.Name.Contains("Utilization"):
+                        _iGpuUsageSensor = s;
+                        break;
+                    case SensorType.Temperature when s.Name.Contains("Core"):
+                        _iGpuTempSensor = s;
+                        break;
+                    case SensorType.Clock when s.Name.Contains("Core"):
+                        _iGpuClockSensor = s;
+                        break;
+                    case SensorType.Power:
+                        _iGpuPowerSensor = s;
+                        break;
+                    case SensorType.SmallData when s.Name.Contains("D3D Dedicated Memory Used", StringComparison.OrdinalIgnoreCase):
+                        _iGpuD3DVramUsedSensor = s;
+                        break;
+                    case SensorType.SmallData when s.Name.Contains("GPU Memory Total", StringComparison.OrdinalIgnoreCase):
+                        _iGpuVramTotalSensor = s;
+                        break;
+                }
+            }
+            _iGpuUsageSensor ??= _iGpuHardware.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Load);
+            _iGpuTempSensor ??= _iGpuHardware.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Temperature);
+            _iGpuClockSensor ??= _iGpuHardware.Sensors.FirstOrDefault(s => s.SensorType == SensorType.Clock);
+            _iGpuD3DVramUsedSensor ??= _iGpuHardware.Sensors.FirstOrDefault(s => s.SensorType == SensorType.SmallData && s.Name.Contains("Used", StringComparison.OrdinalIgnoreCase));
+            _iGpuVramTotalSensor ??= _iGpuHardware.Sensors.FirstOrDefault(s => s.SensorType == SensorType.SmallData && s.Name.Contains("Total", StringComparison.OrdinalIgnoreCase));
+        }
+
+        _memoryLoadSensor = _memoryHardware?.Sensors?.FirstOrDefault(s => s.SensorType == SensorType.Load);
+        _memoryUsedSensor = _memoryHardware?.Sensors?.FirstOrDefault(s => s.SensorType == SensorType.Data && s.Name.Contains(SENSOR_NAME_MEMORY_USED, StringComparison.OrdinalIgnoreCase));
+        _memoryAvailableSensor = _memoryHardware?.Sensors?.FirstOrDefault(s => s.SensorType == SensorType.Data && s.Name.Contains(SENSOR_NAME_MEMORY_AVAILABLE, StringComparison.OrdinalIgnoreCase));
+
+        foreach (var hw in _hardware.Where(h => h.HardwareType == HardwareType.Memory))
+        {
+            if (hw.Sensors == null) continue;
+            _memoryTempSensors.AddRange(hw.Sensors.Where(s => s.SensorType == SensorType.Temperature && s.Name.Contains("DIMM")));
+        }
+
+        foreach (var storage in _hardware.Where(h => h.HardwareType == HardwareType.Storage))
+        {
+            var temp = storage.Sensors?.FirstOrDefault(s => s.SensorType == SensorType.Temperature);
+            if (temp != null) _storageTempSensors.Add(temp);
+        }
+    }
+
+    public Task<float> GetCpuTemperatureAsync() => Task.FromResult(Snapshot.CpuTemp);
+    public Task<float> GetCpuUsageAsync() => Task.FromResult(Snapshot.CpuUsage);
+    public Task<float> GetGpuUsageAsync() => Task.FromResult(Snapshot.GpuUsage);
+    public Task<float> GetGpuTemperatureAsync() => Task.FromResult(Snapshot.GpuTemp);
+    public Task<float> GetGpuCoreClockAsync() => Task.FromResult(Snapshot.GpuClock);
+
     public Task<string> GetCpuNameAsync()
     {
-        if (_isResetting || !IsLibreHardwareMonitorInitialized() || _cpuHardware == null)
+        lock (_configLock)
         {
-            return Task.FromResult(UNKNOWN_NAME);
-        }
+            if (_isResetting || !IsLibreHardwareMonitorInitialized() || _cpuHardware == null)
+                return Task.FromResult(UNKNOWN_NAME);
 
-        if (!string.IsNullOrEmpty(_cachedCpuName))
-        {
+            if (!string.IsNullOrEmpty(_cachedCpuName))
+                return Task.FromResult(_cachedCpuName);
+
+            _cachedCpuName = StripName(_cpuHardware.Name);
             return Task.FromResult(_cachedCpuName);
         }
-
-        _cachedCpuName = StripName(_cpuHardware.Name);
-        return Task.FromResult(_cachedCpuName);
     }
 
     public Task<string> GetGpuNameAsync()
     {
-        if (_isResetting || !IsLibreHardwareMonitorInitialized())
+        lock (_configLock)
         {
-            return Task.FromResult(UNKNOWN_NAME);
-        }
+            if (_isResetting || !IsLibreHardwareMonitorInitialized())
+                return Task.FromResult(UNKNOWN_NAME);
 
-        if (!string.IsNullOrEmpty(_cachedGpuName) && !_needRefreshGpuHardware)
-        {
+            if (!string.IsNullOrEmpty(_cachedGpuName) && !_needRefreshGpuHardware)
+                return Task.FromResult(_cachedGpuName);
+
+            var dGpu = _gpuHardware ?? _amdGpuHardware;
+            var forceIgpu = !SelectedGpuIsIgpu && (dGpu == null || !_isDgpuConnected);
+            var gpu = (SelectedGpuIsIgpu || forceIgpu) ? _iGpuHardware : dGpu;
+            _cachedGpuName = gpu != null ? StripName(gpu.Name) : UNKNOWN_NAME;
+            _needRefreshGpuHardware = false;
             return Task.FromResult(_cachedGpuName);
         }
-
-        var gpu = _gpuHardware ?? _amdGpuHardware;
-        _cachedGpuName = gpu != null ? StripName(gpu.Name) : UNKNOWN_NAME;
-        _needRefreshGpuHardware = false;
-
-        return Task.FromResult(_cachedGpuName);
     }
 
-    public Task<float> GetCpuPowerAsync()
-    {
-        if (_isResetting)
-        {
-            Log.Instance.Trace($"GetCpuPowerAsync(): _isResetting");
-            return Task.FromResult(INVALID_VALUE_FLOAT);
-        }
-
-        try
-        {
-            if (!IsLibreHardwareMonitorInitialized() || _cpuHardware == null)
-            {
-                Log.Instance.Trace($"GetCpuPowerAsync(): !IsLibreHardwareMonitorInitialized() || _cpuHardware == null");
-                return Task.FromResult(INVALID_VALUE_FLOAT);
-            }
-
-            var sensor = _cpuHardware.Sensors?.FirstOrDefault(s => s.SensorType == SensorType.Power && s.Name.Contains(SENSOR_NAME_PACKAGE));
-            var powerValue = sensor?.Value;
-
-            switch (powerValue)
-            {
-                case null or <= MIN_VALID_POWER_READING:
-                    Log.Instance.Trace($"Invalid CPU Power detected.");
-                    return Task.FromResult(INVALID_VALUE_FLOAT);
-                case > MAX_VALID_CPU_POWER:
-                    Log.Instance.Trace($"CPU Power spike detected ({powerValue}). Resetting sensors.");
-                    ResetSensors();
-                    _cachedCpuPowerTime = 0;
-                    _cachedCpuPower = -1f;
-                    return Task.FromResult(INVALID_VALUE_FLOAT);
-                default:
-                    break;
-            }
-
-            var power = powerValue.Value;
-
-            if (Math.Abs(power - _cachedCpuPower) < float.Epsilon)
-            {
-                if (_cachedCpuPowerTime >= MAX_CPU_POWER_STUCK_RETRIES)
-                {
-                    Log.Instance.Trace($"Detected CPU Power stuck at {_cachedCpuPower} for serval cycles, Resetting sensors...");
-                    ResetSensors();
-
-                    _cachedCpuPowerTime = 0;
-                    _cachedCpuPower = -1f;
-
-                    return Task.FromResult(INVALID_VALUE_FLOAT);
-                }
-
-                ++_cachedCpuPowerTime;
-            }
-            else
-            {
-                _cachedCpuPower = power;
-                _cachedCpuPowerTime = 0;
-            }
-
-            return Task.FromResult(power);
-        }
-        catch (Exception ex)
-        {
-            Log.Instance.Trace($"GetCpuPowerAsync() exception", ex);
-            return Task.FromResult(INVALID_VALUE_FLOAT);
-        }
-    }
-
-    public async Task<float> GetGpuPowerAsync()
-    {
-        if (_isResetting || !IsLibreHardwareMonitorInitialized())
-        {
-            return INVALID_VALUE_FLOAT;
-        }
-
-        var state = await _gpuController.GetLastKnownStateAsync().ConfigureAwait(false);
-
-        if ((_lastGpuPower <= MIN_ACTIVE_GPU_POWER && IsGpuInActive(state)) || _gpuHardware == null)
-        {
-            return INVALID_VALUE_FLOAT;
-        }
-
-        try
-        {
-            var sensor = _gpuHardware.Sensors?.FirstOrDefault(s => s.SensorType == SensorType.Power);
-            _lastGpuPower = sensor?.Value ?? 0;
-            return _lastGpuPower;
-        }
-        catch (Exception ex)
-        {
-            Log.Instance.Trace($"GetGpuPowerAsync() exception: {ex.Message}");
-            return INVALID_VALUE_FLOAT;
-        }
-    }
-
-    public async Task<float> GetGpuVramTemperatureAsync()
-    {
-        if (_isResetting || !IsLibreHardwareMonitorInitialized())
-        {
-            return INVALID_VALUE_FLOAT;
-        }
-
-        var gpuState = await _gpuController.GetLastKnownStateAsync().ConfigureAwait(false);
-        if ((_lastGpuPower <= MIN_ACTIVE_GPU_POWER && gpuState is GPUState.Inactive or GPUState.PoweredOff) || _gpuHardware == null)
-        {
-            return INVALID_VALUE_FLOAT;
-        }
-
-        var sensor = _gpuHardware.Sensors?.FirstOrDefault(s => s.SensorType == SensorType.Temperature && s.Name.Contains(SENSOR_NAME_GPU_HOTSPOT, StringComparison.OrdinalIgnoreCase));
-        return sensor?.Value ?? INVALID_VALUE_FLOAT;
-    }
-
-    public Task<(float, float)> GetSsdTemperaturesAsync()
-    {
-        if (_isResetting || !IsLibreHardwareMonitorInitialized())
-        {
-            return Task.FromResult((INVALID_VALUE_FLOAT, INVALID_VALUE_FLOAT));
-        }
-
-        var temps = new List<float>();
-
-        try
-        {
-            List<IHardware> storageHardware;
-            lock (_hardwareLock)
-            {
-                storageHardware = _hardware.Where(h => h.HardwareType == HardwareType.Storage).ToList();
-            }
-
-            if (storageHardware.Count == 0)
-            {
-                return Task.FromResult((INVALID_VALUE_FLOAT, INVALID_VALUE_FLOAT));
-            }
-
-            foreach (var tempSensor in storageHardware.Select(storage => storage.Sensors?.FirstOrDefault(s => s.SensorType == SensorType.Temperature)))
-            {
-                if (tempSensor is { SensorType: SensorType.Temperature, Value: > 0 })
-                {
-                    temps.Add(tempSensor.Value.Value);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Log.Instance.Trace($"SSD temperature read error: {ex.Message}");
-            return Task.FromResult((INVALID_VALUE_FLOAT, INVALID_VALUE_FLOAT));
-        }
-
-        return temps.Count switch
-        {
-            0 => Task.FromResult((INVALID_VALUE_FLOAT, INVALID_VALUE_FLOAT)),
-            1 => Task.FromResult((temps[0], INVALID_VALUE_FLOAT)),
-            _ => Task.FromResult((temps[0], temps[1]))
-        };
-    }
-
-    public Task<float> GetMemoryUsageAsync()
-    {
-        if (_isResetting || !IsLibreHardwareMonitorInitialized() || _memoryHardware == null)
-        {
-            return Task.FromResult(INVALID_VALUE_FLOAT);
-        }
-
-        return Task.FromResult(_memoryHardware.Sensors?.FirstOrDefault(s => s.SensorType == SensorType.Load)?.Value ?? 0);
-    }
-
-    public Task<double> GetHighestMemoryTemperatureAsync()
-    {
-        if (_isResetting || !IsLibreHardwareMonitorInitialized())
-        {
-            return Task.FromResult(INVALID_VALUE_DOUBLE);
-        }
-
-        List<IHardware> memoryHardware;
-        lock (_hardwareLock)
-        {
-            memoryHardware = _hardware.Where(h => h.HardwareType == HardwareType.Memory).ToList();
-        }
-
-        if (memoryHardware.Count == 0)
-        {
-            return Task.FromResult(INVALID_VALUE_DOUBLE);
-        }
-
-        float maxTemperature = 0;
-        foreach (var hardware in memoryHardware)
-        {
-            if (hardware.Sensors == null) continue;
-
-            foreach (var sensor in hardware.Sensors)
-            {
-                if (sensor is not { SensorType: SensorType.Temperature, Value: > 0 })
-                {
-                    continue;
-                }
-                if (sensor.Value.Value > maxTemperature)
-                {
-                    maxTemperature = sensor.Value.Value;
-                }
-            }
-        }
-        return Task.FromResult((double)maxTemperature);
-    }
+    public Task<float> GetCpuPowerAsync() => Task.FromResult(Snapshot.CpuPower);
+    public Task<float> GetCpuCoreClockAsync() => Task.FromResult(_showAverageCpuFrequency ? Snapshot.CpuAvgClock : Snapshot.CpuMaxClock);
+    public Task<float> GetCpuPCoreClockAsync() => Task.FromResult(_showAverageCpuFrequency ? Snapshot.CpuPAvgClock : Snapshot.CpuPClock);
+    public Task<float> GetCpuECoreClockAsync() => Task.FromResult(_showAverageCpuFrequency ? Snapshot.CpuEAvgClock : Snapshot.CpuEClock);
+    public Task<float> GetGpuPowerAsync() => Task.FromResult(Snapshot.GpuPower);
+    public Task<float> GetGpuVramTemperatureAsync() => Task.FromResult(Snapshot.GpuVramTemp);
+    public Task<float> GetGpuVramUtilizationAsync() => Task.FromResult(Snapshot.GpuVramUtilization);
+    public Task<float> GetGpuVramUsedAsync() => Task.FromResult(Snapshot.GpuVramUsed);
+    public Task<float> GetGpuVramTotalAsync() => Task.FromResult(Snapshot.GpuVramTotal);
+    public Task<(float, float)> GetSsdTemperaturesAsync() => Task.FromResult(Snapshot.SsdTemps);
+    public Task<float> GetMemoryUsageAsync() => Task.FromResult(Snapshot.MemUsage);
+    public Task<float> GetMemoryUsedAsync() => Task.FromResult(Snapshot.MemUsed);
+    public Task<float> GetMemoryTotalAsync() => Task.FromResult(Snapshot.MemTotal);
+    public Task<double> GetHighestMemoryTemperatureAsync() => Task.FromResult(Snapshot.MemMaxTemp);
 
     private async Task<LibreHardwareMonitorInitialState> InitializeAsync()
     {
-        if (_initialized)
-        {
-            InitialState = LibreHardwareMonitorInitialState.Initialized;
-            return InitialState;
-        }
-
+        if (_initialized) { InitialState = LibreHardwareMonitorInitialState.Initialized; return InitialState; }
         await _initSemaphore.WaitAsync().ConfigureAwait(false);
         try
         {
-            if (_initialized)
-            {
-                InitialState = LibreHardwareMonitorInitialState.Initialized;
-                return InitialState;
-            }
-
+            if (_initialized) { InitialState = LibreHardwareMonitorInitialState.Initialized; return InitialState; }
             await Task.Run(GetHardware).ConfigureAwait(false);
             _initialized = true;
-
-            if (_hardware.Count == 0)
-            {
-                InitialState = LibreHardwareMonitorInitialState.Fail;
-                return InitialState;
-            }
-
-            InitialState = LibreHardwareMonitorInitialState.Success;
+            InitialState = _hardware.Count == 0 ? LibreHardwareMonitorInitialState.Fail : LibreHardwareMonitorInitialState.Success;
             return InitialState;
         }
-        catch (DllNotFoundException)
-        {
-            HandleInitException("DLL Not Found");
-            InitialState = LibreHardwareMonitorInitialState.PawnIONotInstalled;
-            return InitialState;
-        }
-        catch (Exception ex)
-        {
-            HandleInitException(ex.Message);
-            Log.Instance.Trace($"LibreHardwareMonitor initialization failed: {ex}");
-            throw;
-        }
-        finally
-        {
-            _initSemaphore.Release();
-        }
+        catch (DllNotFoundException) { HandleInitException("DLL Not Found"); InitialState = LibreHardwareMonitorInitialState.PawnIONotInstalled; return InitialState; }
+        catch (Exception ex) { HandleInitException(ex.Message); throw; }
+        finally { _initSemaphore.Release(); }
     }
 
     private void HandleInitException(string reason)
     {
         var settings = IoCContainer.Resolve<ApplicationSettings>();
+        settings.Store.EnableHardwareSensors = false;
         settings.Store.UseNewSensorDashboard = false;
         settings.SynchronizeStore();
         InitialState = LibreHardwareMonitorInitialState.Fail;
-        Log.Instance.Trace($"Disabling new sensor dashboard due to error: {reason}");
     }
 
     public void NeedRefreshHardware(string hardwareId)
     {
-        if (!IsLibreHardwareMonitorInitialized())
-        {
-            return;
-        }
-
-        if (_computer == null)
-        {
-            return;
-        }
-
-        if (hardwareId != HARDWARE_ID_NVIDIA_GPU)
-        {
-            return;
-        }
-
+        if (!IsLibreHardwareMonitorInitialized() || _computer == null || hardwareId != HARDWARE_ID_NVIDIA_GPU) return;
         lock (_hardwareLock)
         {
-            _gpuHardware = null;
             ResetSensors();
-            _hardware.Clear();
-            _hardware.AddRange(_computer.Hardware);
-            _gpuHardware = _hardware.FirstOrDefault(h => h.HardwareType == HardwareType.GpuNvidia);
 
-            try { NVAPI.Initialize(); } catch { /* Ignore NVAPI init fail */ }
+            try
+            {
+                NVAPI.Initialize();
+            }
+            catch { }
 
             _needRefreshGpuHardware = true;
         }
     }
 
-    public async Task UpdateAsync()
+    private Task? _activeUpdateTask;
+    private readonly Lock _updateTaskLock = new();
+
+    public async Task UpdateAsync(bool force = false)
     {
-        if (_isResetting)
+        if (_isResetting || !IsLibreHardwareMonitorInitialized()) return;
+
+        var now = Environment.TickCount64;
+        if (!force && now - _lastUpdateTick < MIN_UPDATE_INTERVAL_MS) return;
+
+        Task? updateTask;
+        lock (_updateTaskLock)
         {
-            return;
+            if (_activeUpdateTask == null)
+            {
+                _activeUpdateTask = PerformUpdateInternal(force);
+            }
+            updateTask = _activeUpdateTask;
         }
 
-        if (!IsLibreHardwareMonitorInitialized())
-        {
-            return;
-        }
-
-        await Task.Run(() =>
-        {
-            if (_isResetting)
-            {
-                return;
-            }
-
-            lock (_hardwareLock)
-            {
-                if (_isResetting)
-                {
-                    return;
-                }
-
-                if (_computer == null || !_hardwareInitialized)
-                {
-                    return;
-                }
-
-                try
-                {
-                    foreach (var hardware in _hardware)
-                    {
-                        hardware?.Update();
-                    }
-                }
-                catch (AccessViolationException){ }
-                catch (Exception ex)
-                {
-                    Log.Instance.Trace($"Failed to update sensors: {ex.Message}");
-
-                    if (ex is IndexOutOfRangeException)
-                    {
-                        Task.Run(ResetSensors);
-                    }
-                }
-            }
-        }).ConfigureAwait(false);
+        if (updateTask != null)
+            await updateTask.ConfigureAwait(false);
     }
 
-    #region Helper
+    private async Task PerformUpdateInternal(bool force)
+    {
+        try
+        {
+            var now = Environment.TickCount64;
+            var gpuState = await _gpuController.GetLastKnownStateAsync().ConfigureAwait(false);
+            bool gpuInactive = IsGpuInActive(gpuState);
+
+            _lastUpdateTick = now;
+
+            await Task.Run(() =>
+            {
+                lock (_hardwareLock)
+                {
+                    if (_isResetting || _computer == null || !_hardwareInitialized) return;
+                    try
+                    {
+                        var brokenHardware = new List<IHardware>();
+                        foreach (var h in _hardware)
+                        {
+                            if (h == null) continue;
+                            if (gpuInactive && h.HardwareType == HardwareType.GpuNvidia) continue;
+                            try
+                            {
+                                h.Update();
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Instance.Trace($"Failed to update hardware {h.Name}: {ex.Message}. It will be removed from the update list.", ex);
+                                brokenHardware.Add(h);
+                            }
+                        }
+
+                        foreach (var h in brokenHardware)
+                        {
+                            _hardware.Remove(h);
+                        }
+
+                        float cpuTemp = _cpuTempSensor?.Value ?? INVALID_VALUE_FLOAT;
+                        float cpuUsage = _cpuUsageSensor?.Value ?? INVALID_VALUE_FLOAT;
+
+                        float cpuMaxClock = INVALID_VALUE_FLOAT;
+                        float cpuAvgClock = INVALID_VALUE_FLOAT;
+                        if (_cpuCoreClockSensors.Count > 0)
+                        {
+                            cpuMaxClock = _cpuCoreClockSensors.Max(s => s.Value) ?? INVALID_VALUE_FLOAT;
+                            cpuAvgClock = _cpuCoreClockSensors.Average(s => s.Value) ?? INVALID_VALUE_FLOAT;
+                        }
+
+                        float pClock = INVALID_VALUE_FLOAT;
+                        float pAvgClock = INVALID_VALUE_FLOAT;
+                        float eClock = INVALID_VALUE_FLOAT;
+                        float eAvgClock = INVALID_VALUE_FLOAT;
+                        if (IsHybrid)
+                        {
+                            float pMax = _pCoreClockSensors.Count > 0 ? (_pCoreClockSensors.Max(s => s.Value) ?? INVALID_VALUE_FLOAT) : INVALID_VALUE_FLOAT;
+                            float eMax = _eCoreClockSensors.Count > 0 ? (_eCoreClockSensors.Max(s => s.Value) ?? INVALID_VALUE_FLOAT) : INVALID_VALUE_FLOAT;
+                            pClock = pMax > 0 ? (float)Math.Round(pMax) : pMax;
+                            eClock = eMax > 0 ? (float)Math.Round(eMax) : eMax;
+
+                            float pAvg = _pCoreClockSensors.Count > 0 ? (_pCoreClockSensors.Average(s => s.Value) ?? INVALID_VALUE_FLOAT) : INVALID_VALUE_FLOAT;
+                            float eAvg = _eCoreClockSensors.Count > 0 ? (_eCoreClockSensors.Average(s => s.Value) ?? INVALID_VALUE_FLOAT) : INVALID_VALUE_FLOAT;
+                            pAvgClock = pAvg > 0 ? (float)Math.Round(pAvg) : pAvg;
+                            eAvgClock = eAvg > 0 ? (float)Math.Round(eAvg) : eAvg;
+                        }
+
+                        float cpuPower = INVALID_VALUE_FLOAT;
+                        if (_cpuPackagePowerSensor != null)
+                        {
+                            float pVal = _cpuPackagePowerSensor.Value ?? INVALID_VALUE_FLOAT;
+                            if (pVal > MAX_VALID_CPU_POWER) { Task.Run(ResetSensors); }
+                            else if (pVal <= MIN_VALID_POWER_READING) { }
+                            else
+                            {
+                                if (Math.Abs(pVal - _cachedCpuPower) < float.Epsilon)
+                                {
+                                    if (++_cachedCpuPowerTime >= MAX_CPU_POWER_STUCK_RETRIES) { Task.Run(ResetSensors); }
+                                    else cpuPower = pVal;
+                                }
+                                else { _cachedCpuPower = pVal; _cachedCpuPowerTime = 0; cpuPower = pVal; }
+                            }
+                        }
+
+                        float gpuUsage = INVALID_VALUE_FLOAT;
+                        float gpuTemp = INVALID_VALUE_FLOAT;
+                        float gpuClock = INVALID_VALUE_FLOAT;
+                        float gpuPower = INVALID_VALUE_FLOAT;
+                        float gpuVramTemp = INVALID_VALUE_FLOAT;
+                        float gpuVramUtilization = INVALID_VALUE_FLOAT;
+                        float gpuVramUsed = INVALID_VALUE_FLOAT;
+                        float gpuVramTotal = INVALID_VALUE_FLOAT;
+
+                        var dGpu = _gpuHardware ?? _amdGpuHardware;
+                        var forceIgpu = !SelectedGpuIsIgpu && (dGpu == null || !_isDgpuConnected);
+
+                        if (SelectedGpuIsIgpu || forceIgpu)
+                        {
+                            if (_cachedIGpuVramTotal <= 0 && _iGpuVramTotalSensor != null)
+                                _cachedIGpuVramTotal = _iGpuVramTotalSensor.Value ?? INVALID_VALUE_FLOAT;
+
+                            float igpuVramUsageRaw = _iGpuD3DVramUsedSensor?.Value ?? INVALID_VALUE_FLOAT;
+                            gpuVramUsed = igpuVramUsageRaw > 0 ? igpuVramUsageRaw / MB_PER_GB : igpuVramUsageRaw;
+                            gpuVramTotal = _cachedIGpuVramTotal > 0 ? _cachedIGpuVramTotal / MB_PER_GB : INVALID_VALUE_FLOAT;
+
+                            if (igpuVramUsageRaw != INVALID_VALUE_FLOAT && _cachedIGpuVramTotal > 0)
+                                gpuVramUtilization = (igpuVramUsageRaw / _cachedIGpuVramTotal) * 100f;
+
+                            gpuPower = _iGpuPowerSensor?.Value ?? INVALID_VALUE_FLOAT;
+                            gpuUsage = _iGpuUsageSensor?.Value ?? INVALID_VALUE_FLOAT;
+                            gpuTemp = _iGpuTempSensor?.Value ?? INVALID_VALUE_FLOAT;
+                            gpuClock = _iGpuClockSensor?.Value ?? INVALID_VALUE_FLOAT;
+                        }
+                        else if (!gpuInactive)
+                        {
+                            if (_cachedGpuVramTotal <= 0 && _gpuVramTotalSensor != null)
+                                _cachedGpuVramTotal = _gpuVramTotalSensor.Value ?? INVALID_VALUE_FLOAT;
+
+                            float dgpuVramUsageRaw = _gpuD3DVramUsedSensor?.Value ?? INVALID_VALUE_FLOAT;
+                            gpuVramUsed = dgpuVramUsageRaw > 0 ? dgpuVramUsageRaw / MB_PER_GB : dgpuVramUsageRaw;
+                            gpuVramTotal = _cachedGpuVramTotal > 0 ? _cachedGpuVramTotal / MB_PER_GB : INVALID_VALUE_FLOAT;
+
+                            if (dgpuVramUsageRaw != INVALID_VALUE_FLOAT && _cachedGpuVramTotal > 0)
+                                gpuVramUtilization = (dgpuVramUsageRaw / _cachedGpuVramTotal) * 100f;
+
+                            float gPowerRaw = _gpuPowerSensor?.Value ?? INVALID_VALUE_FLOAT;
+                            gpuPower = gPowerRaw > MIN_ACTIVE_GPU_POWER ? gPowerRaw : INVALID_VALUE_FLOAT;
+                            gpuVramTemp = _gpuHotspotSensor?.Value ?? INVALID_VALUE_FLOAT;
+                            gpuUsage = _gpuUsageSensor?.Value ?? INVALID_VALUE_FLOAT;
+                            gpuTemp = _gpuTempSensor?.Value ?? INVALID_VALUE_FLOAT;
+                            gpuClock = _gpuClockSensor?.Value ?? INVALID_VALUE_FLOAT;
+                        }
+
+                        float memUsage = _memoryLoadSensor?.Value ?? INVALID_VALUE_FLOAT;
+                        float memUsed = _memoryUsedSensor?.Value ?? INVALID_VALUE_FLOAT;
+                        float memTotal = (_memoryUsedSensor?.Value ?? 0) + (_memoryAvailableSensor?.Value ?? 0);
+                        if (memTotal <= 0) memTotal = INVALID_VALUE_FLOAT;
+
+                        if (memUsed >= 0 && memTotal > 0)
+                        {
+                            if (memUsage < 0) memUsage = (memUsed / memTotal) * 100f;
+                        }
+                        else if (_cachedMemoryTotal > 0 && memUsage >= 0)
+                        {
+                            memTotal = _cachedMemoryTotal;
+                            memUsed = (memUsage / 100f) * memTotal;
+                        }
+
+                        double memMaxTemp = _memoryTempSensors.Count > 0 ? (double)(_memoryTempSensors.Max(s => s.Value) ?? 0) : INVALID_VALUE_DOUBLE;
+                        float t1 = _storageTempSensors.Count > 0 ? _storageTempSensors[0].Value ?? INVALID_VALUE_FLOAT : INVALID_VALUE_FLOAT;
+                        float t2 = _storageTempSensors.Count > 1 ? _storageTempSensors[1].Value ?? INVALID_VALUE_FLOAT : INVALID_VALUE_FLOAT;
+
+                        Snapshot = new HardwareSensorSnapshot
+                        {
+                            CpuTemp = cpuTemp,
+                            CpuUsage = cpuUsage,
+                            CpuPower = cpuPower,
+                            CpuMaxClock = cpuMaxClock,
+                            CpuAvgClock = cpuAvgClock,
+                            CpuPClock = pClock,
+                            CpuPAvgClock = pAvgClock,
+                            CpuEClock = eClock,
+                            CpuEAvgClock = eAvgClock,
+                            GpuUsage = gpuUsage,
+                            GpuTemp = gpuTemp,
+                            GpuClock = gpuClock,
+                            GpuPower = gpuPower,
+                            GpuVramTemp = gpuVramTemp,
+                            GpuVramUtilization = gpuVramUtilization,
+                            GpuVramUsed = gpuVramUsed,
+                            GpuVramTotal = gpuVramTotal,
+                            MemUsage = memUsage,
+                            MemUsed = memUsed,
+                            MemTotal = memTotal,
+                            MemMaxTemp = memMaxTemp,
+                            SsdTemps = (t1, t2)
+                        };
+
+                        SensorsUpdated?.Invoke(Snapshot);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (ex is IndexOutOfRangeException) Task.Run(ResetSensors);
+                    }
+                }
+            }).ConfigureAwait(false);
+        }
+        finally
+        {
+            lock (_updateTaskLock)
+            {
+                _activeUpdateTask = null;
+            }
+        }
+    }
 
     private void ResetSensors()
     {
         _isResetting = true;
-
         try
         {
             lock (_hardwareLock)
             {
-                try
+                _computer?.Close(); _hardware.Clear();
+                _computer?.Open();
+                _computer?.Reset();
+                if (_computer == null)
                 {
-                    Log.Instance.Trace($"Starting sensor reset...");
+                    return;
+                }
+                _computer.Accept(new UpdateVisitor());
 
-                    _computer?.Close();
-
-                    _hardware.Clear();
-                    _cpuHardware = null;
-                    _gpuHardware = null;
-                    _amdGpuHardware = null;
-                    _memoryHardware = null;
-
-                    _computer?.Open();
-                    _computer?.Accept(new UpdateVisitor());
-                    _computer?.Reset();
-
-                    if (_computer != null)
+                foreach (var h in _computer.Hardware)
+                {
+                    try
                     {
-                        _hardware.AddRange(_computer.Hardware);
-                        _cpuHardware = _hardware.FirstOrDefault(h => h.HardwareType == HardwareType.Cpu);
-                        _amdGpuHardware = _hardware.FirstOrDefault(h => h.HardwareType == HardwareType.GpuAmd && !Regex.IsMatch(h.Name, REGEX_AMD_GPU_INTEGRATED, RegexOptions.IgnoreCase));
-                        _gpuHardware = _hardware.FirstOrDefault(h => h.HardwareType == HardwareType.GpuNvidia);
-                        _memoryHardware = _hardware.FirstOrDefault(h => h is { HardwareType: HardwareType.Memory, Name: SENSOR_NAME_TOTAL_MEMORY });
+                        h.Update();
+                        _hardware.Add(h);
                     }
-
-                    Log.Instance.Trace($"Sensors have been reset and hardware references refreshed.");
+                    catch
+                    {
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Log.Instance.Trace($"Error resetting sensors: {ex}");
-                }
+                RefreshSensorCache();
             }
         }
-        finally
-        {
-            _isResetting = false;
-        }
+        finally { _isResetting = false; }
     }
 
     private static string StripName(string name)
     {
-        if (string.IsNullOrEmpty(name))
+        if (string.IsNullOrEmpty(name)) return UNKNOWN_NAME;
+        var cleaned = name.Trim();
+        if (cleaned.Contains("AMD", StringComparison.OrdinalIgnoreCase)) cleaned = Regex.Replace(cleaned, REGEX_STRIP_AMD, "", RegexOptions.IgnoreCase);
+        else if (cleaned.Contains("Intel", StringComparison.OrdinalIgnoreCase)) cleaned = Regex.Replace(cleaned, REGEX_STRIP_INTEL, "", RegexOptions.IgnoreCase);
+        else if (cleaned.Contains("Nvidia", StringComparison.OrdinalIgnoreCase) || cleaned.Contains("GeForce", StringComparison.OrdinalIgnoreCase))
         {
-            return UNKNOWN_NAME;
+            var m = Regex.Match(cleaned, REGEX_STRIP_NVIDIA);
+            if (m.Success) cleaned = m.Groups[1].Value;
         }
+        return Regex.Replace(cleaned, REGEX_CLEAN_SPACES, " ").Trim();
+    }
 
-        var cleanedName = name.Trim();
+    public bool IsGpuInActive(GPUState state) => state is GPUState.Inactive or GPUState.PoweredOff or GPUState.Unknown or GPUState.NvidiaGpuNotFound;
+    public bool IsLibreHardwareMonitorInitialized() => InitialState is LibreHardwareMonitorInitialState.Initialized or LibreHardwareMonitorInitialState.Success;
 
-        if (cleanedName.Contains("AMD", StringComparison.OrdinalIgnoreCase))
+    public void Start(object subscriber, TimeSpan interval)
+    {
+        lock (_subscribers)
         {
-            cleanedName = Regex.Replace(cleanedName, REGEX_STRIP_AMD, "", RegexOptions.IgnoreCase);
+            _subscribers[subscriber] = interval;
+            UpdateProducerLoop();
         }
-        else if (cleanedName.Contains("Intel", StringComparison.OrdinalIgnoreCase))
+    }
+
+    public void Stop(object subscriber)
+    {
+        lock (_subscribers)
         {
-            cleanedName = Regex.Replace(cleanedName, REGEX_STRIP_INTEL, "", RegexOptions.IgnoreCase);
-        }
-        else if (cleanedName.Contains("Nvidia", StringComparison.OrdinalIgnoreCase) || cleanedName.Contains("GeForce", StringComparison.OrdinalIgnoreCase))
-        {
-            var match = Regex.Match(cleanedName, REGEX_STRIP_NVIDIA);
-            if (match.Success)
+            if (_subscribers.Remove(subscriber))
             {
-                cleanedName = match.Groups[1].Value;
+                UpdateProducerLoop();
             }
         }
-
-        return Regex.Replace(cleanedName, REGEX_CLEAN_SPACES, " ").Trim();
     }
 
-    public bool IsGpuInActive(GPUState state)
+    private void UpdateProducerLoop()
     {
-        return state is GPUState.Inactive or GPUState.PoweredOff or GPUState.Unknown or GPUState.NvidiaGpuNotFound;
-    }
-
-    public bool IsLibreHardwareMonitorInitialized()
-    {
-        return InitialState is LibreHardwareMonitorInitialState.Initialized or LibreHardwareMonitorInitialState.Success;
-    }
-
-    public bool IsPawnIOInnstalled()
-    {
-        string? pawnIoPath = Registry.GetValue(REG_KEY_PAWN_IO, REG_VAL_INSTALL_LOC, null) as string;
-
-        if (string.IsNullOrEmpty(pawnIoPath))
+        if (_subscribers.Count == 0)
         {
-            pawnIoPath = Registry.GetValue(REG_KEY_PAWN_IO_WOW64, REG_VAL_INSTALL_DIR, null) as string;
+            StopProducerLoop();
+            return;
         }
 
-        if (string.IsNullOrEmpty(pawnIoPath))
-        {
-            pawnIoPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), FOLDER_PAWN_IO);
-        }
+        StopProducerLoop();
 
-        return Directory.Exists(pawnIoPath);
+        _producerCts = new CancellationTokenSource();
+        var token = _producerCts.Token;
+        _producerTask = Task.Run(() => ProducerLoop(token), token);
     }
-    #endregion
+
+    private void StopProducerLoop()
+    {
+        _producerCts?.Cancel();
+        _producerCts?.Dispose();
+        _producerCts = null;
+        _producerTask = null;
+    }
+
+    private async Task ProducerLoop(CancellationToken token)
+    {
+        while (!token.IsCancellationRequested)
+        {
+            TimeSpan minInterval;
+            lock (_subscribers)
+            {
+                if (_subscribers.Count == 0) return;
+                minInterval = _subscribers.Values.Min();
+            }
+
+            try
+            {
+                await UpdateAsync(true).ConfigureAwait(false);
+
+                await Task.Delay(minInterval, token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Trace($"ProducerLoop error: {ex}");
+                await Task.Delay(1000, token).ConfigureAwait(false);
+            }
+        }
+    }
 
     public void Dispose()
     {
-        lock (_hardwareLock)
-        {
-            _computer?.Close();
-            _computer = null;
-            _hardwareInitialized = false;
-        }
+        lock (_hardwareLock) { _computer?.Close(); _computer = null; _hardwareInitialized = false; }
         _initSemaphore.Dispose();
         GC.SuppressFinalize(this);
     }

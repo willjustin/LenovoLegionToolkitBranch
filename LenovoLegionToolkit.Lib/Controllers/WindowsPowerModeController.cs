@@ -1,13 +1,14 @@
-﻿using LenovoLegionToolkit.Lib.Extensions;
-using LenovoLegionToolkit.Lib.Settings;
-using LenovoLegionToolkit.Lib.System;
-using LenovoLegionToolkit.Lib.Utils;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Win32;
 using Windows.Win32.Foundation;
+using LenovoLegionToolkit.Lib.Extensions;
+using LenovoLegionToolkit.Lib.Settings;
+using LenovoLegionToolkit.Lib.System;
+using LenovoLegionToolkit.Lib.Utils;
 using static LenovoLegionToolkit.Lib.Settings.GodModeSettings;
 
 namespace LenovoLegionToolkit.Lib.Controllers;
@@ -24,83 +25,223 @@ public partial class WindowsPowerModeController(ApplicationSettings settings, IM
     private static readonly Guid BestPerformance = Guid.Parse("ded574b5-45a0-4f42-8737-46345c09c238");
 
     private readonly ThrottleLastDispatcher _dispatcher = new(TimeSpan.FromSeconds(2), nameof(WindowsPowerModeController));
+    private readonly SemaphoreSlim _lock = new(1, 1);
 
-    public async Task SetPowerModeAsync(PowerModeState powerModeState, GodModeSettingsStore.Preset? preset = null)
+    public async Task SetPowerModeAsync(PowerModeState powerModeState, GodModeSettingsStore.Preset? preset = null, bool skipThrottle = false)
     {
-        if (settings.Store.PowerModeMappingMode is not PowerModeMappingMode.WindowsPowerMode)
+        await _lock.WaitAsync().ConfigureAwait(false);
+        try
         {
-            Log.Instance.Trace($"Ignoring... [powerModeMappingMode={settings.Store.PowerModeMappingMode}]");
+            if (settings.Store.PowerModeMappingMode is not PowerModeMappingMode.WindowsPowerMode)
+            {
+                Log.Instance.Trace($"Ignoring... [powerModeMappingMode={settings.Store.PowerModeMappingMode}]");
+                return;
+            }
 
-            return;
+            Log.Instance.Trace($"Activating... [powerModeState={powerModeState}]");
+
+            var defaultMode = settings.Store.PowerModes.GetValueOrDefault(powerModeState, WindowsPowerMode.Balanced);
+            var powerModeOnAc = preset?.Overrides.TryGetEnum<WindowsPowerMode>(PowerOverrideKey.PowerModeOnAc) ?? settings.Store.Overrides.GetPowerModeOnAc(powerModeState) ?? defaultMode;
+            var powerModeOnDc = preset?.Overrides.TryGetEnum<WindowsPowerMode>(PowerOverrideKey.PowerModeOnDc) ?? settings.Store.Overrides.GetPowerModeOnDc(powerModeState) ?? defaultMode;
+
+            var acGuid = GuidForWindowsPowerMode(powerModeOnAc);
+            var dcGuid = GuidForWindowsPowerMode(powerModeOnDc);
+
+            if (Power.IsBatterySaverEnabled())
+            {
+                Log.Instance.Trace($"Battery saver is on - will not set overlay scheme.");
+                return;
+            }
+
+            var adapterStatus = await Power.IsPowerAdapterConnectedAsync().ConfigureAwait(false);
+            var activeGuid = adapterStatus != PowerAdapterStatus.Disconnected ? acGuid : dcGuid;
+
+            if (skipThrottle)
+            {
+                await _dispatcher.DispatchImmediateAsync(() => ExecuteOverlayDispatch(activeGuid, acGuid, dcGuid)).ConfigureAwait(false);
+            }
+            else
+            {
+                await _dispatcher.DispatchAsync(() => ExecuteOverlayDispatch(activeGuid, acGuid, dcGuid)).ConfigureAwait(false);
+            }
+
+            Log.Instance.Trace($"Power mode activated... [powerModeState={powerModeState}, acGuid={acGuid}, dcGuid={dcGuid}]");
         }
-
-        Log.Instance.Trace($"Activating... [powerModeState={powerModeState}]");
-
-        WindowsPowerMode? powerMode = null;
-
-        powerMode = (preset == null) ? settings.Store.PowerModes.GetValueOrDefault(powerModeState, WindowsPowerMode.Balanced) : preset.PowerMode;
-
-        if (powerMode == null)
+        finally
         {
-            Log.Instance.Trace($"I don't think this is possible.");
-            return;
+            _lock.Release();
         }
+    }
 
-        var powerModeGuid = GuidForWindowsPowerMode(powerMode.Value);
-
-        if (Power.IsBatterySaverEnabled())
+    public async Task SetPowerModeAsync(ITSMode itsMode, bool skipThrottle = false)
+    {
+        await _lock.WaitAsync().ConfigureAwait(false);
+        try
         {
-            Log.Instance.Trace($"Battery saver is on - will not set overlay scheme.");
+            if (settings.Store.PowerModeMappingMode is not PowerModeMappingMode.WindowsPowerMode)
+            {
+                Log.Instance.Trace($"Ignoring... [powerModeMappingMode={settings.Store.PowerModeMappingMode}]");
+                return;
+            }
 
-            return;
+            Log.Instance.Trace($"Activating... [itsMode={itsMode}]");
+
+            var defaultMode = settings.Store.ITSPowerModes.GetValueOrDefault(itsMode, WindowsPowerMode.Balanced);
+            var powerModeOnAc = settings.Store.ITSOverrides.GetPowerModeOnAc(itsMode);
+            var powerModeOnDc = settings.Store.ITSOverrides.GetPowerModeOnDc(itsMode);
+
+            if (powerModeOnAc is null && powerModeOnDc is null)
+            {
+                Log.Instance.Trace($"Power mode is null. [itsMode={itsMode}]");
+                return;
+            }
+
+            var acGuid = GuidForWindowsPowerMode(powerModeOnAc ?? defaultMode);
+            var dcGuid = GuidForWindowsPowerMode(powerModeOnDc ?? defaultMode);
+
+            if (Power.IsBatterySaverEnabled())
+            {
+                Log.Instance.Trace($"Battery saver is on - will not set overlay scheme.");
+                return;
+            }
+
+            var adapterStatus = await Power.IsPowerAdapterConnectedAsync().ConfigureAwait(false);
+            var activeGuid = adapterStatus != PowerAdapterStatus.Disconnected ? acGuid : dcGuid;
+
+            if (skipThrottle)
+            {
+                await _dispatcher.DispatchImmediateAsync(() => ExecuteOverlayDispatch(activeGuid, acGuid, dcGuid)).ConfigureAwait(false);
+            }
+            else
+            {
+                await _dispatcher.DispatchAsync(() => ExecuteOverlayDispatch(activeGuid, acGuid, dcGuid)).ConfigureAwait(false);
+            }
+
+            Log.Instance.Trace($"Power mode activated... [itsMode={itsMode}, acGuid={acGuid}, dcGuid={dcGuid}]");
         }
+        finally
+        {
+            _lock.Release();
+        }
+    }
 
-        await _dispatcher.DispatchAsync(() =>
+    public async Task SetBalancedPowerModeAsync(bool skipThrottle = false)
+    {
+        await _lock.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            if (Power.IsBatterySaverEnabled())
+            {
+                Log.Instance.Trace($"Battery saver is on - will not set overlay scheme.");
+                return;
+            }
+
+            var balancedGuid = Guid.Empty;
+
+            if (skipThrottle)
+            {
+                await _dispatcher.DispatchImmediateAsync(() => ExecuteOverlayDispatch(balancedGuid, balancedGuid, balancedGuid)).ConfigureAwait(false);
+            }
+            else
+            {
+                await _dispatcher.DispatchAsync(() => ExecuteOverlayDispatch(balancedGuid, balancedGuid, balancedGuid)).ConfigureAwait(false);
+            }
+
+            Log.Instance.Trace($"Balanced power mode set.");
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    private Task ExecuteOverlayDispatch(Guid activeGuid, Guid acGuid, Guid dcGuid)
+    {
+        try
         {
             ActivateDefaultPowerPlanIfNeeded();
+        }
+        catch (Exception ex)
+        {
+            Log.Instance.Trace($"Failed to activate default power plan.", ex);
+        }
 
-            mainThreadDispatcher.Dispatch(() =>
-            {
-                var result = PowerSetActiveOverlayScheme(powerModeGuid);
-
-                Log.Instance.Trace($"Overlay scheme set. [result={result}]");
-            });
-
+        mainThreadDispatcher.Dispatch(() =>
+        {
             try
             {
-                UpdateRegistry(powerModeGuid);
+                var result = PowerSetActiveOverlayScheme(activeGuid);
+                Log.Instance.Trace($"Overlay scheme set. [result={result}, activeGuid={activeGuid}]");
             }
             catch (Exception ex)
             {
-                Log.Instance.Trace($"Failed to update registry.", ex);
+                Log.Instance.Trace($"Failed to set active overlay scheme.", ex);
             }
+        });
 
-            return Task.CompletedTask;
-        }).ConfigureAwait(false);
+        try
+        {
+            SetActiveOverlayRegistryForAc(acGuid);
+            SetActiveOverlayRegistryForDc(dcGuid);
+        }
+        catch (Exception ex)
+        {
+            Log.Instance.Trace($"Failed to update registry.", ex);
+        }
 
-        Log.Instance.Trace($"Power mode {powerMode} activated... [powerModeState={powerModeState}, powerModeGuid={powerModeGuid}]");
+        return Task.CompletedTask;
     }
 
-    private static void UpdateRegistry(Guid guid)
+    public static void SetActiveOverlayRegistryForAc(Guid guid)
     {
-        Registry.SetValue(POWER_SCHEMES_HIVE, POWER_SCHEMES_SUBKEY, ACTIVE_OVERLAY_AC_POWER_SCHEME_KEY, guid, true);
-        Registry.SetValue(POWER_SCHEMES_HIVE, POWER_SCHEMES_SUBKEY, ACTIVE_OVERLAY_DC_POWER_SCHEME_KEY, guid, true);
+        try
+        {
+            Registry.SetValue(POWER_SCHEMES_HIVE, POWER_SCHEMES_SUBKEY, ACTIVE_OVERLAY_AC_POWER_SCHEME_KEY, guid, true);
+            Log.Instance.Trace($"Set {ACTIVE_OVERLAY_AC_POWER_SCHEME_KEY} to {guid}");
+        }
+        catch (Exception ex)
+        {
+            Log.Instance.Trace($"Failed to set {ACTIVE_OVERLAY_AC_POWER_SCHEME_KEY} registry value.", ex);
+        }
     }
 
-    private static Guid GuidForWindowsPowerMode(WindowsPowerMode windowsPowerMode) => windowsPowerMode switch
+    public static void SetActiveOverlayRegistryForDc(Guid guid)
+    {
+        try
+        {
+            Registry.SetValue(POWER_SCHEMES_HIVE, POWER_SCHEMES_SUBKEY, ACTIVE_OVERLAY_DC_POWER_SCHEME_KEY, guid, true);
+            Log.Instance.Trace($"Set {ACTIVE_OVERLAY_DC_POWER_SCHEME_KEY} to {guid}");
+        }
+        catch (Exception ex)
+        {
+            Log.Instance.Trace($"Failed to set {ACTIVE_OVERLAY_DC_POWER_SCHEME_KEY} registry value.", ex);
+        }
+    }
+
+    public static Guid GuidForWindowsPowerMode(WindowsPowerMode windowsPowerMode) => windowsPowerMode switch
     {
         WindowsPowerMode.BestPowerEfficiency => BestPowerEfficiency,
+        WindowsPowerMode.Balanced => Guid.Empty,
         WindowsPowerMode.BestPerformance => BestPerformance,
-        _ => Guid.Empty
+        _ => throw new ArgumentOutOfRangeException(nameof(windowsPowerMode), windowsPowerMode, null)
     };
+
+    public static void ApplyActiveOverlayScheme(Guid guid)
+    {
+        var result = PowerSetActiveOverlayScheme(guid);
+        Log.Instance.Trace($"Overlay scheme set. [result={result}, guid={guid}]");
+    }
 
     private static unsafe void ActivateDefaultPowerPlanIfNeeded()
     {
         if (PInvoke.PowerGetActiveScheme(null, out var guid) != WIN32_ERROR.ERROR_SUCCESS)
             PInvokeExtensions.ThrowIfWin32Error("PowerGetActiveScheme");
 
-        if (DefaultPowerPlan == *guid)
+        if (PowerPlanExtensions.IsPlanBasedOnBalanced(*guid))
+        {
+            Log.Instance.Trace($"Default power plan is already active.");
             return;
+        }
 
         if (PInvoke.PowerSetActiveScheme(null, DefaultPowerPlan) != WIN32_ERROR.ERROR_SUCCESS)
             PInvokeExtensions.ThrowIfWin32Error("PowerSetActiveScheme");

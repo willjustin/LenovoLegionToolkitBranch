@@ -1,12 +1,13 @@
-﻿using LenovoLegionToolkit.Lib.Extensions;
-using LenovoLegionToolkit.Lib.Utils;
-using LenovoLegionToolkit.WPF.Resources;
 using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Windows;
+using LenovoLegionToolkit.Lib.Extensions;
+using LenovoLegionToolkit.Lib.Utils;
+using LenovoLegionToolkit.WPF.Resources;
+using Wpf.Ui.Controls;
 
 namespace LenovoLegionToolkit.WPF.Pages;
 
@@ -71,6 +72,15 @@ public partial class AboutPage
         if (Directory.Exists(logPath))
         {
             Process.Start("explorer.exe", logPath);
+        }
+    }
+ 
+    private void Hyperlink_Click(object sender, RoutedEventArgs e)
+    {
+        if (e.Source is Hyperlink { Tag: string uriString })
+        {
+            Process.Start("explorer.exe", uriString);
+            e.Handled = true;
         }
     }
 }

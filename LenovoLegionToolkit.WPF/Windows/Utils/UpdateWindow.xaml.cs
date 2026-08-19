@@ -1,14 +1,16 @@
-﻿using LenovoLegionToolkit.Lib;
-using LenovoLegionToolkit.Lib.Utils;
-using LenovoLegionToolkit.WPF.Extensions;
-using LenovoLegionToolkit.WPF.Resources;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using System.Windows;
-using System.Windows.Input;
+using BlackSharp.Core.Extensions;
+using LenovoLegionToolkit.Lib;
+using LenovoLegionToolkit.Lib.Utils;
+using LenovoLegionToolkit.WPF.Extensions;
+using LenovoLegionToolkit.WPF.Resources;
+using LenovoLegionToolkit.WPF.Utils;
+using Wpf.Ui.Controls;
 
 namespace LenovoLegionToolkit.WPF.Windows.Utils;
 
@@ -27,16 +29,29 @@ public partial class UpdateWindow : IProgress<float>
     {
         var updates = await _updateChecker.GetUpdatesAsync();
 
-        var stringBuilder = new StringBuilder();
-        foreach (var update in updates)
+        if (updates.Length > 0)
         {
-            stringBuilder.AppendLine("**" + update.Title + "**   _(" + update.Date.ToString("D") + ")_")
-                .AppendLine()
-                .AppendLine(update.Description)
-                .AppendLine();
-        }
+            var stringBuilder = new StringBuilder();
+            foreach (var update in updates)
+            {
+                stringBuilder.AppendLine("**" + update.Title + "**   _(" + update.Date.ToString("D") + ")_")
+                    .AppendLine()
+                    .AppendLine(update.Description)
+                    .AppendLine();
+            }
 
-        _markdownViewer.Markdown = stringBuilder.ToString();
+            _markdownViewer.Markdown = stringBuilder.ToString();
+        }
+        else
+        {
+            if (_updateChecker.UpdateFromServer != null)
+            {
+                if (_updateChecker.UpdateFromServer?.Description.Length > 0)
+                {
+                    _markdownViewer.Markdown = _updateChecker.UpdateFromServer?.Description;
+                }
+            }
+        }
 
         _downloadButton.IsEnabled = true;
     }
@@ -65,12 +80,25 @@ public partial class UpdateWindow : IProgress<float>
         {
             SetDownloading(false);
         }
-        catch
+        catch (SecurityException ex)
+        {
+            SetDownloading(false);
+            var innerMsg = ex.InnerException is not null ? "\n" + ex.InnerException.Message : string.Empty;
+            await SnackbarHelper.ShowAsync(Resource.UpdateWindow_SecurityError_Title, ex.Message + innerMsg, SnackbarType.Error);
+        }
+        catch (Exception ex)
         {
             SetDownloading(false);
 
-            Constants.LatestReleaseUri.Open();
-            Close();
+            if (_updateChecker.UpdateFromServer != null)
+            {
+                await SnackbarHelper.ShowAsync(Resource.UpdateWindow_DownloadError_Title, ex.Message, SnackbarType.Error);
+            }
+            else
+            {
+                Constants.LatestReleaseUri.Open();
+                Close();
+            }
         }
     }
 

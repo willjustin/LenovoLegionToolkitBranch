@@ -1,122 +1,129 @@
-﻿using LenovoLegionToolkit.Lib;
-using LenovoLegionToolkit.Lib.Extensions;
-using LenovoLegionToolkit.WPF.Controls;
-using LenovoLegionToolkit.WPF.Converters;
-using LenovoLegionToolkit.WPF.Settings;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Input;
+using System.Windows.Controls;
+using LenovoLegionToolkit.Lib;
+using LenovoLegionToolkit.Lib.Messaging;
+using LenovoLegionToolkit.Lib.Messaging.Messages;
+using LenovoLegionToolkit.WPF.Converters;
+using LenovoLegionToolkit.WPF.Resources;
+using LenovoLegionToolkit.WPF.Settings;
 
 namespace LenovoLegionToolkit.WPF.Windows.Dashboard;
 
-public partial class EditSensorGroupWindow : BaseWindow
+public partial class EditSensorGroupWindow
 {
+    private static EditSensorGroupWindow? _instance;
+
     private readonly SensorsControlSettings _settings = IoCContainer.Resolve<SensorsControlSettings>();
     public event EventHandler? Apply;
 
     public EditSensorGroupWindow()
     {
         InitializeComponent();
-        this.DataContext = _settings.Store;
-        IsVisibleChanged += EditSensorGroupWindow_IsVisibleChanged;
+        InitializeCheckboxes();
     }
 
-    private async void EditSensorGroupWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+    public static void ShowInstance()
     {
-        if (IsVisible)
-            await RefreshAsync();
-    }
-
-    private async Task RefreshAsync()
-    {
-        _loader.IsLoading = true;
-        _applyRevertStackPanel.Visibility = Visibility.Hidden;
-
-        var loadingTask = Task.Delay(TimeSpan.FromMilliseconds(500));
-
-        LoadSensors(false);
-
-        await loadingTask;
-
-        _applyRevertStackPanel.Visibility = Visibility.Visible;
-        _loader.IsLoading = false;
-    }
-
-    private void LoadSensors(bool isDefault)
-    {
-        _groupsStackPanel.Children.Clear();
-        if (!isDefault)
+        if (_instance == null)
         {
-            if (_settings.Store.VisibleItems == null || !_settings.Store.VisibleItems.Any())
-            {
-                var defaultItems = SensorGroup.DefaultGroups.SelectMany(group => group.Items).ToArray();
-                _settings.Store.VisibleItems = defaultItems;
-                _settings.SynchronizeStore();
-            }
-
-            foreach (var item in _settings.Store.VisibleItems)
-            {
-                var card = new Wpf.Ui.Controls.CardControl { Margin = new Thickness(0, 0, 16, 16) };
-                var header = new CardHeaderControl { Title = EnumToLocalizedStringConverter.Convert(item) };
-                card.Header = header;
-                var button = new Wpf.Ui.Controls.Button
-                {
-                    Content = "Hide",
-                    Tag = item
-                };
-                button.Click += RemoveButton_Click;
-                card.Content = button;
-                _groupsStackPanel.Children.Add(card);
-            }
+            _instance = new EditSensorGroupWindow();
+            _instance.Closed += (s, e) => _instance = null;
+            _instance.Show();
         }
         else
         {
-            var defaultItems = SensorGroup.DefaultGroups.SelectMany(group => group.Items).ToArray();
-            _settings.Store.VisibleItems = defaultItems;
-            _settings.SynchronizeStore();
+            if (_instance.WindowState == WindowState.Minimized)
+                _instance.WindowState = WindowState.Normal;
+            _instance.Activate();
         }
     }
 
-    private void AddButton_Click(object sender, RoutedEventArgs e)
+    private void InitializeCheckboxes()
     {
-        var allSensors = Enum.GetValues(typeof(SensorItem)).Cast<SensorItem>().ToList();
-        var currentSensors = (_settings.Store.VisibleItems ?? Array.Empty<SensorItem>()).ToList();
-        var availableSensors = allSensors.Except(currentSensors).ToList();
+        _groupsStackPanel.Children.Clear();
+        var activeItems = new HashSet<SensorItem>(_settings.Store.VisibleItems ?? []);
 
-        if (availableSensors.Any())
+        foreach (var group in SensorGroup.DefaultGroups)
         {
-            var selectedItem = availableSensors.First();
-            var newItems = currentSensors.ToList();
-            newItems.Add(selectedItem);
-            _settings.Store.VisibleItems = newItems.ToArray();
-            LoadSensors(false);
-            _applyRevertStackPanel.Visibility = Visibility.Visible;
-            _settings.SynchronizeStore();
+            var groupBox = new GroupBox
+            {
+                Header = GetLocalizedGroupName(group.Type),
+                Padding = new Thickness(10, 5, 5, 10)
+            };
+
+            var stackPanel = new StackPanel();
+
+            foreach (var item in group.Items)
+            {
+                if (item == SensorItem.GpuTemperatures)
+                {
+                    continue;
+                }
+
+                var checkBox = new CheckBox
+                {
+                    Content = EnumToLocalizedStringConverter.Convert(item),
+                    Tag = item,
+                    IsChecked = activeItems.Contains(item)
+                };
+
+                stackPanel.Children.Add(checkBox);
+            }
+
+            groupBox.Content = stackPanel;
+            _groupsStackPanel.Children.Add(groupBox);
         }
     }
 
-    private void RemoveButton_Click(object sender, RoutedEventArgs e)
+    private string GetLocalizedGroupName(SensorGroupType type) => type switch
     {
-        if (sender is Wpf.Ui.Controls.Button button && button.Tag is SensorItem itemToRemove)
-        {
-            var newItems = (_settings.Store.VisibleItems ?? Array.Empty<SensorItem>()).ToList();
-            newItems.Remove(itemToRemove);
-            _settings.Store.VisibleItems = newItems.ToArray();
-            LoadSensors(false);
-            _applyRevertStackPanel.Visibility = Visibility.Visible;
-            _settings.SynchronizeStore();
-        }
-    }
+        SensorGroupType.CPU => Resource.SensorsControl_CPU_Title,
+        SensorGroupType.GPU => Resource.SensorsControl_GPU_Title,
+        SensorGroupType.Motherboard => Resource.SensorsControl_Motherboard_Title,
+        SensorGroupType.Battery => Resource.SensorsControl_Battery_Title,
+        SensorGroupType.Memory => Resource.SensorsControl_Memory_Title,
+        SensorGroupType.Disk => Resource.SensorsControl_Disk_Title,
+        _ => type.ToString()
+    };
 
     private void ApplyButton_Click(object sender, RoutedEventArgs e)
     {
-        _applyRevertStackPanel.Visibility = Visibility.Collapsed;
+        var selectedItems = new List<SensorItem>();
+
+        foreach (var groupBox in _groupsStackPanel.Children.OfType<GroupBox>())
+        {
+            if (groupBox.Content is StackPanel stackPanel)
+            {
+                foreach (var child in stackPanel.Children.OfType<CheckBox>())
+                {
+                    if (child is { IsChecked: true, Tag: SensorItem item })
+                    {
+                        selectedItems.Add(item);
+                    }
+                }
+            }
+        }
+
+        if (selectedItems.Contains(SensorItem.GpuCoreTemperature) ||
+            selectedItems.Contains(SensorItem.GpuVramTemperature))
+        {
+            if (!selectedItems.Contains(SensorItem.GpuTemperatures))
+            {
+                selectedItems.Add(SensorItem.GpuTemperatures);
+            }
+        }
+
+        _settings.Store.VisibleItems = selectedItems.ToArray();
         _settings.SynchronizeStore();
-        Close();
+
+        var libItems = Array.ConvertAll(_settings.Store.VisibleItems, x => (Lib.SensorItem)(int)x);
+        MessagingCenter.Publish(new DashboardElementChangedMessage(libItems));
 
         Apply?.Invoke(this, EventArgs.Empty);
+        Close();
     }
 
     private void CancelButton_Click(object sender, RoutedEventArgs e)
@@ -126,11 +133,8 @@ public partial class EditSensorGroupWindow : BaseWindow
 
     private void DefaultButton_Click(object sender, RoutedEventArgs e)
     {
-        _settings.Reset();
-        LoadSensors(true);
-        LoadSensors(false);
-
-        _applyRevertStackPanel.Visibility = Visibility.Visible;
-        _settings.SynchronizeStore();
+        var defaultItems = SensorGroup.DefaultGroups.SelectMany(g => g.Items).ToArray();
+        _settings.Store.VisibleItems = defaultItems;
+        InitializeCheckboxes();
     }
 }

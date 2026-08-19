@@ -33,4 +33,21 @@ public class ThrottleLastDispatcher(TimeSpan interval, string? tag = null)
                 Log.Instance.Trace($"Throttling... [tag={tag}]");
         }
     }
+
+    public async Task DispatchImmediateAsync(Func<Task> task)
+    {
+        try
+        {
+            if (_cancellationTokenSource is not null)
+            {
+                await _cancellationTokenSource.CancelAsync().ConfigureAwait(false);
+            }
+        }
+        catch (OperationCanceledException) { }
+
+        if (tag is not null)
+            Log.Instance.Trace($"Immediate dispatch... [tag={tag}]");
+
+        await task().ConfigureAwait(false);
+    }
 }

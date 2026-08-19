@@ -1,16 +1,17 @@
-﻿using LenovoLegionToolkit.Lib;
+using LenovoLegionToolkit.Lib;
 using LenovoLegionToolkit.Lib.Controllers;
 using LenovoLegionToolkit.Lib.Settings;
+using LenovoLegionToolkit.Lib.Utils;
 using LenovoLegionToolkit.WPF.Controls.KeyboardBacklight.RGB;
 using LenovoLegionToolkit.WPF.Controls.KeyboardBacklight.Spectrum;
 using LenovoLegionToolkit.WPF.Resources;
+using LenovoLegionToolkit.WPF.Utils;
 using LenovoLegionToolkit.WPF.Windows.Utils;
 using Microsoft.Win32;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
-using LenovoLegionToolkit.Lib.Utils;
 
 namespace LenovoLegionToolkit.WPF.Pages;
 
@@ -93,19 +94,17 @@ public partial class KeyboardBacklightPage
 
     private async Task<(bool ShouldDisable, bool DontShowAgain)> ShowDynamicLightingWarningDialogAsync()
     {
-        return await Application.Current.Dispatcher.InvokeAsync(() =>
+        return await await Application.Current.Dispatcher.InvokeAsync(async () =>
         {
-            var dialog = new DialogWindow
-            {
-                Title = Resource.Warning,
-                Content = Resource.KeyboardBacklightPage_DynamicLightingEnabled,
-                Owner = App.Current.MainWindow
-            };
+            var result = await MessageBoxHelper.ShowAsync(
+                this,
+                Resource.Warning,
+                Resource.KeyboardBacklightPage_DynamicLightingEnabled,
+                true,
+                Resource.Yes,
+                Resource.No);
 
-            dialog.DontShowAgainCheckBox.Visibility = Visibility.Visible;
-            dialog.ShowDialog();
-
-            return dialog.Result;
+            return (result.Result, result.DontShowAgain);
         });
     }
 
@@ -133,11 +132,14 @@ public partial class KeyboardBacklightPage
     {
         try
         {
+            bool anyAdded = false;
+
             var spectrumController = IoCContainer.Resolve<SpectrumKeyboardBacklightController>();
             if (await spectrumController.IsSupportedAsync())
             {
                 var control = new SpectrumKeyboardBacklightControl();
                 _content.Children.Add(control);
+                anyAdded = true;
                 return;
             }
 
@@ -146,10 +148,14 @@ public partial class KeyboardBacklightPage
             {
                 var control = new RGBKeyboardBacklightControl();
                 _content.Children.Add(control);
+                anyAdded = true;
                 return;
             }
 
-            ShowNoKeyboardsMessage();
+            if (!anyAdded)
+            {
+                ShowNoKeyboardsMessage();
+            }
         }
         catch (Exception ex)
         {

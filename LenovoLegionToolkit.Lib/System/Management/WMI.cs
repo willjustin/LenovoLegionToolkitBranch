@@ -51,7 +51,6 @@ public static partial class WMI
         }
         catch (ManagementException ex)
         {
-            Log.Instance.Trace($"Read failed: {ex.Message} [scope={scope}, query={query}]", ex);
             throw new ManagementException($"Read failed: {ex.Message} [scope={scope}, query={query}]", ex);
         }
     }
@@ -74,8 +73,8 @@ public static partial class WMI
         }
         catch (ManagementException ex)
         {
-            Log.Instance.Trace($"Call failed: {ex.Message}. [scope={scope}, query={query}, methodName={methodName}]", ex);
-            throw new ManagementException($"Call failed: {ex.Message}. [scope={scope}, query={query}, methodName={methodName}]", ex);
+            var methodParamsStr = string.Join(", ", methodParams.Select(kv => $"{kv.Key}={kv.Value}"));
+            throw new ManagementException($"Call failed: {ex.Message}. [scope={scope}, query={query}, methodName={methodName}, methodParams={{{methodParamsStr}}}]", ex);
         }
     }
 
@@ -100,8 +99,8 @@ public static partial class WMI
         }
         catch (ManagementException ex)
         {
-            Log.Instance.Trace($"Call failed: {ex.Message}. [scope={scope}, query={query}, methodName={methodName}]", ex);
-            throw new ManagementException($"Call failed: {ex.Message}. [scope={scope}, query={query}, methodName={methodName}]", ex);
+            var methodParamsStr = string.Join(", ", methodParams.Select(kv => $"{kv.Key}={kv.Value}"));
+            throw new ManagementException($"Call failed: {ex.Message}. [scope={scope}, query={query}, methodName={methodName}, methodParams={{{methodParamsStr}}}]", ex);
         }
     }
 

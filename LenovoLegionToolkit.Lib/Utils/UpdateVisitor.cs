@@ -1,9 +1,9 @@
-﻿using LibreHardwareMonitor.Hardware;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LibreHardwareMonitor.Hardware;
 
 namespace LenovoLegionToolkit.Lib.Utils
 {
@@ -15,8 +15,18 @@ namespace LenovoLegionToolkit.Lib.Utils
         }
         public void VisitHardware(IHardware hardware)
         {
-            hardware.Update();
-            foreach (IHardware subHardware in hardware.SubHardware) subHardware.Accept(this);
+            try
+            {
+                hardware.Update();
+                foreach (IHardware subHardware in hardware.SubHardware)
+                {
+                    subHardware.Accept(this);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Trace($"Safety visit failed for hardware {hardware.Name}: {ex.Message}", ex);
+            }
         }
         public void VisitSensor(ISensor sensor) { }
         public void VisitParameter(IParameter parameter) { }

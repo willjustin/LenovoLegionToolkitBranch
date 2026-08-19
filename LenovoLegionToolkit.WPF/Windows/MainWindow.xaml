@@ -1,4 +1,4 @@
-﻿<local:BaseWindow
+<local:BaseWindow
     x:Class="LenovoLegionToolkit.WPF.Windows.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -16,10 +16,6 @@
     FlowDirection="{x:Static utils:LocalizationHelper.Direction}">
 
     <Grid>
-        <Grid.Background>
-            <ImageBrush x:Name="_backgroundImage" />
-        </Grid.Background>
-
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -27,7 +23,25 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
+
+        <Rectangle
+            Grid.RowSpan="7"
+            IsHitTestVisible="False">
+            <Rectangle.Fill>
+                <ImageBrush x:Name="_backgroundImage" />
+            </Rectangle.Fill>
+            <Rectangle.Effect>
+                <BlurEffect x:Name="_backgroundBlurEffect" Radius="0" KernelType="Gaussian" />
+            </Rectangle.Effect>
+        </Rectangle>
+
+        <Rectangle
+            x:Name="_backgroundDimOverlay"
+            Grid.RowSpan="7"
+            Fill="{DynamicResource ApplicationBackgroundBrush}"
+            IsHitTestVisible="False" />
 
         <wpfui:TitleBar Grid.Row="0" />
 
@@ -89,6 +103,7 @@
                 x:Name="_navigationStore"
                 Grid.Column="0"
                 Margin="0,0,12,12"
+                Cursor=""
                 Frame="{Binding ElementName=_rootFrame}"
                 Navigated="NavigationStore_Navigated"
                 SelectedPageIndex="0">
@@ -105,6 +120,12 @@
                         Icon="Keyboard24"
                         PageTag="keyboardBacklight"
                         PageType="{x:Type pages:KeyboardBacklightPage}" />
+                    <custom:NavigationItem
+                        x:Name="_lampArrayKeyboardItem"
+                        Content="{x:Static resources:Resource.MainWindow_NavigationItem_Keyboard}"
+                        Icon="Keyboard24"
+                        PageTag="lampArrayKeyboardBacklight"
+                        PageType="{x:Type pages:LampArrayRGBKeyboardPage}" />
                     <custom:NavigationItem
                         Content="{x:Static resources:Resource.MainWindow_NavigationItem_Battery}"
                         Icon="BatteryCheckmark24"
@@ -147,7 +168,12 @@
 
             </wpfui:NavigationStore>
 
-            <Border Grid.Column="1" Background="{DynamicResource ControlFillColorDefaultBrush}">
+            <Border
+                Grid.Column="1"
+                Margin="0,0,12,12"
+                Background="{DynamicResource ControlFillColorDefaultBrush}"
+                ClipToBounds="True"
+                CornerRadius="4">
                 <Frame Name="_rootFrame" Margin="24,0,0,0" />
             </Border>
 
@@ -183,6 +209,8 @@
             Grid.Row="2"
             Padding="8,4,8,6"
             Background="Orange"
+            Cursor="Hand"
+            MouseLeftButtonDown="SoftwareIndicator_MouseLeftButtonDown"
             Visibility="Collapsed">
             <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                 <wpfui:SymbolIcon
@@ -201,6 +229,8 @@
             Grid.Row="3"
             Padding="8,4,8,6"
             Background="Orange"
+            Cursor="Hand"
+            MouseLeftButtonDown="SoftwareIndicator_MouseLeftButtonDown"
             Visibility="Collapsed">
             <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                 <wpfui:SymbolIcon
@@ -216,9 +246,11 @@
 
         <Border
             x:Name="_legionSpaceIndicator"
-            Grid.Row="3"
+            Grid.Row="4"
             Padding="8,4,8,6"
             Background="Orange"
+            Cursor="Hand"
+            MouseLeftButtonDown="SoftwareIndicator_MouseLeftButtonDown"
             Visibility="Collapsed">
             <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                 <wpfui:SymbolIcon
@@ -234,9 +266,11 @@
 
         <Border
             x:Name="_fnKeysIndicator"
-            Grid.Row="4"
+            Grid.Row="5"
             Padding="8,4,8,6"
             Background="Orange"
+            Cursor="Hand"
+            MouseLeftButtonDown="SoftwareIndicator_MouseLeftButtonDown"
             Visibility="Collapsed">
             <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                 <wpfui:SymbolIcon
@@ -252,7 +286,7 @@
 
         <Border
             x:Name="_updateIndicator"
-            Grid.Row="5"
+            Grid.Row="6"
             Padding="8,4,8,6"
             Background="{DynamicResource SystemFillColorSuccessBrush}"
             Cursor="Hand"

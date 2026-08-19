@@ -1,6 +1,3 @@
-﻿using LenovoLegionToolkit.Lib.Extensions;
-using Newtonsoft.Json;
-using Octokit;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,8 +7,61 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using Windows.Devices.Lights;
+using LenovoLegionToolkit.Lib.Extensions;
+using Newtonsoft.Json;
+using Octokit;
+
 
 namespace LenovoLegionToolkit.Lib;
+
+internal static class AuroraColorUtils
+{
+    public static readonly RGBColor[] HueToRGBLut = new RGBColor[361];
+
+    static AuroraColorUtils()
+    {
+        for (var h = 0; h <= 360; h++)
+        {
+            const byte c = 255;
+            var x = (byte)Math.Round(c * (1 - Math.Abs(h / 60.0 % 2 - 1)));
+
+            HueToRGBLut[h] = h switch
+            {
+                < 60 => new RGBColor(c, x, 0),
+                < 120 => new RGBColor(x, c, 0),
+                < 180 => new RGBColor(0, c, x),
+                < 240 => new RGBColor(0, x, c),
+                < 300 => new RGBColor(x, 0, c),
+                _ => new RGBColor(c, 0, x)
+            };
+        }
+    }
+}
+
+public readonly struct AmdWmiCommand
+{
+    public string Name { get; init; }
+    public uint Id { get; init; }
+    public bool IsSet { get; init; }
+
+    public override string ToString()
+    {
+        return $"{Name} (0x{Id:X8})";
+    }
+}
+
+public class LampArrayAvailabilityChangedEventArgs : EventArgs
+{
+    public bool IsAvailable { get; }
+    public int LampCount { get; }
+
+    public LampArrayAvailabilityChangedEventArgs(bool isAvailable, int lampCount)
+    {
+        IsAvailable = isAvailable;
+        LampCount = lampCount;
+    }
+}
 
 public readonly struct BatteryInformation(
     bool isCharging,
@@ -45,10 +95,11 @@ public readonly struct BatteryInformation(
     public double? BatteryTemperatureC { get; } = batteryTemperatureC;
     public DateTime? ManufactureDate { get; } = manufactureDate;
     public DateTime? FirstUseDate { get; } = firstUseDate;
+
     public double BatteryHealth =>
         DesignCapacity > 0
-        ? Math.Round((double)FullChargeCapacity / DesignCapacity * 100.0, 2, MidpointRounding.AwayFromZero)
-        : 0.0;
+            ? Math.Round((double)FullChargeCapacity / DesignCapacity * 100.0, 2, MidpointRounding.AwayFromZero)
+            : 0.0;
 }
 
 public readonly struct BiosVersion(string prefix, int? version)
@@ -78,7 +129,10 @@ public readonly struct BiosVersion(string prefix, int? version)
         return Version < other.Version;
     }
 
-    public override string ToString() => $"{nameof(Prefix)}: {Prefix}, {nameof(Version)}: {Version}";
+    public override string ToString()
+    {
+        return $"{nameof(Prefix)}: {Prefix}, {nameof(Version)}: {Version}";
+    }
 }
 
 public readonly struct Brightness(byte value)
@@ -92,14 +146,17 @@ internal struct CIntelligentCooling
     private long value;
 }
 
-
 public readonly struct DiscreteCapability(CapabilityID id, int value)
 {
     public CapabilityID Id { get; } = id;
     public int Value { get; } = value;
 }
 
-public readonly struct DisplayAdvancedColorInfo(bool advancedColorSupported, bool advancedColorEnabled, bool wideColorEnforced, bool advancedColorForceDisabled)
+public readonly struct DisplayAdvancedColorInfo(
+    bool advancedColorSupported,
+    bool advancedColorEnabled,
+    bool wideColorEnforced,
+    bool advancedColorForceDisabled)
 {
     public bool AdvancedColorSupported { get; } = advancedColorSupported;
     public bool AdvancedColorEnabled { get; } = advancedColorEnabled;
@@ -161,12 +218,14 @@ public readonly struct FanTableData(FanTableType type, byte fanId, byte sensorId
     public ushort[] FanSpeeds { get; } = fanSpeeds;
     public ushort[] Temps { get; } = temps;
 
-    public override string ToString() =>
-        $"{nameof(Type)}: {Type}," +
-        $" {nameof(FanId)}: {FanId}," +
-        $" {nameof(SensorId)}: {SensorId}," +
-        $" {nameof(FanSpeeds)}: [{string.Join(", ", FanSpeeds)}]," +
-        $" {nameof(Temps)}: [{string.Join(", ", Temps)}]";
+    public override string ToString()
+    {
+        return $"{nameof(Type)}: {Type}," +
+               $" {nameof(FanId)}: {FanId}," +
+               $" {nameof(SensorId)}: {SensorId}," +
+               $" {nameof(FanSpeeds)}: [{string.Join(", ", FanSpeeds)}]," +
+               $" {nameof(Temps)}: [{string.Join(", ", Temps)}]";
+    }
 }
 
 public readonly struct FanTable
@@ -216,7 +275,10 @@ public readonly struct FanTable
         FSS9 = fanTable[9];
     }
 
-    public ushort[] GetTable() => [FSS0, FSS1, FSS2, FSS3, FSS4, FSS5, FSS6, FSS7, FSS8, FSS9];
+    public ushort[] GetTable()
+    {
+        return [FSS0, FSS1, FSS2, FSS3, FSS4, FSS5, FSS6, FSS7, FSS8, FSS9];
+    }
 
     public byte[] GetBytes()
     {
@@ -237,20 +299,22 @@ public readonly struct FanTable
         return ms.ToArray();
     }
 
-    public override string ToString() =>
-        $"{nameof(FSTM)}: {FSTM}," +
-        $" {nameof(FSID)}: {FSID}," +
-        $" {nameof(FSTL)}: {FSTL}," +
-        $" {nameof(FSS0)}: {FSS0}," +
-        $" {nameof(FSS1)}: {FSS1}," +
-        $" {nameof(FSS2)}: {FSS2}," +
-        $" {nameof(FSS3)}: {FSS3}," +
-        $" {nameof(FSS4)}: {FSS4}," +
-        $" {nameof(FSS5)}: {FSS5}," +
-        $" {nameof(FSS6)}: {FSS6}," +
-        $" {nameof(FSS7)}: {FSS7}," +
-        $" {nameof(FSS8)}: {FSS8}," +
-        $" {nameof(FSS9)}: {FSS9}";
+    public override string ToString()
+    {
+        return $"{nameof(FSTM)}: {FSTM}," +
+               $" {nameof(FSID)}: {FSID}," +
+               $" {nameof(FSTL)}: {FSTL}," +
+               $" {nameof(FSS0)}: {FSS0}," +
+               $" {nameof(FSS1)}: {FSS1}," +
+               $" {nameof(FSS2)}: {FSS2}," +
+               $" {nameof(FSS3)}: {FSS3}," +
+               $" {nameof(FSS4)}: {FSS4}," +
+               $" {nameof(FSS5)}: {FSS5}," +
+               $" {nameof(FSS6)}: {FSS6}," +
+               $" {nameof(FSS7)}: {FSS7}," +
+               $" {nameof(FSS8)}: {FSS8}," +
+               $" {nameof(FSS9)}: {FSS9}";
+    }
 }
 
 public readonly struct FanTableInfo(FanTableData[] data, FanTable table)
@@ -258,9 +322,11 @@ public readonly struct FanTableInfo(FanTableData[] data, FanTable table)
     public FanTableData[] Data { get; } = data;
     public FanTable Table { get; } = table;
 
-    public override string ToString() =>
-        $"{nameof(Data)}: [{string.Join(", ", Data)}]," +
-        $" {nameof(Table)}: {Table}";
+    public override string ToString()
+    {
+        return $"{nameof(Data)}: [{string.Join(", ", Data)}]," +
+               $" {nameof(Table)}: {Table}";
+    }
 }
 
 public readonly struct FanSpeedTable(int cpuFanSpeed, int gpuFanSpeed, int pchFanSpeed)
@@ -270,27 +336,54 @@ public readonly struct FanSpeedTable(int cpuFanSpeed, int gpuFanSpeed, int pchFa
     public int PchFanSpeed { get; } = pchFanSpeed;
 }
 
-public readonly struct GPUOverclockInfo(int coreDeltaMhz, int memoryDeltaMhz)
+public readonly struct GPUOverclockInfo(int coreDeltaMhz, int memoryDeltaMhz, int voltageLockMv = 0)
 {
     public static readonly GPUOverclockInfo Zero = new();
 
     public int CoreDeltaMhz { get; } = coreDeltaMhz;
     public int MemoryDeltaMhz { get; } = memoryDeltaMhz;
+    public int VoltageLockMv { get; } = voltageLockMv;
 
     #region Equality
 
-    public override bool Equals(object? obj) => obj is GPUOverclockInfo other && CoreDeltaMhz == other.CoreDeltaMhz && MemoryDeltaMhz == other.MemoryDeltaMhz;
+    public override bool Equals(object? obj)
+    {
+        return obj is GPUOverclockInfo other && 
+               CoreDeltaMhz == other.CoreDeltaMhz &&
+               MemoryDeltaMhz == other.MemoryDeltaMhz &&
+               VoltageLockMv == other.VoltageLockMv;
+    }
 
-    public override int GetHashCode() => HashCode.Combine(CoreDeltaMhz, MemoryDeltaMhz);
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(CoreDeltaMhz, MemoryDeltaMhz, VoltageLockMv);
+    }
 
-    public static bool operator ==(GPUOverclockInfo left, GPUOverclockInfo right) => left.Equals(right);
+    public static bool operator ==(GPUOverclockInfo left, GPUOverclockInfo right)
+    {
+        return left.Equals(right);
+    }
 
-    public static bool operator !=(GPUOverclockInfo left, GPUOverclockInfo right) => !left.Equals(right);
+    public static bool operator !=(GPUOverclockInfo left, GPUOverclockInfo right)
+    {
+        return !left.Equals(right);
+    }
 
     #endregion
 
-    public override string ToString() => $"{nameof(CoreDeltaMhz)}: {CoreDeltaMhz}, {nameof(MemoryDeltaMhz)}: {MemoryDeltaMhz}";
+    public override string ToString()
+    {
+        return $"{nameof(CoreDeltaMhz)}: {CoreDeltaMhz}, {nameof(MemoryDeltaMhz)}: {MemoryDeltaMhz}";
+    }
+}
 
+public readonly struct FakeMachineInformation
+{
+    public string? Manufacturer { get; init; }
+    public string? Model { get; init; }
+    public string? MachineType { get; init; }
+    public string? SerialNumber { get; init; }
+    public string? BiosVersion { get; init; }
 }
 
 public readonly struct GodModeDefaults
@@ -315,21 +408,23 @@ public readonly struct GodModeDefaults
     public FanTable? FanTable { get; init; }
     public bool? FanFullSpeed { get; init; }
 
-    public override string ToString() =>
-        $"{nameof(CPULongTermPowerLimit)}: {CPULongTermPowerLimit}," +
-        $" {nameof(CPUShortTermPowerLimit)}: {CPUShortTermPowerLimit}," +
-        $" {nameof(CPUPeakPowerLimit)}: {CPUPeakPowerLimit}," +
-        $" {nameof(CPUCrossLoadingPowerLimit)}: {CPUCrossLoadingPowerLimit}," +
-        $" {nameof(CPUPL1Tau)}: {CPUPL1Tau}," +
-        $" {nameof(APUsPPTPowerLimit)}: {APUsPPTPowerLimit}," +
-        $" {nameof(CPUTemperatureLimit)}: {CPUTemperatureLimit}," +
-        $" {nameof(GPUPowerBoost)}: {GPUPowerBoost}," +
-        $" {nameof(GPUConfigurableTGP)}: {GPUConfigurableTGP}," +
-        $" {nameof(GPUTemperatureLimit)}: {GPUTemperatureLimit}," +
-        $" {nameof(GPUTotalProcessingPowerTargetOnAcOffsetFromBaseline)}: {GPUTotalProcessingPowerTargetOnAcOffsetFromBaseline}," +
-        $" {nameof(GPUToCPUDynamicBoost)}: {GPUToCPUDynamicBoost}," +
-        $" {nameof(FanTable)}: {FanTable}," +
-        $" {nameof(FanFullSpeed)}: {FanFullSpeed}";
+    public override string ToString()
+    {
+        return $"{nameof(CPULongTermPowerLimit)}: {CPULongTermPowerLimit}," +
+               $" {nameof(CPUShortTermPowerLimit)}: {CPUShortTermPowerLimit}," +
+               $" {nameof(CPUPeakPowerLimit)}: {CPUPeakPowerLimit}," +
+               $" {nameof(CPUCrossLoadingPowerLimit)}: {CPUCrossLoadingPowerLimit}," +
+               $" {nameof(CPUPL1Tau)}: {CPUPL1Tau}," +
+               $" {nameof(APUsPPTPowerLimit)}: {APUsPPTPowerLimit}," +
+               $" {nameof(CPUTemperatureLimit)}: {CPUTemperatureLimit}," +
+               $" {nameof(GPUPowerBoost)}: {GPUPowerBoost}," +
+               $" {nameof(GPUConfigurableTGP)}: {GPUConfigurableTGP}," +
+               $" {nameof(GPUTemperatureLimit)}: {GPUTemperatureLimit}," +
+               $" {nameof(GPUTotalProcessingPowerTargetOnAcOffsetFromBaseline)}: {GPUTotalProcessingPowerTargetOnAcOffsetFromBaseline}," +
+               $" {nameof(GPUToCPUDynamicBoost)}: {GPUToCPUDynamicBoost}," +
+               $" {nameof(FanTable)}: {FanTable}," +
+               $" {nameof(FanFullSpeed)}: {FanFullSpeed}";
+    }
 }
 
 public readonly struct GodModeState
@@ -341,8 +436,6 @@ public readonly struct GodModeState
 public readonly struct GodModePreset
 {
     public string Name { get; init; }
-    public Guid? PowerPlanGuid { get; init; }
-    public WindowsPowerMode? PowerMode { get; init; }
     public StepperValue? CPULongTermPowerLimit { get; init; }
     public StepperValue? CPUShortTermPowerLimit { get; init; }
     public StepperValue? CPUPeakPowerLimit { get; init; }
@@ -365,24 +458,29 @@ public readonly struct GodModePreset
     public int? MinValueOffset { get; init; }
     public int? MaxValueOffset { get; init; }
 
-    public override string ToString() =>
-        $"{nameof(Name)}: {Name}," +
-        $" {nameof(CPULongTermPowerLimit)}: {CPULongTermPowerLimit}," +
-        $" {nameof(CPUShortTermPowerLimit)}: {CPUShortTermPowerLimit}," +
-        $" {nameof(CPUPeakPowerLimit)}: {CPUPeakPowerLimit}," +
-        $" {nameof(CPUCrossLoadingPowerLimit)}: {CPUCrossLoadingPowerLimit}," +
-        $" {nameof(CPUPL1Tau)}: {CPUPL1Tau}," +
-        $" {nameof(APUsPPTPowerLimit)}: {APUsPPTPowerLimit}," +
-        $" {nameof(CPUTemperatureLimit)}: {CPUTemperatureLimit}," +
-        $" {nameof(GPUPowerBoost)}: {GPUPowerBoost}," +
-        $" {nameof(GPUConfigurableTGP)}: {GPUConfigurableTGP}," +
-        $" {nameof(GPUTemperatureLimit)}: {GPUTemperatureLimit}," +
-        $" {nameof(GPUTotalProcessingPowerTargetOnAcOffsetFromBaseline)}: {GPUTotalProcessingPowerTargetOnAcOffsetFromBaseline}," +
-        $" {nameof(GPUToCPUDynamicBoost)}: {GPUToCPUDynamicBoost}," +
-        $" {nameof(FanTableInfo)}: {FanTableInfo}," +
-        $" {nameof(FanFullSpeed)}: {FanFullSpeed}," +
-        $" {nameof(MinValueOffset)}: {MinValueOffset}," +
-        $" {nameof(MaxValueOffset)}: {MaxValueOffset}";
+    public Dictionary<PowerOverrideKey, string> Overrides { get; init; }
+
+    public override string ToString()
+    {
+        return $"{nameof(Name)}: {Name}," +
+               $" {nameof(CPULongTermPowerLimit)}: {CPULongTermPowerLimit}," +
+               $" {nameof(CPUShortTermPowerLimit)}: {CPUShortTermPowerLimit}," +
+               $" {nameof(CPUPeakPowerLimit)}: {CPUPeakPowerLimit}," +
+               $" {nameof(CPUCrossLoadingPowerLimit)}: {CPUCrossLoadingPowerLimit}," +
+               $" {nameof(CPUPL1Tau)}: {CPUPL1Tau}," +
+               $" {nameof(APUsPPTPowerLimit)}: {APUsPPTPowerLimit}," +
+               $" {nameof(CPUTemperatureLimit)}: {CPUTemperatureLimit}," +
+               $" {nameof(GPUPowerBoost)}: {GPUPowerBoost}," +
+               $" {nameof(GPUConfigurableTGP)}: {GPUConfigurableTGP}," +
+               $" {nameof(GPUTemperatureLimit)}: {GPUTemperatureLimit}," +
+               $" {nameof(GPUTotalProcessingPowerTargetOnAcOffsetFromBaseline)}: {GPUTotalProcessingPowerTargetOnAcOffsetFromBaseline}," +
+               $" {nameof(GPUToCPUDynamicBoost)}: {GPUToCPUDynamicBoost}," +
+               $" {nameof(FanTableInfo)}: {FanTableInfo}," +
+               $" {nameof(FanFullSpeed)}: {FanFullSpeed}," +
+               $" {nameof(MinValueOffset)}: {MinValueOffset}," +
+               $" {nameof(MaxValueOffset)}: {MaxValueOffset}," +
+               $" {nameof(Overrides)}: [{string.Join(", ", Overrides?.Select(kv => $"{kv.Key}={kv.Value}") ?? [])}]";
+    }
 }
 
 public readonly struct GPUStatus(GPUState state, string? performanceState, List<Process> processes)
@@ -416,11 +514,20 @@ public readonly struct HardwareId(string vendor, string device)
         return true;
     }
 
-    public override int GetHashCode() => HashCode.Combine(Vendor, Device);
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Vendor, Device);
+    }
 
-    public static bool operator ==(HardwareId left, HardwareId right) => left.Equals(right);
+    public static bool operator ==(HardwareId left, HardwareId right)
+    {
+        return left.Equals(right);
+    }
 
-    public static bool operator !=(HardwareId left, HardwareId right) => !left.Equals(right);
+    public static bool operator !=(HardwareId left, HardwareId right)
+    {
+        return !left.Equals(right);
+    }
 
     #endregion
 }
@@ -435,6 +542,24 @@ public readonly struct HidDeviceConfig(
     public ushort ProductIdMasked { get; } = productIdMasked;
     public ushort ProductIdMask { get; } = productIdMask;
     public ushort DescriptorLength { get; } = descriptorLength;
+}
+
+public readonly struct KeyMap(int width, int height, ushort[,] keyCodes, ushort[] additionalKeyCodes)
+{
+    public static readonly KeyMap Empty = new(0, 0, new ushort[0, 0], []);
+
+    public readonly int Width = width;
+    public readonly int Height = height;
+    public readonly ushort[,] KeyCodes = keyCodes;
+    public readonly ushort[] AdditionalKeyCodes = additionalKeyCodes;
+}
+
+public readonly struct LampArrayInfo(string id, string displayName, LampArray lampArray)
+{
+    public static readonly LampArrayInfo Empty = new();
+    public readonly string Id = id;
+    public readonly string DisplayName = displayName;
+    public readonly LampArray LampArray = lampArray;
 }
 
 public readonly struct MachineInformation
@@ -456,7 +581,9 @@ public readonly struct MachineInformation
 
         public IEnumerable<CapabilityID> All => _capabilities.Order().AsEnumerable();
 
-        public FeatureData(SourceType sourceType) : this(sourceType, []) { }
+        public FeatureData(SourceType sourceType) : this(sourceType, [])
+        {
+        }
 
         public bool this[CapabilityID key]
         {
@@ -473,7 +600,6 @@ public readonly struct MachineInformation
 
     public readonly struct PropertyData
     {
-
         public bool SupportsGodMode => SupportsGodModeV1 || SupportsGodModeV2 || SupportsGodModeV3 || SupportsGodModeV4;
 
         public (bool status, bool connectivity) SupportsAlwaysOnAc { get; init; }
@@ -511,6 +637,19 @@ public readonly struct MachineInformation
     public int LegionZoneVersion { get; init; }
     public FeatureData Features { get; init; }
     public PropertyData Properties { get; init; }
+}
+
+public readonly struct OverclockingProfile
+{
+    public uint? FMax { get; init; }
+    public List<double?> CoreValues { get; init; }
+    public short? PowerLimit1 { get; init; }
+    public short? PowerLimit2 { get; init; }
+    public short? PowerLimit3 { get; init; }
+    public short? EDCSoc { get; init; }
+    public short? EDCVdd { get; init; }
+    public short? TDCSoc { get; init; }
+    public short? TDCVdd { get; init; }
 }
 
 public struct Package
@@ -553,31 +692,69 @@ public readonly struct WindowsPowerPlan(Guid guid, string name, bool isActive)
     public string Name { get; } = name;
     public bool IsActive { get; } = isActive;
 
-    public override string ToString() => $"{nameof(Guid)}: {Guid}, {nameof(Name)}: {Name}, {nameof(IsActive)}: {IsActive}";
+    public override string ToString()
+    {
+        return $"{nameof(Guid)}: {Guid}, {nameof(Name)}: {Name}, {nameof(IsActive)}: {IsActive}";
+    }
 
     #region Equality
 
-    public override bool Equals(object? obj) => obj is WindowsPowerPlan other && Guid.Equals(other.Guid);
+    public override bool Equals(object? obj)
+    {
+        return obj is WindowsPowerPlan other && Guid.Equals(other.Guid);
+    }
 
-    public override int GetHashCode() => Guid.GetHashCode();
+    public override int GetHashCode()
+    {
+        return Guid.GetHashCode();
+    }
 
-    public static bool operator ==(WindowsPowerPlan left, WindowsPowerPlan right) => left.Equals(right);
+    public static bool operator ==(WindowsPowerPlan left, WindowsPowerPlan right)
+    {
+        return left.Equals(right);
+    }
 
-    public static bool operator !=(WindowsPowerPlan left, WindowsPowerPlan right) => !left.Equals(right);
+    public static bool operator !=(WindowsPowerPlan left, WindowsPowerPlan right)
+    {
+        return !left.Equals(right);
+    }
 
     #endregion
+}
+
+public class ProcessEqualityComparer : IEqualityComparer<Process>
+{
+    public bool Equals(Process? x, Process? y)
+    {
+        if (ReferenceEquals(x, y)) return true;
+        if (x is null) return false;
+        if (y is null) return false;
+        if (x.GetType() != y.GetType()) return false;
+        return x.Id == y.Id;
+    }
+
+    public int GetHashCode(Process obj)
+    {
+        return obj.Id;
+    }
 }
 
 [method: JsonConstructor]
 public readonly struct ProcessInfo(string name, string? executablePath) : IComparable
 {
-    public static ProcessInfo FromPath(string path) => new(Path.GetFileNameWithoutExtension(path), path);
+    public static ProcessInfo FromPath(string path)
+    {
+        return new ProcessInfo(Path.GetFileNameWithoutExtension(path), path);
+    }
 
     public string Name { get; } = name;
 
     public string? ExecutablePath { get; } = executablePath;
 
-    public override string ToString() => $"{nameof(Name)}: {Name}, {nameof(ExecutablePath)}: {ExecutablePath}";
+    public override string ToString()
+    {
+        return $"{nameof(Name)}: {Name}, {nameof(ExecutablePath)}: {ExecutablePath}";
+    }
 
     #region Equality
 
@@ -585,24 +762,50 @@ public readonly struct ProcessInfo(string name, string? executablePath) : ICompa
     {
         var other = obj is null ? default : (ProcessInfo)obj;
         var result = string.Compare(Name, other.Name, StringComparison.InvariantCultureIgnoreCase);
-        return result != 0 ? result : string.Compare(ExecutablePath, other.ExecutablePath, StringComparison.InvariantCultureIgnoreCase);
+        return result != 0
+            ? result
+            : string.Compare(ExecutablePath, other.ExecutablePath, StringComparison.InvariantCultureIgnoreCase);
     }
 
-    public override bool Equals(object? obj) => obj is ProcessInfo info && Name == info.Name && ExecutablePath == info.ExecutablePath;
+    public override bool Equals(object? obj)
+    {
+        return obj is ProcessInfo info && Name == info.Name && ExecutablePath == info.ExecutablePath;
+    }
 
-    public override int GetHashCode() => HashCode.Combine(Name, ExecutablePath);
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Name, ExecutablePath);
+    }
 
-    public static bool operator ==(ProcessInfo left, ProcessInfo right) => left.Equals(right);
+    public static bool operator ==(ProcessInfo left, ProcessInfo right)
+    {
+        return left.Equals(right);
+    }
 
-    public static bool operator !=(ProcessInfo left, ProcessInfo right) => !(left == right);
+    public static bool operator !=(ProcessInfo left, ProcessInfo right)
+    {
+        return !(left == right);
+    }
 
-    public static bool operator <(ProcessInfo left, ProcessInfo right) => left.CompareTo(right) < 0;
+    public static bool operator <(ProcessInfo left, ProcessInfo right)
+    {
+        return left.CompareTo(right) < 0;
+    }
 
-    public static bool operator <=(ProcessInfo left, ProcessInfo right) => left.CompareTo(right) <= 0;
+    public static bool operator <=(ProcessInfo left, ProcessInfo right)
+    {
+        return left.CompareTo(right) <= 0;
+    }
 
-    public static bool operator >(ProcessInfo left, ProcessInfo right) => left.CompareTo(right) > 0;
+    public static bool operator >(ProcessInfo left, ProcessInfo right)
+    {
+        return left.CompareTo(right) > 0;
+    }
 
-    public static bool operator >=(ProcessInfo left, ProcessInfo right) => left.CompareTo(right) >= 0;
+    public static bool operator >=(ProcessInfo left, ProcessInfo right)
+    {
+        return left.CompareTo(right) >= 0;
+    }
 
     #endregion
 }
@@ -637,15 +840,27 @@ public readonly struct RGBColor(byte r, byte g, byte b)
         return obj is RGBColor color && R == color.R && G == color.G && B == color.B;
     }
 
-    public override int GetHashCode() => (R, G, B).GetHashCode();
+    public override int GetHashCode()
+    {
+        return (R, G, B).GetHashCode();
+    }
 
-    public static bool operator ==(RGBColor left, RGBColor right) => left.Equals(right);
+    public static bool operator ==(RGBColor left, RGBColor right)
+    {
+        return left.Equals(right);
+    }
 
-    public static bool operator !=(RGBColor left, RGBColor right) => !left.Equals(right);
+    public static bool operator !=(RGBColor left, RGBColor right)
+    {
+        return !left.Equals(right);
+    }
 
     #endregion
 
-    public override string ToString() => $"{nameof(R)}: {R}, {nameof(G)}: {G}, {nameof(B)}: {B}";
+    public override string ToString()
+    {
+        return $"{nameof(R)}: {R}, {nameof(G)}: {G}, {nameof(B)}: {B}";
+    }
 }
 
 [method: JsonConstructor]
@@ -658,7 +873,9 @@ public readonly struct RGBKeyboardBacklightBacklightPresetDescription(
     RGBColor zone3,
     RGBColor zone4)
 {
-    public static readonly RGBKeyboardBacklightBacklightPresetDescription Default = new(RGBKeyboardBacklightEffect.Static, RGBKeyboardBacklightSpeed.Slowest, RGBKeyboardBacklightBrightness.High, RGBColor.White, RGBColor.White, RGBColor.White, RGBColor.White);
+    public static readonly RGBKeyboardBacklightBacklightPresetDescription Default =
+        new(RGBKeyboardBacklightEffect.Static, RGBKeyboardBacklightSpeed.Slowest, RGBKeyboardBacklightBrightness.High,
+            RGBColor.White, RGBColor.White, RGBColor.White, RGBColor.White);
 
     public RGBKeyboardBacklightEffect Effect { get; } = effect;
     public RGBKeyboardBacklightSpeed Speed { get; } = speed;
@@ -682,22 +899,35 @@ public readonly struct RGBKeyboardBacklightBacklightPresetDescription(
                Zone4.Equals(settings.Zone4);
     }
 
-    public override int GetHashCode() => HashCode.Combine(Effect, Speed, Brightness, Zone1, Zone2, Zone3, Zone4);
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Effect, Speed, Brightness, Zone1, Zone2, Zone3, Zone4);
+    }
 
-    public static bool operator ==(RGBKeyboardBacklightBacklightPresetDescription left, RGBKeyboardBacklightBacklightPresetDescription right) => left.Equals(right);
+    public static bool operator ==(RGBKeyboardBacklightBacklightPresetDescription left,
+        RGBKeyboardBacklightBacklightPresetDescription right)
+    {
+        return left.Equals(right);
+    }
 
-    public static bool operator !=(RGBKeyboardBacklightBacklightPresetDescription left, RGBKeyboardBacklightBacklightPresetDescription right) => !(left == right);
+    public static bool operator !=(RGBKeyboardBacklightBacklightPresetDescription left,
+        RGBKeyboardBacklightBacklightPresetDescription right)
+    {
+        return !(left == right);
+    }
 
     #endregion
 
-    public override string ToString() =>
-        $"{nameof(Effect)}: {Effect}," +
-        $" {nameof(Speed)}: {Speed}," +
-        $" {nameof(Brightness)}: {Brightness}," +
-        $" {nameof(Zone1)}: {Zone1}," +
-        $" {nameof(Zone2)}: {Zone2}," +
-        $" {nameof(Zone3)}: {Zone3}," +
-        $" {nameof(Zone4)}: {Zone4}";
+    public override string ToString()
+    {
+        return $"{nameof(Effect)}: {Effect}," +
+               $" {nameof(Speed)}: {Speed}," +
+               $" {nameof(Brightness)}: {Brightness}," +
+               $" {nameof(Zone1)}: {Zone1}," +
+               $" {nameof(Zone2)}: {Zone2}," +
+               $" {nameof(Zone3)}: {Zone3}," +
+               $" {nameof(Zone4)}: {Zone4}";
+    }
 }
 
 [method: JsonConstructor]
@@ -706,7 +936,9 @@ public readonly struct RGBKeyboardBacklightState(
     Dictionary<RGBKeyboardBacklightPreset, RGBKeyboardBacklightBacklightPresetDescription> presets)
 {
     public RGBKeyboardBacklightPreset SelectedPreset { get; } = selectedPreset;
-    public Dictionary<RGBKeyboardBacklightPreset, RGBKeyboardBacklightBacklightPresetDescription> Presets { get; } = presets;
+
+    public Dictionary<RGBKeyboardBacklightPreset, RGBKeyboardBacklightBacklightPresetDescription> Presets { get; } =
+        presets;
 }
 
 public readonly struct SensorData(
@@ -734,17 +966,19 @@ public readonly struct SensorData(
     public int FanSpeed { get; } = fanSpeed;
     public int MaxFanSpeed { get; } = maxFanSpeed;
 
-    public override string ToString() =>
-        $"{nameof(Utilization)}: {Utilization}," +
-        $" {nameof(MaxUtilization)}: {MaxUtilization}," +
-        $" {nameof(CoreClock)}: {CoreClock}," +
-        $" {nameof(MaxCoreClock)}: {MaxCoreClock}," +
-        $" {nameof(MemoryClock)}: {MemoryClock}," +
-        $" {nameof(MaxMemoryClock)}: {MaxMemoryClock}," +
-        $" {nameof(Temperature)}: {Temperature}," +
-        $" {nameof(MaxTemperature)}: {MaxTemperature}," +
-        $" {nameof(FanSpeed)}: {FanSpeed}," +
-        $" {nameof(MaxFanSpeed)}: {MaxFanSpeed}";
+    public override string ToString()
+    {
+        return $"{nameof(Utilization)}: {Utilization}," +
+               $" {nameof(MaxUtilization)}: {MaxUtilization}," +
+               $" {nameof(CoreClock)}: {CoreClock}," +
+               $" {nameof(MaxCoreClock)}: {MaxCoreClock}," +
+               $" {nameof(MemoryClock)}: {MemoryClock}," +
+               $" {nameof(MaxMemoryClock)}: {MaxMemoryClock}," +
+               $" {nameof(Temperature)}: {Temperature}," +
+               $" {nameof(MaxTemperature)}: {MaxTemperature}," +
+               $" {nameof(FanSpeed)}: {FanSpeed}," +
+               $" {nameof(MaxFanSpeed)}: {MaxFanSpeed}";
+    }
 }
 
 public readonly struct SensorsData(SensorData cpu, SensorData gpu, SensorData pch)
@@ -756,7 +990,16 @@ public readonly struct SensorsData(SensorData cpu, SensorData gpu, SensorData pc
 
     public SensorData PCH { get; } = pch;
 
-    public override string ToString() => $"{nameof(CPU)}: {CPU}, {nameof(GPU)}: {GPU}, {nameof(PCH)}: {PCH}";
+    public override string ToString()
+    {
+        return $"{nameof(CPU)}: {CPU}, {nameof(GPU)}: {GPU}, {nameof(PCH)}: {PCH}";
+    }
+}
+
+public readonly struct ShutdownInfo
+{
+    public string Status { get; init; }
+    public int AbnormalCount { get; init; }
 }
 
 [method: JsonConstructor]
@@ -764,20 +1007,34 @@ public readonly struct DpiScale(int scale) : IDisplayName, IEquatable<DpiScale>
 {
     public int Scale { get; } = scale;
 
-    [JsonIgnore]
-    public string DisplayName => $"{Scale}%";
+    [JsonIgnore] public string DisplayName => $"{Scale}%";
 
     #region Equality
 
-    public override bool Equals(object? obj) => obj is DpiScale rate && Equals(rate);
+    public override bool Equals(object? obj)
+    {
+        return obj is DpiScale rate && Equals(rate);
+    }
 
-    public bool Equals(DpiScale other) => Scale == other.Scale;
+    public bool Equals(DpiScale other)
+    {
+        return Scale == other.Scale;
+    }
 
-    public override int GetHashCode() => HashCode.Combine(Scale);
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Scale);
+    }
 
-    public static bool operator ==(DpiScale left, DpiScale right) => left.Equals(right);
+    public static bool operator ==(DpiScale left, DpiScale right)
+    {
+        return left.Equals(right);
+    }
 
-    public static bool operator !=(DpiScale left, DpiScale right) => !(left == right);
+    public static bool operator !=(DpiScale left, DpiScale right)
+    {
+        return !(left == right);
+    }
 
     #endregion
 }
@@ -787,22 +1044,39 @@ public readonly struct RefreshRate(int frequency) : IDisplayName, IEquatable<Ref
 {
     public int Frequency { get; } = frequency;
 
-    [JsonIgnore]
-    public string DisplayName => $"{Frequency} Hz";
+    [JsonIgnore] public string DisplayName => $"{Frequency} Hz";
 
-    public override string ToString() => $"{Frequency}Hz";
+    public override string ToString()
+    {
+        return $"{Frequency}Hz";
+    }
 
     #region Equality
 
-    public override bool Equals(object? obj) => obj is RefreshRate rate && Equals(rate);
+    public override bool Equals(object? obj)
+    {
+        return obj is RefreshRate rate && Equals(rate);
+    }
 
-    public bool Equals(RefreshRate other) => Frequency == other.Frequency;
+    public bool Equals(RefreshRate other)
+    {
+        return Frequency == other.Frequency;
+    }
 
-    public override int GetHashCode() => HashCode.Combine(Frequency);
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Frequency);
+    }
 
-    public static bool operator ==(RefreshRate left, RefreshRate right) => left.Equals(right);
+    public static bool operator ==(RefreshRate left, RefreshRate right)
+    {
+        return left.Equals(right);
+    }
 
-    public static bool operator !=(RefreshRate left, RefreshRate right) => !(left == right);
+    public static bool operator !=(RefreshRate left, RefreshRate right)
+    {
+        return !(left == right);
+    }
 
     #endregion
 }
@@ -810,18 +1084,20 @@ public readonly struct RefreshRate(int frequency) : IDisplayName, IEquatable<Ref
 [method: JsonConstructor]
 public readonly struct Resolution(int width, int height) : IDisplayName, IEquatable<Resolution>, IComparable<Resolution>
 {
-    [JsonProperty]
-    public int Width { get; } = width;
+    [JsonProperty] public int Width { get; } = width;
 
-    [JsonProperty]
-    public int Height { get; } = height;
+    [JsonProperty] public int Height { get; } = height;
 
-    [JsonIgnore]
-    public string DisplayName => $"{Width} × {Height}";
+    [JsonIgnore] public string DisplayName => $"{Width} × {Height}";
 
-    public Resolution(Size size) : this(size.Width, size.Height) { }
+    public Resolution(Size size) : this(size.Width, size.Height)
+    {
+    }
 
-    public override string ToString() => $"{Width}x{Height}";
+    public override string ToString()
+    {
+        return $"{Width}x{Height}";
+    }
 
     public int CompareTo(Resolution other)
     {
@@ -833,26 +1109,46 @@ public readonly struct Resolution(int width, int height) : IDisplayName, IEquata
 
     #region Conversion
 
-    public static explicit operator Resolution(Size value) => new(value);
+    public static explicit operator Resolution(Size value)
+    {
+        return new Resolution(value);
+    }
 
-    public static implicit operator Size(Resolution data) => new(data.Width, data.Height);
+    public static implicit operator Size(Resolution data)
+    {
+        return new Size(data.Width, data.Height);
+    }
 
     #endregion
 
     #region Equality
 
-    public override bool Equals(object? obj) => obj is Resolution other && Equals(other);
+    public override bool Equals(object? obj)
+    {
+        return obj is Resolution other && Equals(other);
+    }
 
-    public bool Equals(Resolution other) => Width == other.Width && Height == other.Height;
+    public bool Equals(Resolution other)
+    {
+        return Width == other.Width && Height == other.Height;
+    }
 
-    public override int GetHashCode() => HashCode.Combine(Width, Height);
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Width, Height);
+    }
 
-    public static bool operator ==(Resolution left, Resolution right) => left.Equals(right);
+    public static bool operator ==(Resolution left, Resolution right)
+    {
+        return left.Equals(right);
+    }
 
-    public static bool operator !=(Resolution left, Resolution right) => !(left == right);
+    public static bool operator !=(Resolution left, Resolution right)
+    {
+        return !(left == right);
+    }
 
     #endregion
-
 }
 
 public readonly struct SpectrumKeyboardBacklightEffect(
@@ -861,7 +1157,8 @@ public readonly struct SpectrumKeyboardBacklightEffect(
     SpectrumKeyboardBacklightDirection direction,
     SpectrumKeyboardBacklightClockwiseDirection clockwiseDirection,
     RGBColor[] colors,
-    ushort[] keys)
+    ushort[] keys,
+    bool useVantageColorBoost = false)
 {
     public SpectrumKeyboardBacklightEffectType Type { get; } = type;
     public SpectrumKeyboardBacklightSpeed Speed { get; } = speed;
@@ -869,6 +1166,7 @@ public readonly struct SpectrumKeyboardBacklightEffect(
     public SpectrumKeyboardBacklightClockwiseDirection ClockwiseDirection { get; } = clockwiseDirection;
     public RGBColor[] Colors { get; } = colors;
     public ushort[] Keys { get; } = type.IsAllLightsEffect() ? [] : keys;
+    public bool UseVantageColorBoost { get; } = useVantageColorBoost;
 }
 
 public readonly struct StepperValue(int value, int min, int max, int step, int[] steps, int? defaultValue)
@@ -880,66 +1178,111 @@ public readonly struct StepperValue(int value, int min, int max, int step, int[]
     public int[] Steps { get; } = steps;
     public int? DefaultValue { get; } = defaultValue;
 
-    public StepperValue WithValue(int value) => new(value, Min, Max, Step, Steps, DefaultValue);
+    public StepperValue WithValue(int value)
+    {
+        return new StepperValue(value, Min, Max, Step, Steps, DefaultValue);
+    }
 
-    public override string ToString() =>
-        $"{nameof(Value)}: {Value}," +
-        $" {nameof(Min)}: {Min}," +
-        $" {nameof(Max)}: {Max}," +
-        $" {nameof(Step)}: {Step}," +
-        $" {nameof(Steps)}: [{string.Join(", ", Steps)}]," +
-        $" {nameof(DefaultValue)} : {DefaultValue}";
+    public override string ToString()
+    {
+        return $"{nameof(Value)}: {Value}," +
+               $" {nameof(Min)}: {Min}," +
+               $" {nameof(Max)}: {Max}," +
+               $" {nameof(Step)}: {Step}," +
+               $" {nameof(Steps)}: [{string.Join(", ", Steps)}]," +
+               $" {nameof(DefaultValue)} : {DefaultValue}";
+    }
 }
 
-public readonly struct Time(int hour, int minute)
+public readonly struct Time(int hour, int minute, int second)
 {
     public int Hour { get; } = hour;
     public int Minute { get; } = minute;
+    public int Second { get; } = second;
 
-    #region Equality
+    #region Equality / Overrides
 
-    public override bool Equals(object? obj) => obj is Time time && Hour == time.Hour && Minute == time.Minute;
+    public override bool Equals(object? obj)
+    {
+        return obj is Time time && Hour == time.Hour && Minute == time.Minute && Second == time.Second;
+    }
 
-    public override int GetHashCode() => HashCode.Combine(Hour, Minute);
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Hour, Minute, Second);
+    }
 
-    public static bool operator ==(Time left, Time right) => left.Equals(right);
+    public static bool operator ==(Time left, Time right)
+    {
+        return left.Equals(right);
+    }
 
-    public static bool operator !=(Time left, Time right) => !(left == right);
+    public static bool operator !=(Time left, Time right)
+    {
+        return !(left == right);
+    }
+
+    public override string ToString()
+    {
+        return $"{Hour}:{Minute}:{Second}";
+    }
 
     #endregion
 }
 
 public readonly struct Update(Release release)
 {
-    public Version Version { get; } = Version.Parse(release.TagName.TrimStart('v'));
+    public Version Version { get; } = ParseVersion(release.TagName);
     public string Title { get; } = release.Name;
     public string Description { get; } = release.Body;
     public DateTimeOffset Date { get; } = release.PublishedAt ?? release.CreatedAt;
+
     public string? Url { get; } = release.Assets
-        .Where(ra => ra.Name.EndsWith("setup.exe", StringComparison.InvariantCultureIgnoreCase))
+        .Where(ra => ra.Name.StartsWith("LenovoLegionToolkitSetup", StringComparison.InvariantCultureIgnoreCase) &&
+                     ra.Name.EndsWith(".exe", StringComparison.InvariantCultureIgnoreCase))
         .Select(ra => ra.BrowserDownloadUrl)
         .FirstOrDefault();
 
     #region Equality
 
-    public override bool Equals(object? obj) => obj is Update other && Version.Equals(other.Version);
+    public override bool Equals(object? obj)
+    {
+        return obj is Update other && Version.Equals(other.Version);
+    }
 
-    public override int GetHashCode() => Version.GetHashCode();
+    public override int GetHashCode()
+    {
+        return Version.GetHashCode();
+    }
 
-    public static bool operator ==(Update left, Update right) => left.Equals(right);
+    public static bool operator ==(Update left, Update right)
+    {
+        return left.Equals(right);
+    }
 
-    public static bool operator !=(Update left, Update right) => !left.Equals(right);
+    public static bool operator !=(Update left, Update right)
+    {
+        return !left.Equals(right);
+    }
 
     #endregion
-}
 
-public struct UpdateFromServer(ProjectInfo projectInfo)
-{
-    public Version Version { get; } = Version.Parse(projectInfo.ProjectNewVersion);
-    public string Title { get; } = "LenovoLegionToolkit Updates available.";
-    public string Description { get; } = "Temporarly empty.";
-    public DateTimeOffset Date { get; } = DateTimeOffset.Now;
-    public string? Url { get; } = "http://kaguya.net.cn:9999/LenovoLegionToolkit/LenovoLegionToolkitSetup.exe";
+    private static Version ParseVersion(string tagName)
+    {
+        var normalized = tagName.TrimStart('v', 'V');
+        if (Version.TryParse(normalized, out var version))
+            return version;
+
+        var numericPart = new string(normalized
+                .TakeWhile(c => char.IsDigit(c) || c == '.')
+                .ToArray())
+            .Trim('.');
+
+        if (Version.TryParse(numericPart, out version))
+            return version;
+
+        throw new FormatException($"Invalid release tag format: {tagName}");
+    }
 }
 
 public readonly struct WarrantyInfo(DateTime? start, DateTime? end, Uri? link)
@@ -955,6 +1298,12 @@ public readonly struct WindowSize(double width, double height)
     public double Height { get; } = height;
 }
 
+public readonly struct WindowPosition(double left, double top)
+{
+    public double Left { get; } = left;
+    public double Top { get; } = top;
+}
+
 public struct ProjectEntry()
 {
     public bool MaintenanceMode { get; set; } = false;
@@ -962,6 +1311,7 @@ public struct ProjectEntry()
     public string ProjectCurrentVersion { get; set; } = string.Empty;
     public string ProjectVersion { get; set; } = string.Empty;
     public bool ProjectForceUpdate { get; set; } = false;
+    public string DownloadUrl { get; set; } = string.Empty;
 
     public bool IsValid()
     {
@@ -973,12 +1323,53 @@ public struct ProjectEntry()
 
 public struct ProjectInfo
 {
-    public ProjectInfo() { }
-    public string ProjectName { get; set; } = String.Empty;
-    public string ProjectExeName { get; set; } = String.Empty;
-    public string ProjectAuthor { get; set; } = String.Empty;
-    public string ProjectCurrentVersion { get; set; } = String.Empty;
-    public string ProjectCurrentExePath { get; set; } = String.Empty;
-    public string ProjectNewExePath { get; set; } = String.Empty;
-    public string ProjectNewVersion { get; set; } = String.Empty;
+    public ProjectInfo()
+    {
+    }
+
+    public string ProjectName { get; set; } = string.Empty;
+    public string ProjectExeName { get; set; } = string.Empty;
+    public string ProjectAuthor { get; set; } = string.Empty;
+    public string ProjectCurrentVersion { get; set; } = string.Empty;
+    public string ProjectCurrentExePath { get; set; } = string.Empty;
+    public string ProjectNewExePath { get; set; } = string.Empty;
+    public string ProjectNewVersion { get; set; } = string.Empty;
+}
+
+public struct UpdateFromServer(ProjectInfo projectInfo, string patchNote)
+{
+    public Version Version { get; set; } = Version.Parse(projectInfo.ProjectNewVersion);
+    public string Title { get; set; } = "LenovoLegionToolkit Updates available.";
+    public string Description { get; set; } = patchNote;
+    public DateTimeOffset Date { get; set; } = DateTimeOffset.Now;
+    public string? Url = projectInfo.ProjectNewExePath;
+}
+
+public sealed record HardwareSensorSnapshot
+{
+    public float CpuTemp { get; init; } = -1;
+    public float CpuUsage { get; init; } = -1;
+    public float CpuPower { get; init; } = -1;
+    public float CpuMaxClock { get; init; } = -1;
+    public float CpuAvgClock { get; init; } = -1;
+    public float CpuPClock { get; init; } = -1;
+    public float CpuPAvgClock { get; init; } = -1;
+    public float CpuEClock { get; init; } = -1;
+    public float CpuEAvgClock { get; init; } = -1;
+
+    public float GpuUsage { get; init; } = -1;
+    public float GpuTemp { get; init; } = -1;
+    public float GpuClock { get; init; } = -1;
+    public float GpuPower { get; init; } = -1;
+    public float GpuVramTemp { get; init; } = -1;
+    public float GpuVramUtilization { get; init; } = -1;
+    public float GpuVramUsed { get; init; } = -1;
+    public float GpuVramTotal { get; init; } = -1;
+
+    public float MemUsage { get; init; } = -1;
+    public float MemUsed { get; init; } = -1;
+    public float MemTotal { get; init; } = -1;
+    public double MemMaxTemp { get; init; } = -1;
+
+    public (float, float) SsdTemps { get; init; } = (-1, -1);
 }

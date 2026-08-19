@@ -1,7 +1,7 @@
 ﻿using System;
-using Microsoft.Win32.SafeHandles;
 using Windows.Win32;
 using Windows.Win32.Storage.FileSystem;
+using Microsoft.Win32.SafeHandles;
 
 namespace LenovoLegionToolkit.Lib.System;
 
@@ -14,6 +14,7 @@ public static class Drivers
     public const uint IOCTL_ENERGY_KEYBOARD = 0x83102144;
     public const uint IOCTL_KEY_WAIT_HANDLE = 0x831020D8;
     public const uint IOCTL_KEY_VALUE = 0x831020CC;
+    public const uint IOCTL_DYTC = 0x831E003C;
 
     private static readonly object Lock = new();
 

@@ -50,7 +50,11 @@ public class AutomationEnvironment
 
     public bool LidOpen { set => _dictionary[LID_OPEN] = value ? VALUE_TRUE : VALUE_FALSE; }
 
-    public bool Startup { set => _dictionary[STARTUP] = value ? VALUE_TRUE : VALUE_FALSE; }
+    public bool Startup
+    {
+        get => _dictionary.TryGetValue(STARTUP, out var val) && val == VALUE_TRUE;
+        set => _dictionary[STARTUP] = value ? VALUE_TRUE : VALUE_FALSE;
+    }
 
     public bool Resume { set => _dictionary[RESUME] = value ? VALUE_TRUE : VALUE_FALSE; }
 
@@ -139,7 +143,7 @@ public class AutomationEnvironment
 
     public bool IsSunrise { set => _dictionary[IS_SUNRISE] = value ? VALUE_TRUE : VALUE_FALSE; }
 
-    public Time? Time { set => _dictionary[TIME] = value is null ? null : $"{value.Value.Hour}:{value.Value.Minute}"; }
+    public Time? Time { set => _dictionary[TIME] = value is null ? null : $"{value.Value.Hour}:{value.Value.Minute}.{value.Value.Second}"; }
 
     public DayOfWeek[] Days { set => _dictionary[DAYS] = value.Length < 1 ? null : string.Join(",", value.Select(v => v.ToString().ToUpperInvariant())); }
 

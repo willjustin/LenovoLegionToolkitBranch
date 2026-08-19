@@ -1,11 +1,13 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using LenovoLegionToolkit.Lib.Controllers;
 using LenovoLegionToolkit.Lib.Controllers.GodMode;
 using LenovoLegionToolkit.Lib.Extensions;
 using LenovoLegionToolkit.Lib.Messaging;
 using LenovoLegionToolkit.Lib.Messaging.Messages;
+using LenovoLegionToolkit.Lib.Overclocking.Amd;
 using LenovoLegionToolkit.Lib.System.Management;
+using LenovoLegionToolkit.Lib.Utils;
 
 namespace LenovoLegionToolkit.Lib.Listeners;
 
@@ -40,6 +42,12 @@ public class PowerModeListener(
         RaiseChanged(value);
     }
 
+    protected override async Task<bool> CanStartAsync()
+    {
+        var mi = await Compatibility.GetMachineInformationAsync().ConfigureAwait(false);
+        return Compatibility.IsLegion(mi.LegionSeries);
+    }
+
     private async Task ChangeDependenciesAsync(PowerModeState value)
     {
         if (value is PowerModeState.GodMode)
@@ -47,6 +55,22 @@ public class PowerModeListener(
 
         await windowsPowerModeController.SetPowerModeAsync(value).ConfigureAwait(false);
         await windowsPowerPlanController.SetPowerPlanAsync(value).ConfigureAwait(false);
+
+        var gpuOverclockController = IoCContainer.Resolve<GPUOverclockController>();
+        if (await gpuOverclockController.IsSupportedAsync().ConfigureAwait(false))
+        {
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+                await gpuOverclockController.EnsureOverclockIsAppliedAsync().ConfigureAwait(false);
+            });
+        }
+
+        var amdOverclockingController = IoCContainer.Resolve<AmdOverclockingController>();
+        if (amdOverclockingController.IsActive() && !amdOverclockingController.AllowInAllPowerModes)
+        {
+            await amdOverclockingController.ApplyDefaultProfileAsync().ConfigureAwait(false);
+        }
     }
 
     private static void PublishNotification(PowerModeState value)

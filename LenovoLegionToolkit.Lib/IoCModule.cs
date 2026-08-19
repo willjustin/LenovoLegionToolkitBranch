@@ -1,4 +1,4 @@
-﻿using Autofac;
+using Autofac;
 using LenovoLegionToolkit.Lib.AutoListeners;
 using LenovoLegionToolkit.Lib.Controllers;
 using LenovoLegionToolkit.Lib.Controllers.GodMode;
@@ -14,12 +14,16 @@ using LenovoLegionToolkit.Lib.Features.PanelLogo;
 using LenovoLegionToolkit.Lib.Features.WhiteKeyboardBacklight;
 using LenovoLegionToolkit.Lib.Integrations;
 using LenovoLegionToolkit.Lib.Listeners;
+using LenovoLegionToolkit.Lib.Overclocking.Amd;
 using LenovoLegionToolkit.Lib.PackageDownloader;
 using LenovoLegionToolkit.Lib.Services;
 using LenovoLegionToolkit.Lib.Settings;
 using LenovoLegionToolkit.Lib.SoftwareDisabler;
 using LenovoLegionToolkit.Lib.Utils;
 using LenovoLegionToolkit.Lib.Utils.Warranty;
+
+using LenovoLegionToolkit.Lib.Scripting;
+using LenovoLegionToolkit.Lib.System;
 
 namespace LenovoLegionToolkit.Lib;
 
@@ -35,15 +39,21 @@ public class IoCModule : Module
         builder.Register<VantageDisabler>();
 
         builder.Register<ApplicationSettings>();
+        builder.Register<NotificationSettings>();
         builder.Register<BalanceModeSettings>();
+        builder.Register<OsdSettings>();
         builder.Register<GodModeSettings>();
         builder.Register<GPUOverclockSettings>();
+        builder.Register<AmdOverclockingSettings>().SingleInstance();
         builder.Register<IntegrationsSettings>();
         builder.Register<PackageDownloaderSettings>();
         builder.Register<RGBKeyboardSettings>();
         builder.Register<SpectrumKeyboardSettings>();
         builder.Register<SunriseSunsetSettings>();
-        builder.Register<UpdateCheckSettings>();
+        builder.Register<UpdateSettings>();
+        builder.Register<LampArraySettings>();
+        builder.Register<SpecialKeySettings>();
+        builder.Register<ITSModeSettings>();
 
         builder.Register<AlwaysOnUSBFeature>();
         builder.Register<BatteryFeature>();
@@ -55,6 +65,7 @@ public class IoCModule : Module
         builder.Register<FnLockFeature>();
         builder.Register<GSyncFeature>();
         builder.Register<HDRFeature>();
+        builder.Register<BiosHybridModeFeature>(true);
         builder.Register<HybridModeFeature>();
         builder.Register<IGPUModeFeature>();
         builder.Register<IGPUModeCapabilityFeature>(true);
@@ -64,6 +75,7 @@ public class IoCModule : Module
         builder.Register<InstantBootFeature>();
         builder.Register<InstantBootFeatureFlagsFeature>(true);
         builder.Register<InstantBootCapabilityFeature>(true);
+        builder.Register<HardwareSensorsFeature>();
         builder.Register<MicrophoneFeature>();
         builder.Register<OneLevelWhiteKeyboardBacklightFeature>();
         builder.Register<OverDriveFeature>();
@@ -90,18 +102,21 @@ public class IoCModule : Module
 
         builder.Register<DisplayBrightnessListener>().AutoActivateListener();
         builder.Register<DisplayConfigurationListener>().AutoActivateListener();
-        builder.Register<DriverKeyListener>().AutoActivateListener();
+        builder.Register<DriverKeyListener>().SingleInstance().AutoActivateListener();
         builder.Register<LightingChangeListener>().AutoActivateListener();
         builder.Register<NativeWindowsMessageListener>().AutoActivateListener();
         builder.Register<PowerModeListener>().AutoActivateListener();
         builder.Register<PowerStateListener>().AutoActivateListener();
         builder.Register<RGBKeyboardBacklightListener>().AutoActivateListener();
         builder.Register<SessionLockUnlockListener>().AutoActivateListener();
-        builder.Register<SpecialKeyListener>().AutoActivateListener();
+        builder.Register<SpecialKeyListener>().SingleInstance().AutoActivateListener();
         builder.Register<SystemThemeListener>().AutoActivateListener();
         builder.Register<ThermalModeListener>().AutoActivateListener();
         builder.Register<WinKeyListener>().AutoActivateListener();
+        builder.Register<ITSModeListener>().AutoActivateListener();
+        builder.Register<VolumeListener>().AutoActivateListener();
 
+        builder.Register<BatteryAutoListener>();
         builder.Register<GameAutoListener>();
         builder.Register<InstanceStartedEventAutoAutoListener>();
         builder.Register<InstanceStoppedEventAutoAutoListener>();
@@ -120,7 +135,9 @@ public class IoCModule : Module
         builder.Register<GPUController>();
         builder.Register<GPUOverclockController>();
         builder.Register<RGBKeyboardBacklightController>();
+        builder.Register<LampArrayController>();
         builder.Register<SensorsController>();
+        builder.Register<SensorsControllerV0>(true);
         builder.Register<SensorsControllerV1>(true);
         builder.Register<SensorsControllerV2>(true);
         builder.Register<SensorsControllerV3>(true);
@@ -145,5 +162,10 @@ public class IoCModule : Module
         builder.Register<SunriseSunset>();
 
         builder.Register<BatteryDischargeRateMonitorService>();
+        builder.Register<DgpuAwakeManager>().SingleInstance().AutoActivate();
+
+        builder.Register<AmdOverclockingController>();
+
+        builder.Register<ScriptEngine>().SingleInstance();
     }
 }

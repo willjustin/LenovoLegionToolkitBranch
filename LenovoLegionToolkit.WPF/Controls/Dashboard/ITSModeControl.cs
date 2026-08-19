@@ -1,15 +1,16 @@
-﻿using LenovoLegionToolkit.Lib;
-using LenovoLegionToolkit.Lib.Extensions;
-using LenovoLegionToolkit.Lib.Features;
-using LenovoLegionToolkit.Lib.Utils;
-using LenovoLegionToolkit.WPF.Resources;
-using LenovoLegionToolkit.WPF.Utils;
-using LenovoLegionToolkit.WPF.Windows.Utils;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
+using LenovoLegionToolkit.Lib;
+using LenovoLegionToolkit.Lib.Extensions;
+using LenovoLegionToolkit.Lib.Features;
+using LenovoLegionToolkit.Lib.Listeners;
+using LenovoLegionToolkit.Lib.Utils;
+using LenovoLegionToolkit.WPF.Resources;
+using LenovoLegionToolkit.WPF.Utils;
+using LenovoLegionToolkit.WPF.Windows.Utils;
 using Wpf.Ui.Common;
 using Button = Wpf.Ui.Controls.Button;
 
@@ -18,6 +19,7 @@ namespace LenovoLegionToolkit.WPF.Controls.Dashboard;
 public class ITSModeControl : AbstractComboBoxFeatureCardControl<ITSMode>
 {
     private readonly ITSModeFeature _itsModeFeature = IoCContainer.Resolve<ITSModeFeature>();
+    private readonly ITSModeListener _iTSModeListener = IoCContainer.Resolve<ITSModeListener>();
 
     private readonly Button _configButton = new()
     {
@@ -36,11 +38,26 @@ public class ITSModeControl : AbstractComboBoxFeatureCardControl<ITSMode>
         AutomationProperties.SetName(_configButton, Resource.ITSModeControl_Title);
 
         IsVisibleChanged += ITSModeControl_IsVisibleChanged;
+        _iTSModeListener.Changed += ITSModeListener_Changed;
+    }
+
+    private async void ITSModeListener_Changed(object? sender, ITSModeListener.ChangedEventArgs e)
+    {
+        await Dispatcher.InvokeAsync(async () =>
+        {
+            if (IsLoaded && IsVisible)
+                await RefreshAsync();
+        });
     }
 
     private async void ITSModeControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
-        ITSMode mode = ITSMode.None;
+        if (!await _itsModeFeature.IsSupportedAsync().ConfigureAwait(false))
+        {
+            return;
+        }
+
+        ITSMode mode;
         if (_itsModeFeature.LastItsMode == ITSMode.None)
         {
             mode = await _itsModeFeature.GetStateAsync();
@@ -57,6 +74,8 @@ public class ITSModeControl : AbstractComboBoxFeatureCardControl<ITSMode>
         _comboBox.SelectedItem = mode;
     }
 
+    protected override string ComboBoxItemDisplayName(ITSMode value) => _itsModeFeature.GetITSModeDisplayName(value);
+
     protected override async Task OnStateChangeAsync(ComboBox comboBox, IFeature<ITSMode> feature, ITSMode? newValue, ITSMode? oldValue)
     {
         if (newValue == null || oldValue == null)
@@ -64,22 +83,8 @@ public class ITSModeControl : AbstractComboBoxFeatureCardControl<ITSMode>
 
         if (newValue.Value != oldValue.Value)
         {
-            try
-            {
-                await _itsModeFeature.SetStateAsync(newValue.Value);
-                _itsModeFeature.LastItsMode = newValue.Value;
-            }
-            catch (DllNotFoundException)
-            {
-                var dialog = new DialogWindow
-                {
-                    Title = Resource.ITSModeControl_Dialog_Title,
-                    Content = Resource.ITSModeControl_Dialog_Message,
-                    Owner = App.Current.MainWindow
-                };
-
-                dialog.ShowDialog();
-            }
+            await _itsModeFeature.SetStateAsync(newValue.Value);
+            await _iTSModeListener.NotifyAsync(newValue.Value);
         }
 
         await base.OnStateChangeAsync(comboBox, feature, newValue, oldValue);

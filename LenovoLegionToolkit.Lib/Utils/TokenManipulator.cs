@@ -1,7 +1,7 @@
 ﻿using System.Linq;
-using Microsoft.Win32.SafeHandles;
 using Windows.Win32;
 using Windows.Win32.Security;
+using Microsoft.Win32.SafeHandles;
 
 namespace LenovoLegionToolkit.Lib.Utils;
 
@@ -47,6 +47,6 @@ public static class TokenManipulator
             Attributes = enable ? TOKEN_PRIVILEGES_ATTRIBUTES.SE_PRIVILEGE_ENABLED : 0
         };
 
-        return PInvoke.AdjustTokenPrivileges(safeTokenHandle, false, &state, 0, null, null);
+        return PInvoke.AdjustTokenPrivileges(new Windows.Win32.Foundation.HANDLE(safeTokenHandle.DangerousGetHandle()), false, &state, 0, null, null);
     }
 }

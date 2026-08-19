@@ -1,4 +1,9 @@
-﻿using LenovoLegionToolkit.Lib;
+﻿using System;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Controls;
+using LenovoLegionToolkit.Lib;
 using LenovoLegionToolkit.Lib.Controllers.Sensors;
 using LenovoLegionToolkit.Lib.Extensions;
 using LenovoLegionToolkit.Lib.Features;
@@ -10,11 +15,6 @@ using LenovoLegionToolkit.Lib.Utils;
 using LenovoLegionToolkit.WPF.Resources;
 using LenovoLegionToolkit.WPF.Utils;
 using LenovoLegionToolkit.WPF.Windows.Dashboard;
-using System;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Automation;
-using System.Windows.Controls;
 using Wpf.Ui.Common;
 using Wpf.Ui.Controls;
 using Button = Wpf.Ui.Controls.Button;
@@ -25,6 +25,12 @@ public static class HybridModeControlFactory
 {
     public static async Task<AbstractRefreshingControl> GetControlAsync()
     {
+        BiosHybridModeFeature biosHybridMode = IoCContainer.Resolve<BiosHybridModeFeature>();
+        if (await biosHybridMode.IsSupportedAsync())
+        {
+            return new ComboBoxHybridModeControl();
+        }
+
         var mi = await Compatibility.GetMachineInformationAsync();
         return mi.Properties.SupportsIGPUMode
             ? new ComboBoxHybridModeControl()
@@ -75,7 +81,7 @@ public static class HybridModeControlFactory
             if (newValue is null || oldValue is null)
                 return;
 
-            var reboot = (newValue == HybridModeState.Off || oldValue == HybridModeState.Off) && await MessageBoxHelper.ShowAsync(this,
+            var reboot = (newValue == HybridModeState.Off || oldValue == HybridModeState.Off || newValue == HybridModeState.UMA || oldValue == HybridModeState.UMA) && await MessageBoxHelper.ShowAsync(this,
                     Resource.ComboBoxHybridModeControl_RestartRequired_Title,
                     string.Format(Resource.ComboBoxHybridModeControl_RestartRequired_Message, newValue.GetDisplayName()),
                     Resource.RestartNow,
@@ -120,16 +126,21 @@ public static class HybridModeControlFactory
             if (e)
             {
                 SnackbarHelper.Show(Resource.DGPU_Connected_Title, type: SnackbarType.Info);
-                var feature = IoCContainer.Resolve<ApplicationSettings>();
-                if (feature.Store.UseNewSensorDashboard)
-                {
-                    var controller = IoCContainer.Resolve<SensorsGroupController>();
-                    controller.NeedRefreshHardware("NvidiaGPU");
-                }
             }
             else
             {
                 SnackbarHelper.Show(Resource.DGPU_Disconnected_Title, type: SnackbarType.Info);
+            }
+
+            var feature = IoCContainer.Resolve<ApplicationSettings>();
+            if (feature.Store.EnableHardwareSensors)
+            {
+                var controller = IoCContainer.Resolve<SensorsGroupController>();
+                controller.IsDgpuConnected = e;
+                if (e)
+                {
+                    controller.NeedRefreshHardware("NvidiaGPU");
+                }
             }
         });
 

@@ -19,7 +19,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
     // 类通过类似于 ResGen 或 Visual Studio 的工具自动生成的。
     // 若要添加或移除成员，请编辑 .ResX 文件，然后重新运行 ResGen
     // (以 /str 作为命令选项)，或重新生成 VS 项目。
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class Resource {
@@ -70,7 +70,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Lenovo Legion Toolkit (Unofficial Fork) 的本地化字符串。
+        ///   查找类似 Lenovo Legion Toolkit 的本地化字符串。
         /// </summary>
         public static string AboutPage_AppName {
             get {
@@ -205,6 +205,15 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Multiple steps... 的本地化字符串。
+        /// </summary>
+        public static string AddAutomationStepWindow_MultipleSteps {
+            get {
+                return ResourceManager.GetString("AddAutomationStepWindow_MultipleSteps", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Add step 的本地化字符串。
         /// </summary>
         public static string AddAutomationStepWindow_Title {
@@ -219,6 +228,15 @@ namespace LenovoLegionToolkit.WPF.Resources {
         public static string AddNew {
             get {
                 return ResourceManager.GetString("AddNew", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Airplane mode 的本地化字符串。
+        /// </summary>
+        public static string AirplaneModeAutomationStepControl_Title {
+            get {
+                return ResourceManager.GetString("AirplaneModeAutomationStepControl_Title", resourceCulture);
             }
         }
         
@@ -259,6 +277,312 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Apply Curve Optimizer and advanced options over all power mode. 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_AllowInAllPowerModes_Message {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_AllowInAllPowerModes_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Allow in all power modes 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_AllowInAllPowerModes_Title {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_AllowInAllPowerModes_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Apply Curve Optimizer and advanced options even when running on battery power. 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_AllowOnBattery_Message {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_AllowOnBattery_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Allow on battery 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_AllowOnBattery_Title {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_AllowOnBattery_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Apply Changes 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_Apply_Changes {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_Apply_Changes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Changing these settings may impact system stability. Proceed with caution. 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_Caution_Message {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_Caution_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Caution 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_Caution_Title {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_Caution_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Core 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_Core_Title {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_Core_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Current Limits 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_CurrentLimits {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_CurrentLimits", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Profile apply has been canceled due to abnormal restart. 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_Do_Not_Apply_Message {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_Do_Not_Apply_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 EDC SoC 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_EDC_SoC {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_EDC_SoC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 EDC VDD 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_EDC_VDD {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_EDC_VDD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Enable AMD overclocking features. 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_Enable_Message {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_Enable_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Enable AMD Overclocking 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_Enable_Title {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_Enable_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Maximum CPU boost frequency override (MHz). 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_FMax_Frequency_Message {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_FMax_Frequency_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 FMax Frequency 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_FMax_Frequency_Title {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_FMax_Frequency_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 -1 All 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_Global_Dim {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_Global_Dim", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Global Offset: 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_Global_Offset {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_Global_Offset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 +1 All 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_Global_Plus {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_Global_Plus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Per-Core Optimization 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_Per_Core_Title {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_Per_Core_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Power Limit (Long) 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_PowerLimit_Long {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_PowerLimit_Long", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Power Limit (Peak) 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_PowerLimit_Peak {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_PowerLimit_Peak", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Power Limit (Short) 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_PowerLimit_Short {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_PowerLimit_Short", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Power Limits 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_PowerLimits {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_PowerLimits", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Status 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_Status_Title {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_Status_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Settings applied successfully. 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_Success_Message {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_Success_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Success 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_Success_Title {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_Success_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Advanced 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_Tab_Advanced {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_Tab_Advanced", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Curve Optimizer 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_Tab_CurveOptimizer {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_Tab_CurveOptimizer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Settings 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_Tab_Settings {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_Tab_Settings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 TDC SoC 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_TDC_SoC {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_TDC_SoC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 TDC VDD 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_TDC_VDD {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_TDC_VDD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Disable CCD 1 to get stability on both FPS and temperatures. 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_X3D_Gaming_Mode_Message {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_X3D_Gaming_Mode_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 X3D Gaming Mode 的本地化字符串。
+        /// </summary>
+        public static string AmdOverclocking_X3D_Gaming_Mode_Title {
+            get {
+                return ResourceManager.GetString("AmdOverclocking_X3D_Gaming_Mode_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Apply 的本地化字符串。
         /// </summary>
         public static string Apply {
@@ -282,6 +606,231 @@ namespace LenovoLegionToolkit.WPF.Resources {
         public static string AppName {
             get {
                 return ResourceManager.GetString("AppName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Debugging 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Category_Debugging {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Category_Debugging", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 General 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Category_General {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Category_General", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Hardware &amp; Automation 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Category_Hardware_Automation {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Category_Hardware_Automation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Lighting 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Category_Lighting {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Category_Lighting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Network Proxy 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Category_Network_Proxy {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Category_Network_Proxy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Allow All Certificates 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Flag_AllowAllCerts {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Flag_AllowAllCerts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Allow All Power Modes on Battery 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Flag_AllowPowerModesBattery {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Flag_AllowPowerModesBattery", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Debug Mode 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Flag_DebugMode {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Flag_DebugMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Disable Conflict Warning 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Flag_DisableConflictWarning {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Flag_DisableConflictWarning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Disable Lenovo Lighting 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Flag_DisableLenovoLighting {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Flag_DisableLenovoLighting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Disable RGB Keyboard 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Flag_DisableRgbKb {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Flag_DisableRgbKb", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Disable Spectrum Keyboard 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Flag_DisableSpectrumKb {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Flag_DisableSpectrumKb", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Disable Tray Tooltip 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Flag_DisableTrayTooltip {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Flag_DisableTrayTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Disable Update Checker 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Flag_DisableUpdateChecker {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Flag_DisableUpdateChecker", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Enable Lamp Array 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Flag_EnableLampArray {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Flag_EnableLampArray", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Experimental GPU Working Mode 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Flag_ExpGpuMode {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Flag_ExpGpuMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Proxy Password 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Flag_ProxyPassword {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Flag_ProxyPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Proxy URL 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Flag_ProxyUrl {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Flag_ProxyUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Proxy Username 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Flag_ProxyUsername {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Flag_ProxyUsername", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Skip Compatibility Check 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Flag_SkipCompatCheck {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Flag_SkipCompatCheck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Start Minimized 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Flag_StartMinimized {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Flag_StartMinimized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Enable Trace Logging 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Flag_TraceEnabled {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Flag_TraceEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Not Set 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_NotSet {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_NotSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Argument Window 的本地化字符串。
+        /// </summary>
+        public static string ArgumentWindow_Title {
+            get {
+                return ResourceManager.GetString("ArgumentWindow_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Supported: {0} / Available: {1} 的本地化字符串。
+        /// </summary>
+        public static string Automation_SupportedAvailableCount {
+            get {
+                return ResourceManager.GetString("Automation_SupportedAvailableCount", resourceCulture);
             }
         }
         
@@ -355,6 +904,60 @@ namespace LenovoLegionToolkit.WPF.Resources {
         public static string AutomationPage_ChangeIcon {
             get {
                 return ResourceManager.GetString("AutomationPage_ChangeIcon", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Automatic (All Methods) 的本地化字符串。
+        /// </summary>
+        public static string AutomationPage_Game_Detection_Method_Auto {
+            get {
+                return ResourceManager.GetString("AutomationPage_Game_Detection_Method_Auto", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Discrete GPU Activity 的本地化字符串。
+        /// </summary>
+        public static string AutomationPage_Game_Detection_Method_Discrete_GPU {
+            get {
+                return ResourceManager.GetString("AutomationPage_Game_Detection_Method_Discrete_GPU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Windows Game Mode 的本地化字符串。
+        /// </summary>
+        public static string AutomationPage_Game_Detection_Method_Game_Mode {
+            get {
+                return ResourceManager.GetString("AutomationPage_Game_Detection_Method_Game_Mode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Known Game List 的本地化字符串。
+        /// </summary>
+        public static string AutomationPage_Game_Detection_Method_List {
+            get {
+                return ResourceManager.GetString("AutomationPage_Game_Detection_Method_List", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Configure detection methods and exclusions. 的本地化字符串。
+        /// </summary>
+        public static string AutomationPage_Game_Detection_Sub_Title {
+            get {
+                return ResourceManager.GetString("AutomationPage_Game_Detection_Sub_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Game Detection 的本地化字符串。
+        /// </summary>
+        public static string AutomationPage_Game_Detection_Title {
+            get {
+                return ResourceManager.GetString("AutomationPage_Game_Detection_Title", resourceCulture);
             }
         }
         
@@ -476,7 +1079,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Do not execute further actions when this action runs. 的本地化字符串。
+        ///   查找类似 When checked, stops further automations from running after this one. 的本地化字符串。
         /// </summary>
         public static string AutomationPipelineControl_Exclusive_ToolTip {
             get {
@@ -539,6 +1142,24 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Run on startup 的本地化字符串。
+        /// </summary>
+        public static string AutomationPipelineControl_RunOnStartup {
+            get {
+                return ResourceManager.GetString("AutomationPipelineControl_RunOnStartup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 When enabled, this automation will check and apply when the app starts 的本地化字符串。
+        /// </summary>
+        public static string AutomationPipelineControl_RunOnStartup_Tooltip {
+            get {
+                return ResourceManager.GetString("AutomationPipelineControl_RunOnStartup_Tooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 {0} step 的本地化字符串。
         /// </summary>
         public static string AutomationPipelineControl_Step {
@@ -593,11 +1214,20 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 At {0:D2}:{1:D2} 的本地化字符串。
+        ///   查找类似 At {0:D2}:{1:D2}:{2:D2} 的本地化字符串。
         /// </summary>
         public static string AutomationPipelineControl_SubtitlePart_AtTime {
             get {
                 return ResourceManager.GetString("AutomationPipelineControl_SubtitlePart_AtTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 GPU Working Mode 的本地化字符串。
+        /// </summary>
+        public static string AutomationPipelineControl_SubtitlePart_HybridMode {
+            get {
+                return ResourceManager.GetString("AutomationPipelineControl_SubtitlePart_HybridMode", resourceCulture);
             }
         }
         
@@ -634,6 +1264,15 @@ namespace LenovoLegionToolkit.WPF.Resources {
         public static string AutomationPipelineTriggerConfigurationWindow_Title {
             get {
                 return ResourceManager.GetString("AutomationPipelineTriggerConfigurationWindow_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Back 的本地化字符串。
+        /// </summary>
+        public static string Back {
+            get {
+                return ResourceManager.GetString("Back", resourceCulture);
             }
         }
         
@@ -751,15 +1390,6 @@ namespace LenovoLegionToolkit.WPF.Resources {
         public static string BatteryPage_ACAdapterConnectedNotCharging {
             get {
                 return ResourceManager.GetString("BatteryPage_ACAdapterConnectedNotCharging", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 No AC 的本地化字符串。
-        /// </summary>
-        public static string BatteryPage_ACAdapterNotConnected {
-            get {
-                return ResourceManager.GetString("BatteryPage_ACAdapterNotConnected", resourceCulture);
             }
         }
         
@@ -926,6 +1556,15 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Current charge 的本地化字符串。
+        /// </summary>
+        public static string BatteryPage_LiveCharge_Title {
+            get {
+                return ResourceManager.GetString("BatteryPage_LiveCharge_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Battery level low 的本地化字符串。
         /// </summary>
         public static string BatteryPage_LowLevel {
@@ -1026,6 +1665,42 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Goes above 的本地化字符串。
+        /// </summary>
+        public static string BatteryPercentageAutomationPipelineTriggerTabItemContent_Above {
+            get {
+                return ResourceManager.GetString("BatteryPercentageAutomationPipelineTriggerTabItemContent_Above", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Goes below 的本地化字符串。
+        /// </summary>
+        public static string BatteryPercentageAutomationPipelineTriggerTabItemContent_Below {
+            get {
+                return ResourceManager.GetString("BatteryPercentageAutomationPipelineTriggerTabItemContent_Below", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Percentage 的本地化字符串。
+        /// </summary>
+        public static string BatteryPercentageAutomationPipelineTriggerTabItemContent_Percentage {
+            get {
+                return ResourceManager.GetString("BatteryPercentageAutomationPipelineTriggerTabItemContent_Percentage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 BIOS version 的本地化字符串。
+        /// </summary>
+        public static string BiosVersion {
+            get {
+                return ResourceManager.GetString("BiosVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Customize 的本地化字符串。
         /// </summary>
         public static string BootLogoWindow_Customize {
@@ -1053,12 +1728,21 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Custom boot logo must be exactly {0} pixels large.
+        ///   查找类似 Custom boot logo must within {0} pixels large.
         ///Supported formats are: {1}. 的本地化字符串。
         /// </summary>
         public static string BootLogoWindow_Description {
             get {
                 return ResourceManager.GetString("BootLogoWindow_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Disable Windows Startup Animation 的本地化字符串。
+        /// </summary>
+        public static string BootLogoWindow_Disable_Windows_Animation {
+            get {
+                return ResourceManager.GetString("BootLogoWindow_Disable_Windows_Animation", resourceCulture);
             }
         }
         
@@ -1200,18 +1884,18 @@ namespace LenovoLegionToolkit.WPF.Resources {
         /// <summary>
         ///   查找类似 Close the Lenovo Legion Toolkit 的本地化字符串。
         /// </summary>
-        public static string CloseAutomationStepControl_Message {
+        public static string CloseAppAutomationStepControl_Message {
             get {
-                return ResourceManager.GetString("CloseAutomationStepControl_Message", resourceCulture);
+                return ResourceManager.GetString("CloseAppAutomationStepControl_Message", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   查找类似 Close 的本地化字符串。
+        ///   查找类似 Close App 的本地化字符串。
         /// </summary>
-        public static string CloseAutomationStepControl_Title {
+        public static string CloseAppAutomationStepControl_Title {
             get {
-                return ResourceManager.GetString("CloseAutomationStepControl_Title", resourceCulture);
+                return ResourceManager.GetString("CloseAppAutomationStepControl_Title", resourceCulture);
             }
         }
         
@@ -1243,8 +1927,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Select GPU operating mode based on your computer&apos;s usage and power conditions.
-        ///Switching modes may require restart. 的本地化字符串。
+        ///   查找类似 Select GPU operating mode based on your computer&apos;s usage and power conditions. 的本地化字符串。
         /// </summary>
         public static string ComboBoxHybridModeAutomationStepControl_Message {
             get {
@@ -1308,29 +1991,11 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Quick Actions 的本地化字符串。
-        /// </summary>
-        public static string ContextMenu_QuickActions {
-            get {
-                return ResourceManager.GetString("ContextMenu_QuickActions", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Continue 的本地化字符串。
         /// </summary>
         public static string Continue {
             get {
                 return ResourceManager.GetString("Continue", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Text copied to clipboard. 的本地化字符串。
-        /// </summary>
-        public static string CopiedToClipboard_Message {
-            get {
-                return ResourceManager.GetString("CopiedToClipboard_Message", resourceCulture);
             }
         }
         
@@ -1362,6 +2027,24 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Cores 的本地化字符串。
+        /// </summary>
+        public static string Cores {
+            get {
+                return ResourceManager.GetString("Cores", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 CPU 的本地化字符串。
+        /// </summary>
+        public static string CPU {
+            get {
+                return ResourceManager.GetString("CPU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Create 的本地化字符串。
         /// </summary>
         public static string Create {
@@ -1376,6 +2059,33 @@ namespace LenovoLegionToolkit.WPF.Resources {
         public static string CreateAutomationPipelineWindow_Title {
             get {
                 return ResourceManager.GetString("CreateAutomationPipelineWindow_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Customize 的本地化字符串。
+        /// </summary>
+        public static string Customize {
+            get {
+                return ResourceManager.GetString("Customize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Cycle through available Custom Mode presets. 的本地化字符串。
+        /// </summary>
+        public static string CycleGodModePresetAutomationStepControl_Message {
+            get {
+                return ResourceManager.GetString("CycleGodModePresetAutomationStepControl_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Cycle Custom Mode preset 的本地化字符串。
+        /// </summary>
+        public static string CycleGodModePresetAutomationStepControl_Title {
+            get {
+                return ResourceManager.GetString("CycleGodModePresetAutomationStepControl_Title", resourceCulture);
             }
         }
         
@@ -1452,9 +2162,16 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Disable discrete GPU if it is active unnecessarily.
-        ///
-        ///WARNING: This action will not run correctly, if internal display is off or Hybrid mode is not active. 的本地化字符串。
+        ///   查找类似 Days remaining 的本地化字符串。
+        /// </summary>
+        public static string DaysRemaining {
+            get {
+                return ResourceManager.GetString("DaysRemaining", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Disable discrete GPU if it is active unnecessarily. 的本地化字符串。
         /// </summary>
         public static string DeactivateGPUAutomationStepControl_Message {
             get {
@@ -1508,11 +2225,11 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Deselect all 的本地化字符串。
+        ///   查找类似 Device 的本地化字符串。
         /// </summary>
-        public static string DeselectAll {
+        public static string Device {
             get {
-                return ResourceManager.GetString("DeselectAll", resourceCulture);
+                return ResourceManager.GetString("Device", resourceCulture);
             }
         }
         
@@ -1544,24 +2261,6 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 BIOS version 的本地化字符串。
-        /// </summary>
-        public static string DeviceInformationWindow_BiosVersion_Title {
-            get {
-                return ResourceManager.GetString("DeviceInformationWindow_BiosVersion_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Device 的本地化字符串。
-        /// </summary>
-        public static string DeviceInformationWindow_Device_Title {
-            get {
-                return ResourceManager.GetString("DeviceInformationWindow_Device_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Lenovo Support 的本地化字符串。
         /// </summary>
         public static string DeviceInformationWindow_LenovoSupport {
@@ -1571,83 +2270,11 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Machine Type 的本地化字符串。
-        /// </summary>
-        public static string DeviceInformationWindow_MachineType_Title {
-            get {
-                return ResourceManager.GetString("DeviceInformationWindow_MachineType_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Manufacturer 的本地化字符串。
-        /// </summary>
-        public static string DeviceInformationWindow_Manufacturer_Title {
-            get {
-                return ResourceManager.GetString("DeviceInformationWindow_Manufacturer_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Model 的本地化字符串。
-        /// </summary>
-        public static string DeviceInformationWindow_Model_Title {
-            get {
-                return ResourceManager.GetString("DeviceInformationWindow_Model_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Refresh 的本地化字符串。
-        /// </summary>
-        public static string DeviceInformationWindow_Refresh {
-            get {
-                return ResourceManager.GetString("DeviceInformationWindow_Refresh", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Serial number 的本地化字符串。
-        /// </summary>
-        public static string DeviceInformationWindow_SerialNumber_Title {
-            get {
-                return ResourceManager.GetString("DeviceInformationWindow_SerialNumber_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 About your device 的本地化字符串。
         /// </summary>
         public static string DeviceInformationWindow_Title {
             get {
                 return ResourceManager.GetString("DeviceInformationWindow_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Warranty 的本地化字符串。
-        /// </summary>
-        public static string DeviceInformationWindow_Warranty_Title {
-            get {
-                return ResourceManager.GetString("DeviceInformationWindow_Warranty_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 End date 的本地化字符串。
-        /// </summary>
-        public static string DeviceInformationWindow_WarrantyEndDate_Title {
-            get {
-                return ResourceManager.GetString("DeviceInformationWindow_WarrantyEndDate_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Start date 的本地化字符串。
-        /// </summary>
-        public static string DeviceInformationWindow_WarrantyStartDate_Title {
-            get {
-                return ResourceManager.GetString("DeviceInformationWindow_WarrantyStartDate_Title", resourceCulture);
             }
         }
         
@@ -1679,20 +2306,65 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Don&apos;t show again. 的本地化字符串。
-        /// </summary>
-        public static string DialogWindow_DontShowAgain {
-            get {
-                return ResourceManager.GetString("DialogWindow_DontShowAgain", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Deactivate 的本地化字符串。
         /// </summary>
         public static string DiscreteGPUControl_Deactivate {
             get {
                 return ResourceManager.GetString("DiscreteGPUControl_Deactivate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Manage active processes by changing their graphics preferences, right-click to forcefully terminate them, or configure advanced settings. 的本地化字符串。
+        /// </summary>
+        public static string DiscreteGPUControl_FooterMessage {
+            get {
+                return ResourceManager.GetString("DiscreteGPUControl_FooterMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Force Kill Process 的本地化字符串。
+        /// </summary>
+        public static string DiscreteGPUControl_ForceKillProcessMenu {
+            get {
+                return ResourceManager.GetString("DiscreteGPUControl_ForceKillProcessMenu", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Graphics Preferences 的本地化字符串。
+        /// </summary>
+        public static string DiscreteGPUControl_GraphicsPreferencesTabLabel {
+            get {
+                return ResourceManager.GetString("DiscreteGPUControl_GraphicsPreferencesTabLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Maintains an active connection to the discrete GPU to prevent stuttering. 的本地化字符串。
+        /// </summary>
+        public static string DiscreteGPUControl_KeepDgpuAwakeDescription {
+            get {
+                return ResourceManager.GetString("DiscreteGPUControl_KeepDgpuAwakeDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 This increases power consumption and reduces battery life. 的本地化字符串。
+        /// </summary>
+        public static string DiscreteGPUControl_KeepDgpuAwakeInfo {
+            get {
+                return ResourceManager.GetString("DiscreteGPUControl_KeepDgpuAwakeInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Keep dGPU awake 的本地化字符串。
+        /// </summary>
+        public static string DiscreteGPUControl_KeepDgpuAwakeTitle {
+            get {
+                return ResourceManager.GetString("DiscreteGPUControl_KeepDgpuAwakeTitle", resourceCulture);
             }
         }
         
@@ -1706,11 +2378,47 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Wait time before refreshing the apps list after terminating a process. 的本地化字符串。
+        /// </summary>
+        public static string DiscreteGPUControl_KillProcessDelayDescription {
+            get {
+                return ResourceManager.GetString("DiscreteGPUControl_KillProcessDelayDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Force Kill Refresh Delay 的本地化字符串。
+        /// </summary>
+        public static string DiscreteGPUControl_KillProcessDelayTitle {
+            get {
+                return ResourceManager.GetString("DiscreteGPUControl_KillProcessDelayTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Discrete GPU Management 的本地化字符串。
+        /// </summary>
+        public static string DiscreteGPUControl_ManagementWindowTitle {
+            get {
+                return ResourceManager.GetString("DiscreteGPUControl_ManagementWindowTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Disable discrete GPU, if it is active unnecessarily. 的本地化字符串。
         /// </summary>
         public static string DiscreteGPUControl_Message {
             get {
                 return ResourceManager.GetString("DiscreteGPUControl_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Miscellaneous 的本地化字符串。
+        /// </summary>
+        public static string DiscreteGPUControl_MiscellaneousTabLabel {
+            get {
+                return ResourceManager.GetString("DiscreteGPUControl_MiscellaneousTabLabel", resourceCulture);
             }
         }
         
@@ -1751,6 +2459,51 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 How often to check the discrete GPU for active processes. 的本地化字符串。
+        /// </summary>
+        public static string DiscreteGPUControl_PollingIntervalDescription {
+            get {
+                return ResourceManager.GetString("DiscreteGPUControl_PollingIntervalDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Polling Interval 的本地化字符串。
+        /// </summary>
+        public static string DiscreteGPUControl_PollingIntervalTitle {
+            get {
+                return ResourceManager.GetString("DiscreteGPUControl_PollingIntervalTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Let Windows decide 的本地化字符串。
+        /// </summary>
+        public static string DiscreteGPUControl_PreferenceDefault {
+            get {
+                return ResourceManager.GetString("DiscreteGPUControl_PreferenceDefault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Discrete GPU 的本地化字符串。
+        /// </summary>
+        public static string DiscreteGPUControl_PreferenceDiscrete {
+            get {
+                return ResourceManager.GetString("DiscreteGPUControl_PreferenceDiscrete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Integrated GPU 的本地化字符串。
+        /// </summary>
+        public static string DiscreteGPUControl_PreferenceIntegrated {
+            get {
+                return ResourceManager.GetString("DiscreteGPUControl_PreferenceIntegrated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Processes 的本地化字符串。
         /// </summary>
         public static string DiscreteGPUControl_Processes {
@@ -1769,6 +2522,24 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Wait time before starting the discrete GPU monitoring service. 的本地化字符串。
+        /// </summary>
+        public static string DiscreteGPUControl_StartupDelayDescription {
+            get {
+                return ResourceManager.GetString("DiscreteGPUControl_StartupDelayDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Startup Delay 的本地化字符串。
+        /// </summary>
+        public static string DiscreteGPUControl_StartupDelayTitle {
+            get {
+                return ResourceManager.GetString("DiscreteGPUControl_StartupDelayTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Discrete GPU 的本地化字符串。
         /// </summary>
         public static string DiscreteGPUControl_Title {
@@ -1778,9 +2549,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Change display brightness of the built-in display.
-        ///
-        ///WARNING: This action will not run correctly, if internal display is off. 的本地化字符串。
+        ///   查找类似 Change display brightness of the built-in display. 的本地化字符串。
         /// </summary>
         public static string DisplayBrightnessAutomationStepControl_Message {
             get {
@@ -1798,24 +2567,94 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Donate with 的本地化字符串。
+        ///   查找类似 Displays 的本地化字符串。
         /// </summary>
-        public static string DonatePage_DonateWith {
+        public static string Displays {
             get {
-                return ResourceManager.GetString("DonatePage_DonateWith", resourceCulture);
+                return ResourceManager.GetString("Displays", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   查找类似 Development and maintenance of Lenovo Legion Toolkit takes a lot of time. If you like using this software you can support its future by donating an amount of your choice.
+        ///   查找类似 Bartosz created Lenovo Legion Toolkit and authored the foundational architecture that powers every feature in the application today. 的本地化字符串。
+        /// </summary>
+        public static string DonatePage_Bartosz_Description {
+            get {
+                return ResourceManager.GetString("DonatePage_Bartosz_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Original Creator 的本地化字符串。
+        /// </summary>
+        public static string DonatePage_Bartosz_Role {
+            get {
+                return ResourceManager.GetString("DonatePage_Bartosz_Role", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Even if you can&apos;t donate, simply using, sharing, and starring the project on GitHub goes a long way. Every bit of support is genuinely appreciated 的本地化字符串。
+        /// </summary>
+        public static string DonatePage_BottomMessage {
+            get {
+                return ResourceManager.GetString("DonatePage_BottomMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Responsible for core feature development, quality assurance, UI/UX design, and overall project direction as the current project lead. 的本地化字符串。
+        /// </summary>
+        public static string DonatePage_DrSkinner_Description {
+            get {
+                return ResourceManager.GetString("DonatePage_DrSkinner_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Core Developer &amp; Project Lead 的本地化字符串。
+        /// </summary>
+        public static string DonatePage_DrSkinner_Role {
+            get {
+                return ResourceManager.GetString("DonatePage_DrSkinner_Role", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Specializes in hardware research and reverse engineering, with contributions spanning core feature development and low-level system integration. 的本地化字符串。
+        /// </summary>
+        public static string DonatePage_Kaguya_Description {
+            get {
+                return ResourceManager.GetString("DonatePage_Kaguya_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Core Developer &amp; Reverser 的本地化字符串。
+        /// </summary>
+        public static string DonatePage_Kaguya_Role {
+            get {
+                return ResourceManager.GetString("DonatePage_Kaguya_Role", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Development and maintenance of Lenovo Legion Toolkit takes a lot of time and effort. If you enjoy using this software, you can support its future by sponsoring the authors who make it possible.
         ///
-        ///Click the PayPal logo below or scan the QR code to donate with PayPal.
-        ///
-        ///Thanks in advance! 的本地化字符串。
+        ///Thank you for your support! 的本地化字符串。
         /// </summary>
         public static string DonatePage_Message {
             get {
                 return ResourceManager.GetString("DonatePage_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Sponsor 的本地化字符串。
+        /// </summary>
+        public static string DonatePage_Sponsor {
+            get {
+                return ResourceManager.GetString("DonatePage_Sponsor", resourceCulture);
             }
         }
         
@@ -1829,9 +2668,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Change scaling of the built-in display.
-        ///
-        ///WARNING: This action will not run correctly, if internal display is off. 的本地化字符串。
+        ///   查找类似 Change scaling of the built-in display. 的本地化字符串。
         /// </summary>
         public static string DpiScaleAutomationStepControl_Message {
             get {
@@ -1948,6 +2785,51 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 End date 的本地化字符串。
+        /// </summary>
+        public static string EndDate {
+            get {
+                return ResourceManager.GetString("EndDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Error 的本地化字符串。
+        /// </summary>
+        public static string Error {
+            get {
+                return ResourceManager.GetString("Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Processes in this list will be ignored by game start/stop triggers and Lenovo&apos;s AI/Intelligent Mode. Enter the process name without the path (e.g., &quot;discord&quot; or &quot;blender&quot;). 的本地化字符串。
+        /// </summary>
+        public static string ExcludeProcessesWindow_Description {
+            get {
+                return ResourceManager.GetString("ExcludeProcessesWindow_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Process Name (e.g. discord) 的本地化字符串。
+        /// </summary>
+        public static string ExcludeProcessesWindow_ProcessNamePlaceholder {
+            get {
+                return ResourceManager.GetString("ExcludeProcessesWindow_ProcessNamePlaceholder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Excluded Processes 的本地化字符串。
+        /// </summary>
+        public static string ExcludeProcessesWindow_Title {
+            get {
+                return ResourceManager.GetString("ExcludeProcessesWindow_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Uncheck refresh rates that you do not want to use when Fn+R shortcut is used. 的本地化字符串。
         /// </summary>
         public static string ExcludeRefreshRatesWindow_Description {
@@ -1989,6 +2871,15 @@ namespace LenovoLegionToolkit.WPF.Resources {
         public static string Exit {
             get {
                 return ResourceManager.GetString("Exit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Expired 的本地化字符串。
+        /// </summary>
+        public static string Expired {
+            get {
+                return ResourceManager.GetString("Expired", resourceCulture);
             }
         }
         
@@ -2164,6 +3055,24 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Set fan to maximum speed. 的本地化字符串。
+        /// </summary>
+        public static string FanMaxSpeedAutomationStepControl_Message {
+            get {
+                return ResourceManager.GetString("FanMaxSpeedAutomationStepControl_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Fan Max Speed 的本地化字符串。
+        /// </summary>
+        public static string FanMaxSpeedAutomationStepControl_Title {
+            get {
+                return ResourceManager.GetString("FanMaxSpeedAutomationStepControl_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Filter... 的本地化字符串。
         /// </summary>
         public static string Filter {
@@ -2209,195 +3118,6 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Chipset 的本地化字符串。
-        /// </summary>
-        public static string FloatingGadget_Custom_Chipset {
-            get {
-                return ResourceManager.GetString("FloatingGadget_Custom_Chipset", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 CPU 的本地化字符串。
-        /// </summary>
-        public static string FloatingGadget_Custom_CPU {
-            get {
-                return ResourceManager.GetString("FloatingGadget_Custom_CPU", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Game 的本地化字符串。
-        /// </summary>
-        public static string FloatingGadget_Custom_Game {
-            get {
-                return ResourceManager.GetString("FloatingGadget_Custom_Game", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 GPU 的本地化字符串。
-        /// </summary>
-        public static string FloatingGadget_Custom_GPU {
-            get {
-                return ResourceManager.GetString("FloatingGadget_Custom_GPU", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Simple 的本地化字符串。
-        /// </summary>
-        public static string FloatingGadget_Style_Simple {
-            get {
-                return ResourceManager.GetString("FloatingGadget_Style_Simple", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Show or Hide the Floating Gadget 的本地化字符串。
-        /// </summary>
-        public static string FloatingGadgetAutomationStepControl_Message {
-            get {
-                return ResourceManager.GetString("FloatingGadgetAutomationStepControl_Message", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Floating Gadget 的本地化字符串。
-        /// </summary>
-        public static string FloatingGadgetAutomationStepControl_Title {
-            get {
-                return ResourceManager.GetString("FloatingGadgetAutomationStepControl_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Chipset 的本地化字符串。
-        /// </summary>
-        public static string FloatingGadgets_Chipset {
-            get {
-                return ResourceManager.GetString("FloatingGadgets_Chipset", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 CPU 的本地化字符串。
-        /// </summary>
-        public static string FloatingGadgets_Cpu {
-            get {
-                return ResourceManager.GetString("FloatingGadgets_Cpu", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 CPU Fan 的本地化字符串。
-        /// </summary>
-        public static string FloatingGadgets_CPU_Fan {
-            get {
-                return ResourceManager.GetString("FloatingGadgets_CPU_Fan", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Disk 1 Temperature 的本地化字符串。
-        /// </summary>
-        public static string FloatingGadgets_Disk_0_Temperature {
-            get {
-                return ResourceManager.GetString("FloatingGadgets_Disk_0_Temperature", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Disk 2 Temperature 的本地化字符串。
-        /// </summary>
-        public static string FloatingGadgets_Disk_1_Temperature {
-            get {
-                return ResourceManager.GetString("FloatingGadgets_Disk_1_Temperature", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Fans 的本地化字符串。
-        /// </summary>
-        public static string FloatingGadgets_Fans {
-            get {
-                return ResourceManager.GetString("FloatingGadgets_Fans", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 FPS 的本地化字符串。
-        /// </summary>
-        public static string FloatingGadgets_Fps {
-            get {
-                return ResourceManager.GetString("FloatingGadgets_Fps", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Frame Time 的本地化字符串。
-        /// </summary>
-        public static string FloatingGadgets_Frame_Time {
-            get {
-                return ResourceManager.GetString("FloatingGadgets_Frame_Time", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 GPU 的本地化字符串。
-        /// </summary>
-        public static string FloatingGadgets_Gpu {
-            get {
-                return ResourceManager.GetString("FloatingGadgets_Gpu", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 GPU Fan 的本地化字符串。
-        /// </summary>
-        public static string FloatingGadgets_GPU_Fan {
-            get {
-                return ResourceManager.GetString("FloatingGadgets_GPU_Fan", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 1% Low 的本地化字符串。
-        /// </summary>
-        public static string FloatingGadgets_Low_Fps {
-            get {
-                return ResourceManager.GetString("FloatingGadgets_Low_Fps", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Memory Temperature 的本地化字符串。
-        /// </summary>
-        public static string FloatingGadgets_Memory_Temperature {
-            get {
-                return ResourceManager.GetString("FloatingGadgets_Memory_Temperature", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Memory Utilization 的本地化字符串。
-        /// </summary>
-        public static string FloatingGadgets_Memory_Utilization {
-            get {
-                return ResourceManager.GetString("FloatingGadgets_Memory_Utilization", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 PCH Fan 的本地化字符串。
-        /// </summary>
-        public static string FloatingGadgets_PCH_Fan {
-            get {
-                return ResourceManager.GetString("FloatingGadgets_PCH_Fan", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Use secondary functions of F1-F12 keys without holding Fn key. 的本地化字符串。
         /// </summary>
         public static string FnLockAutomationStepControl_Message {
@@ -2434,6 +3154,24 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 GB 的本地化字符串。
+        /// </summary>
+        public static string GB {
+            get {
+                return ResourceManager.GetString("GB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Generation 的本地化字符串。
+        /// </summary>
+        public static string Generation {
+            get {
+                return ResourceManager.GetString("Generation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 GHz 的本地化字符串。
         /// </summary>
         public static string GHz {
@@ -2443,8 +3181,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Activate Custom Mode preset.
-        ///This settings takes effect only when Custom Mode is enabled. 的本地化字符串。
+        ///   查找类似 Apply a specific Custom Mode preset. 的本地化字符串。
         /// </summary>
         public static string GodModePresetAutomationStepControl_Message {
             get {
@@ -2676,6 +3413,19 @@ namespace LenovoLegionToolkit.WPF.Resources {
         public static string GodModeSettingsWindow_CPU_Title {
             get {
                 return ResourceManager.GetString("GodModeSettingsWindow_CPU_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Custom Mode grants access to critical system parameters such as power limits and fan curves. 
+        ///
+        ///Misconfiguration can lead to severe system instability, thermal throttling, or permanent hardware damage. Modifications made here may void your manufacturer warranty. 
+        ///
+        ///Do not proceed unless you possess the necessary technical expertise. 的本地化字符串。
+        /// </summary>
+        public static string GodModeSettingsWindow_CustomMode_Warning {
+            get {
+                return ResourceManager.GetString("GodModeSettingsWindow_CustomMode_Warning", resourceCulture);
             }
         }
         
@@ -2972,9 +3722,43 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Enable high dynamic range (HDR) on the built-in display.
-        ///
-        ///WARNING: This action will not run correctly if the internal display is off. 的本地化字符串。
+        ///   查找类似 GPU 的本地化字符串。
+        /// </summary>
+        public static string GPU {
+            get {
+                return ResourceManager.GetString("GPU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Hardware Features 的本地化字符串。
+        /// </summary>
+        public static string HardwareFeatures {
+            get {
+                return ResourceManager.GetString("HardwareFeatures", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Enable or disable background polling for hardware sensors. 的本地化字符串。
+        /// </summary>
+        public static string HardwareSensorsAutomationStepControl_Message {
+            get {
+                return ResourceManager.GetString("HardwareSensorsAutomationStepControl_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Hardware Sensors 的本地化字符串。
+        /// </summary>
+        public static string HardwareSensorsAutomationStepControl_Title {
+            get {
+                return ResourceManager.GetString("HardwareSensorsAutomationStepControl_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Enable high dynamic range (HDR) on the built-in display. 的本地化字符串。
         /// </summary>
         public static string HDRAutomationStepControl_Message {
             get {
@@ -3033,6 +3817,33 @@ namespace LenovoLegionToolkit.WPF.Resources {
         public static string HideAll {
             get {
                 return ResourceManager.GetString("HideAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Hz 的本地化字符串。
+        /// </summary>
+        public static string Hz {
+            get {
+                return ResourceManager.GetString("Hz", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Icon 的本地化字符串。
+        /// </summary>
+        public static string Icon {
+            get {
+                return ResourceManager.GetString("Icon", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Icon color 的本地化字符串。
+        /// </summary>
+        public static string IconColor {
+            get {
+                return ResourceManager.GetString("IconColor", resourceCulture);
             }
         }
         
@@ -3110,15 +3921,6 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 This device is not compatible with Lenovo Legion Toolkit. 的本地化字符串。
-        /// </summary>
-        public static string IncompatibleDevice_Message {
-            get {
-                return ResourceManager.GetString("IncompatibleDevice_Message", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Information 的本地化字符串。
         /// </summary>
         public static string Information {
@@ -3178,24 +3980,6 @@ namespace LenovoLegionToolkit.WPF.Resources {
         public static string ITSModeAutomationStepControl_Title {
             get {
                 return ResourceManager.GetString("ITSModeAutomationStepControl_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 PowerBattery.dll is missing. Please place it manually to use ITSMode feature. 的本地化字符串。
-        /// </summary>
-        public static string ITSModeControl_Dialog_Message {
-            get {
-                return ResourceManager.GetString("ITSModeControl_Dialog_Message", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Missing Compoment 的本地化字符串。
-        /// </summary>
-        public static string ITSModeControl_Dialog_Title {
-            get {
-                return ResourceManager.GetString("ITSModeControl_Dialog_Title", resourceCulture);
             }
         }
         
@@ -3265,11 +4049,398 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Add Custom Key 的本地化字符串。
+        /// </summary>
+        public static string KeyDiscovery_AddCustomKey {
+            get {
+                return ResourceManager.GetString("KeyDiscovery_AddCustomKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Added 的本地化字符串。
+        /// </summary>
+        public static string KeyDiscovery_Added {
+            get {
+                return ResourceManager.GetString("KeyDiscovery_Added", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Code: {0} 的本地化字符串。
+        /// </summary>
+        public static string KeyDiscovery_CodeText {
+            get {
+                return ResourceManager.GetString("KeyDiscovery_CodeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Known key 的本地化字符串。
+        /// </summary>
+        public static string KeyDiscovery_KnownKeyTooltip {
+            get {
+                return ResourceManager.GetString("KeyDiscovery_KnownKeyTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Listening for key presses... Press ESC to stop. 的本地化字符串。
+        /// </summary>
+        public static string KeyDiscovery_Listening {
+            get {
+                return ResourceManager.GetString("KeyDiscovery_Listening", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Unknown key – can be added 的本地化字符串。
+        /// </summary>
+        public static string KeyDiscovery_UnknownKeyTooltip {
+            get {
+                return ResourceManager.GetString("KeyDiscovery_UnknownKeyTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Aft Ambient 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Aft_Ambient {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Aft_Ambient", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 All 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_All {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_All", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Aurora Sync 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Aurora_Sync {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Aurora_Sync", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Bottom to Top 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Bottom_to_Top {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Bottom_to_Top", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Breathe 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Breathe {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Breathe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Brightness 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Brightness {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Brightness", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Clear Colors 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Clear_Colors {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Clear_Colors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Custom 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Custom {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Custom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Direction 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Direction {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Direction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Effect 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Effect {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Effect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Export Profile 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Export_Profile {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Export_Profile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Gradient 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Gradient {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Gradient", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Import Profile 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Import_Profile {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Import_Profile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Keyboard 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Keyboard {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Keyboard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Left to Right 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Left_to_Right {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Left_to_Right", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Meteor 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Meteor {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Meteor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 No Selection 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_No_Selection {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_No_Selection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 None 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_None {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_None", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Probe Indices 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Probe_Indices {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Probe_Indices", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Rainbow 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Rainbow {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Rainbow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Rainbow Wave 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Rainbow_Wave {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Rainbow_Wave", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Rear Ambient 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Rear_Ambient {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Rear_Ambient", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Right to Left 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Right_to_Left {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Right_to_Left", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Ripple 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Ripple {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Ripple", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Selected {0} keys with {1} effect 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Selected_Key {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Selected_Key", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Selection 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Selection {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Selection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Smooth Transition 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Smooth_Transition {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Smooth_Transition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Sparkle 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Sparkle {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Sparkle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Speed 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Speed {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Speed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Spiral Rainbow 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Spiral_Rainbow {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Spiral_Rainbow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Static 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Static {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Static", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Target Zone 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Target_Zone {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Target_Zone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Top to Bottom 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Top_to_Bottom {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Top_to_Bottom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Wave 的本地化字符串。
+        /// </summary>
+        public static string LampArrayRGBKeyboardPage_Wave {
+            get {
+                return ResourceManager.GetString("LampArrayRGBKeyboardPage_Wave", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Live Preview 的本地化字符串。
+        /// </summary>
+        public static string LivePreview {
+            get {
+                return ResourceManager.GetString("LivePreview", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Load 的本地化字符串。
         /// </summary>
         public static string Load {
             get {
                 return ResourceManager.GetString("Load", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 MAC address 的本地化字符串。
+        /// </summary>
+        public static string MacAddress {
+            get {
+                return ResourceManager.GetString("MacAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Machine Type 的本地化字符串。
+        /// </summary>
+        public static string MachineType {
+            get {
+                return ResourceManager.GetString("MachineType", resourceCulture);
             }
         }
         
@@ -3436,15 +4607,6 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Stop recording 的本地化字符串。
-        /// </summary>
-        public static string MacroSequenceControl_StopRecording {
-            get {
-                return ResourceManager.GetString("MacroSequenceControl_StopRecording", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 API rate limit reached, please try again later. 的本地化字符串。
         /// </summary>
         public static string MainWindow_CheckForUpdates_Error_ReachedRateLimit_Message {
@@ -3580,7 +4742,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 You need install PawnIO first to use the new dashboard! 的本地化字符串。
+        ///   查找类似 You need to install PawnIO first to use hardware sensors! 的本地化字符串。
         /// </summary>
         public static string MainWindow_PawnIO_Warning_Message {
             get {
@@ -3634,6 +4796,15 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Don&apos;t show again. 的本地化字符串。
+        /// </summary>
+        public static string MessageBoxHelper_DontShowAgain {
+            get {
+                return ResourceManager.GetString("MessageBoxHelper_DontShowAgain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 MHz 的本地化字符串。
         /// </summary>
         public static string MHz {
@@ -3679,6 +4850,24 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Model 的本地化字符串。
+        /// </summary>
+        public static string Model {
+            get {
+                return ResourceManager.GetString("Model", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Motherboard 的本地化字符串。
+        /// </summary>
+        public static string Motherboard {
+            get {
+                return ResourceManager.GetString("Motherboard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Move down 的本地化字符串。
         /// </summary>
         public static string MoveDown {
@@ -3702,6 +4891,60 @@ namespace LenovoLegionToolkit.WPF.Resources {
         public static string MultipleTriggersAutomationPipelineTrigger_DisplayName {
             get {
                 return ResourceManager.GetString("MultipleTriggersAutomationPipelineTrigger_DisplayName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Match All (AND) 的本地化字符串。
+        /// </summary>
+        public static string MultipleTriggersAutomationPipelineTrigger_Logic_And {
+            get {
+                return ResourceManager.GetString("MultipleTriggersAutomationPipelineTrigger_Logic_And", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 No Logic (Separate) 的本地化字符串。
+        /// </summary>
+        public static string MultipleTriggersAutomationPipelineTrigger_Logic_None {
+            get {
+                return ResourceManager.GetString("MultipleTriggersAutomationPipelineTrigger_Logic_None", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Match Any (OR) 的本地化字符串。
+        /// </summary>
+        public static string MultipleTriggersAutomationPipelineTrigger_Logic_Or {
+            get {
+                return ResourceManager.GetString("MultipleTriggersAutomationPipelineTrigger_Logic_Or", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Logic 的本地化字符串。
+        /// </summary>
+        public static string MultipleTriggersAutomationPipelineTrigger_Logic_Title {
+            get {
+                return ResourceManager.GetString("MultipleTriggersAutomationPipelineTrigger_Logic_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 mV 的本地化字符串。
+        /// </summary>
+        public static string mV {
+            get {
+                return ResourceManager.GetString("mV", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Network adapters 的本地化字符串。
+        /// </summary>
+        public static string NetworkAdapters {
+            get {
+                return ResourceManager.GetString("NetworkAdapters", resourceCulture);
             }
         }
         
@@ -3738,6 +4981,24 @@ namespace LenovoLegionToolkit.WPF.Resources {
         public static string Notification_ACAdapterDisconnected {
             get {
                 return ResourceManager.GetString("Notification_ACAdapterDisconnected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Airplane mode off 的本地化字符串。
+        /// </summary>
+        public static string Notification_AirplaneModeOff {
+            get {
+                return ResourceManager.GetString("Notification_AirplaneModeOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Airplane mode on 的本地化字符串。
+        /// </summary>
+        public static string Notification_AirplaneModeOn {
+            get {
+                return ResourceManager.GetString("Notification_AirplaneModeOn", resourceCulture);
             }
         }
         
@@ -3868,6 +5129,69 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 RGB Changed 的本地化字符串。
+        /// </summary>
+        public static string Notification_RGBKeyboardBacklightChanged {
+            get {
+                return ResourceManager.GetString("Notification_RGBKeyboardBacklightChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 RGB Off 的本地化字符串。
+        /// </summary>
+        public static string Notification_RGBKeyboardBacklightOff {
+            get {
+                return ResourceManager.GetString("Notification_RGBKeyboardBacklightOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Double Press 的本地化字符串。
+        /// </summary>
+        public static string Notification_SmartKeyDoublePress {
+            get {
+                return ResourceManager.GetString("Notification_SmartKeyDoublePress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Single Press 的本地化字符串。
+        /// </summary>
+        public static string Notification_SmartKeySinglePress {
+            get {
+                return ResourceManager.GetString("Notification_SmartKeySinglePress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Spectrum Changed 的本地化字符串。
+        /// </summary>
+        public static string Notification_SpectrumBacklightChanged {
+            get {
+                return ResourceManager.GetString("Notification_SpectrumBacklightChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Spectrum Off 的本地化字符串。
+        /// </summary>
+        public static string Notification_SpectrumBacklightOff {
+            get {
+                return ResourceManager.GetString("Notification_SpectrumBacklightOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Spectrum Preset 的本地化字符串。
+        /// </summary>
+        public static string Notification_SpectrumBacklightPresetChanged {
+            get {
+                return ResourceManager.GetString("Notification_SpectrumBacklightPresetChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Backlight {0} 的本地化字符串。
         /// </summary>
         public static string Notification_SpectrumKeyboardBacklight_Backlight {
@@ -3931,7 +5255,34 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Notification Text 的本地化字符串。
+        ///   查找类似 White Changed 的本地化字符串。
+        /// </summary>
+        public static string Notification_WhiteKeyboardBacklightChanged {
+            get {
+                return ResourceManager.GetString("Notification_WhiteKeyboardBacklightChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 White Off 的本地化字符串。
+        /// </summary>
+        public static string Notification_WhiteKeyboardBacklightOff {
+            get {
+                return ResourceManager.GetString("Notification_WhiteKeyboardBacklightOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Backlight changed 的本地化字符串。
+        /// </summary>
+        public static string Notification_WhiteKeyboardBacklightSpecial {
+            get {
+                return ResourceManager.GetString("Notification_WhiteKeyboardBacklightSpecial", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Notification Text (supports $RUN_OUTPUT$) 的本地化字符串。
         /// </summary>
         public static string NotificationAutomationStepControl_NotificationText {
             get {
@@ -3949,11 +5300,29 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 You can use $RUN_OUTPUT$ to insert the output of the previous step dynamically. 的本地化字符串。
+        /// </summary>
+        public static string NotificationAutomationStepControl_ToolTip {
+            get {
+                return ResourceManager.GetString("NotificationAutomationStepControl_ToolTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 AC Adapter 的本地化字符串。
         /// </summary>
         public static string NotificationsSettingsWindow_ACAdapter {
             get {
                 return ResourceManager.GetString("NotificationsSettingsWindow_ACAdapter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Airplane mode 的本地化字符串。
+        /// </summary>
+        public static string NotificationsSettingsWindow_AirplaneMode {
+            get {
+                return ResourceManager.GetString("NotificationsSettingsWindow_AirplaneMode", resourceCulture);
             }
         }
         
@@ -3976,11 +5345,11 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Caps Lock and Num Lock 的本地化字符串。
+        ///   查找类似 Caps Lock 的本地化字符串。
         /// </summary>
-        public static string NotificationsSettingsWindow_CapsAndNumLock {
+        public static string NotificationsSettingsWindow_CapsLock {
             get {
-                return ResourceManager.GetString("NotificationsSettingsWindow_CapsAndNumLock", resourceCulture);
+                return ResourceManager.GetString("NotificationsSettingsWindow_CapsLock", resourceCulture);
             }
         }
         
@@ -4009,6 +5378,15 @@ namespace LenovoLegionToolkit.WPF.Resources {
         public static string NotificationsSettingsWindow_FnLock {
             get {
                 return ResourceManager.GetString("NotificationsSettingsWindow_FnLock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 ITS Mode 的本地化字符串。
+        /// </summary>
+        public static string NotificationsSettingsWindow_ITSMode {
+            get {
+                return ResourceManager.GetString("NotificationsSettingsWindow_ITSMode", resourceCulture);
             }
         }
         
@@ -4082,6 +5460,24 @@ namespace LenovoLegionToolkit.WPF.Resources {
         public static string NotificationsSettingsWindow_NotificationPosition_Title {
             get {
                 return ResourceManager.GetString("NotificationsSettingsWindow_NotificationPosition_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Name 的本地化字符串。
+        /// </summary>
+        public static string NotificationsSettingsWindow_NotificationType {
+            get {
+                return ResourceManager.GetString("NotificationsSettingsWindow_NotificationType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Num Lock 的本地化字符串。
+        /// </summary>
+        public static string NotificationsSettingsWindow_NumLock {
+            get {
+                return ResourceManager.GetString("NotificationsSettingsWindow_NumLock", resourceCulture);
             }
         }
         
@@ -4203,9 +5599,484 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Increase performance by overclocking discrete GPU.
-        ///
-        ///WARNING: This action will not run correctly, if discrete GPU is not available. 的本地化字符串。
+        ///   查找类似 CPU 的本地化字符串。
+        /// </summary>
+        public static string Osd_Cpu {
+            get {
+                return ResourceManager.GetString("Osd_Cpu", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Fan 的本地化字符串。
+        /// </summary>
+        public static string Osd_CPU_Fan {
+            get {
+                return ResourceManager.GetString("Osd_CPU_Fan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Disk 1 Temperature 的本地化字符串。
+        /// </summary>
+        public static string Osd_Disk_0_Temperature {
+            get {
+                return ResourceManager.GetString("Osd_Disk_0_Temperature", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Disk 2 Temperature 的本地化字符串。
+        /// </summary>
+        public static string Osd_Disk_1_Temperature {
+            get {
+                return ResourceManager.GetString("Osd_Disk_1_Temperature", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 E-Core Clock 的本地化字符串。
+        /// </summary>
+        public static string Osd_ECoreClock {
+            get {
+                return ResourceManager.GetString("Osd_ECoreClock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 FPS 的本地化字符串。
+        /// </summary>
+        public static string Osd_Fps {
+            get {
+                return ResourceManager.GetString("Osd_Fps", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Frame Time 的本地化字符串。
+        /// </summary>
+        public static string Osd_Frame_Time {
+            get {
+                return ResourceManager.GetString("Osd_Frame_Time", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Game 的本地化字符串。
+        /// </summary>
+        public static string Osd_Game {
+            get {
+                return ResourceManager.GetString("Osd_Game", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 GPU 的本地化字符串。
+        /// </summary>
+        public static string Osd_Gpu {
+            get {
+                return ResourceManager.GetString("Osd_Gpu", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Fan 的本地化字符串。
+        /// </summary>
+        public static string Osd_GPU_Fan {
+            get {
+                return ResourceManager.GetString("Osd_GPU_Fan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 1% Low 的本地化字符串。
+        /// </summary>
+        public static string Osd_Low_Fps {
+            get {
+                return ResourceManager.GetString("Osd_Low_Fps", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Temperature 的本地化字符串。
+        /// </summary>
+        public static string Osd_Memory_Temperature {
+            get {
+                return ResourceManager.GetString("Osd_Memory_Temperature", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Utilization 的本地化字符串。
+        /// </summary>
+        public static string Osd_Memory_Utilization {
+            get {
+                return ResourceManager.GetString("Osd_Memory_Utilization", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 PCH 的本地化字符串。
+        /// </summary>
+        public static string Osd_Pch {
+            get {
+                return ResourceManager.GetString("Osd_Pch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 PCH Fan 的本地化字符串。
+        /// </summary>
+        public static string Osd_PCH_Fan {
+            get {
+                return ResourceManager.GetString("Osd_PCH_Fan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 P-Core Clock 的本地化字符串。
+        /// </summary>
+        public static string Osd_PCoreClock {
+            get {
+                return ResourceManager.GetString("Osd_PCoreClock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Bar 的本地化字符串。
+        /// </summary>
+        public static string Osd_Style_Bar {
+            get {
+                return ResourceManager.GetString("Osd_Style_Bar", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Panel 的本地化字符串。
+        /// </summary>
+        public static string Osd_Style_Panel {
+            get {
+                return ResourceManager.GetString("Osd_Style_Panel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Show or Hide the OSD 的本地化字符串。
+        /// </summary>
+        public static string OsdAutomationStepControl_Message {
+            get {
+                return ResourceManager.GetString("OsdAutomationStepControl_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 OSD 的本地化字符串。
+        /// </summary>
+        public static string OsdAutomationStepControl_Title {
+            get {
+                return ResourceManager.GetString("OsdAutomationStepControl_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Set the lock position state of the OSD. 的本地化字符串。
+        /// </summary>
+        public static string OsdLockPositionAutomationStepControl_Message {
+            get {
+                return ResourceManager.GetString("OsdLockPositionAutomationStepControl_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 OSD Lock Position 的本地化字符串。
+        /// </summary>
+        public static string OsdLockPositionAutomationStepControl_Title {
+            get {
+                return ResourceManager.GetString("OsdLockPositionAutomationStepControl_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Background Color 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Appearance_BackgroundColor {
+            get {
+                return ResourceManager.GetString("OsdSettings_Appearance_BackgroundColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Category Color 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Appearance_CategoryColor {
+            get {
+                return ResourceManager.GetString("OsdSettings_Appearance_CategoryColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Corner Radius 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Appearance_CornerRadius {
+            get {
+                return ResourceManager.GetString("OsdSettings_Appearance_CornerRadius", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Bottom 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Appearance_CornerRadiusBottom {
+            get {
+                return ResourceManager.GetString("OsdSettings_Appearance_CornerRadiusBottom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Top 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Appearance_CornerRadiusTop {
+            get {
+                return ResourceManager.GetString("OsdSettings_Appearance_CornerRadiusTop", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Critical Color 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Appearance_CriticalColor {
+            get {
+                return ResourceManager.GetString("OsdSettings_Appearance_CriticalColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Font Size 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Appearance_FontSize {
+            get {
+                return ResourceManager.GetString("OsdSettings_Appearance_FontSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Label Color 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Appearance_LabelColor {
+            get {
+                return ResourceManager.GetString("OsdSettings_Appearance_LabelColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Opacity 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Appearance_Opacity {
+            get {
+                return ResourceManager.GetString("OsdSettings_Appearance_Opacity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Value Color 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Appearance_ValueColor {
+            get {
+                return ResourceManager.GetString("OsdSettings_Appearance_ValueColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Warning Color 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Appearance_WarningColor {
+            get {
+                return ResourceManager.GetString("OsdSettings_Appearance_WarningColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Lock Position 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_General_LockPosition {
+            get {
+                return ResourceManager.GetString("OsdSettings_General_LockPosition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Overlay Style 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_General_OverlayStyle {
+            get {
+                return ResourceManager.GetString("OsdSettings_General_OverlayStyle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Refresh Interval 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_General_RefreshInterval {
+            get {
+                return ResourceManager.GetString("OsdSettings_General_RefreshInterval", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Sensor refresh interval 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_General_RefreshInterval_Tooltip {
+            get {
+                return ResourceManager.GetString("OsdSettings_General_RefreshInterval_Tooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Reset Position 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_General_ResetPosition {
+            get {
+                return ResourceManager.GetString("OsdSettings_General_ResetPosition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Snapping Threshold 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_General_SnapThreshold {
+            get {
+                return ResourceManager.GetString("OsdSettings_General_SnapThreshold", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Appearance 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Tabs_Appearance {
+            get {
+                return ResourceManager.GetString("OsdSettings_Tabs_Appearance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 General 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Tabs_General {
+            get {
+                return ResourceManager.GetString("OsdSettings_Tabs_General", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Sensors 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Tabs_SensorItems {
+            get {
+                return ResourceManager.GetString("OsdSettings_Tabs_SensorItems", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Thresholds 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Tabs_Thresholds {
+            get {
+                return ResourceManager.GetString("OsdSettings_Tabs_Thresholds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Critical 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Thresholds_Critical {
+            get {
+                return ResourceManager.GetString("OsdSettings_Thresholds_Critical", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 FPS Redline 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Thresholds_FpsRedline {
+            get {
+                return ResourceManager.GetString("OsdSettings_Thresholds_FpsRedline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The minimum acceptable frame rate. Below this, the color turns critical. 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Thresholds_FpsRedline_Description {
+            get {
+                return ResourceManager.GetString("OsdSettings_Thresholds_FpsRedline_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Low FPS Delta 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Thresholds_LowFpsDelta {
+            get {
+                return ResourceManager.GetString("OsdSettings_Thresholds_LowFpsDelta", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The maximum difference between average FPS and 1% Low. Above this, the counter turns critical. 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Thresholds_LowFpsDelta_Description {
+            get {
+                return ResourceManager.GetString("OsdSettings_Thresholds_LowFpsDelta_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Performance 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Thresholds_Performance {
+            get {
+                return ResourceManager.GetString("OsdSettings_Thresholds_Performance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Temperature 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Thresholds_Temperature {
+            get {
+                return ResourceManager.GetString("OsdSettings_Thresholds_Temperature", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Usage 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Thresholds_Usage {
+            get {
+                return ResourceManager.GetString("OsdSettings_Thresholds_Usage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Warning 的本地化字符串。
+        /// </summary>
+        public static string OsdSettings_Thresholds_Warning {
+            get {
+                return ResourceManager.GetString("OsdSettings_Thresholds_Warning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 OSD Settings 的本地化字符串。
+        /// </summary>
+        public static string OsdWindow_Title {
+            get {
+                return ResourceManager.GetString("OsdWindow_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Increase performance by overclocking discrete GPU. 的本地化字符串。
         /// </summary>
         public static string OverclockDiscreteGPUAutomationStepControl_Message {
             get {
@@ -4241,11 +6112,29 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Adjust the GPU core frequency to run faster or slower than factory speeds. 的本地化字符串。
+        /// </summary>
+        public static string OverclockDiscreteGPUSettingsWindow_CoreDesc {
+            get {
+                return ResourceManager.GetString("OverclockDiscreteGPUSettingsWindow_CoreDesc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Core Frequency Offset 的本地化字符串。
         /// </summary>
         public static string OverclockDiscreteGPUSettingsWindow_CoreFrequencyOffset_Title {
             get {
                 return ResourceManager.GetString("OverclockDiscreteGPUSettingsWindow_CoreFrequencyOffset_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Adjust VRAM speed to modify memory bandwidth. 的本地化字符串。
+        /// </summary>
+        public static string OverclockDiscreteGPUSettingsWindow_MemoryDesc {
+            get {
+                return ResourceManager.GetString("OverclockDiscreteGPUSettingsWindow_MemoryDesc", resourceCulture);
             }
         }
         
@@ -4259,11 +6148,56 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Overclocking 的本地化字符串。
+        /// </summary>
+        public static string OverclockDiscreteGPUSettingsWindow_Overclocking {
+            get {
+                return ResourceManager.GetString("OverclockDiscreteGPUSettingsWindow_Overclocking", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Overclock GPU Settings 的本地化字符串。
         /// </summary>
         public static string OverclockDiscreteGPUSettingsWindow_Title {
             get {
                 return ResourceManager.GetString("OverclockDiscreteGPUSettingsWindow_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Undervolting 的本地化字符串。
+        /// </summary>
+        public static string OverclockDiscreteGPUSettingsWindow_Undervolting {
+            get {
+                return ResourceManager.GetString("OverclockDiscreteGPUSettingsWindow_Undervolting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Voltage Lock 的本地化字符串。
+        /// </summary>
+        public static string OverclockDiscreteGPUSettingsWindow_VoltageLock {
+            get {
+                return ResourceManager.GetString("OverclockDiscreteGPUSettingsWindow_VoltageLock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Locks GPU voltage and frequency for perfectly consistent performance. 的本地化字符串。
+        /// </summary>
+        public static string OverclockDiscreteGPUSettingsWindow_VoltageLockDesc {
+            get {
+                return ResourceManager.GetString("OverclockDiscreteGPUSettingsWindow_VoltageLockDesc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Unlocking in {0}... 的本地化字符串。
+        /// </summary>
+        public static string Overclocking_UnlockSteps {
+            get {
+                return ResourceManager.GetString("Overclocking_UnlockSteps", resourceCulture);
             }
         }
         
@@ -4701,11 +6635,47 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Period (minutes) 的本地化字符串。
+        ///   查找类似 % 的本地化字符串。
         /// </summary>
-        public static string PeriodicActionPipelineTriggerTabItemContent_PeriodMinutes {
+        public static string Percent {
             get {
-                return ResourceManager.GetString("PeriodicActionPipelineTriggerTabItemContent_PeriodMinutes", resourceCulture);
+                return ResourceManager.GetString("Percent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Minutes 的本地化字符串。
+        /// </summary>
+        public static string PeriodicActionPipelineTriggerTabItemContent_Minutes {
+            get {
+                return ResourceManager.GetString("PeriodicActionPipelineTriggerTabItemContent_Minutes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Period 的本地化字符串。
+        /// </summary>
+        public static string PeriodicActionPipelineTriggerTabItemContent_Period {
+            get {
+                return ResourceManager.GetString("PeriodicActionPipelineTriggerTabItemContent_Period", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Seconds 的本地化字符串。
+        /// </summary>
+        public static string PeriodicActionPipelineTriggerTabItemContent_Seconds {
+            get {
+                return ResourceManager.GetString("PeriodicActionPipelineTriggerTabItemContent_Seconds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Platform &amp; Capabilities 的本地化字符串。
+        /// </summary>
+        public static string PlatformAndCapabilities {
+            get {
+                return ResourceManager.GetString("PlatformAndCapabilities", resourceCulture);
             }
         }
         
@@ -4828,6 +6798,15 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Power Modes 的本地化字符串。
+        /// </summary>
+        public static string PowerModes {
+            get {
+                return ResourceManager.GetString("PowerModes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 {0} power mode is not available without AC power. 的本地化字符串。
         /// </summary>
         public static string PowerModeUnavailableWithoutACException_Message {
@@ -4882,11 +6861,20 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Readme 的本地化字符串。
+        ///   查找类似 RAM 的本地化字符串。
         /// </summary>
-        public static string ReadmeWindow_Title {
+        public static string RAM {
             get {
-                return ResourceManager.GetString("ReadmeWindow_Title", resourceCulture);
+                return ResourceManager.GetString("RAM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Ready 的本地化字符串。
+        /// </summary>
+        public static string Ready {
+            get {
+                return ResourceManager.GetString("Ready", resourceCulture);
             }
         }
         
@@ -4900,9 +6888,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Change refresh rate of the built-in display.
-        ///
-        ///WARNING: This action will not run correctly, if internal display is off. 的本地化字符串。
+        ///   查找类似 Change refresh rate of the built-in display. 的本地化字符串。
         /// </summary>
         public static string RefreshRateAutomationStepControl_Message {
             get {
@@ -4947,9 +6933,16 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Change resolution of the built-in display.
-        ///
-        ///WARNING: This action will not run correctly, if internal display is off. 的本地化字符串。
+        ///   查找类似 Reset 的本地化字符串。
+        /// </summary>
+        public static string Reset {
+            get {
+                return ResourceManager.GetString("Reset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Change resolution of the built-in display. 的本地化字符串。
         /// </summary>
         public static string ResolutionAutomationStepControl_Message {
             get {
@@ -4999,6 +6992,33 @@ namespace LenovoLegionToolkit.WPF.Resources {
         public static string RestartNow {
             get {
                 return ResourceManager.GetString("RestartNow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Changing this requires restart. Do you want to restart now? 的本地化字符串。
+        /// </summary>
+        public static string RestartRequired_Message {
+            get {
+                return ResourceManager.GetString("RestartRequired_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Restart required 的本地化字符串。
+        /// </summary>
+        public static string RestartRequired_Title {
+            get {
+                return ResourceManager.GetString("RestartRequired_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Restore Defaults 的本地化字符串。
+        /// </summary>
+        public static string RestoreDefaults {
+            get {
+                return ResourceManager.GetString("RestoreDefaults", resourceCulture);
             }
         }
         
@@ -5156,6 +7176,15 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Run 的本地化字符串。
+        /// </summary>
+        public static string Run {
+            get {
+                return ResourceManager.GetString("Run", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Arguments 的本地化字符串。
         /// </summary>
         public static string RunAutomationStepControl_ExeArguments {
@@ -5174,12 +7203,29 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Run a script or a program.
-        ///Make sure that your script runs correctly first. 的本地化字符串。
+        ///   查找类似 Run a script or a program. 的本地化字符串。
         /// </summary>
         public static string RunAutomationStepControl_Message {
             get {
                 return ResourceManager.GetString("RunAutomationStepControl_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Check Instance 的本地化字符串。
+        /// </summary>
+        public static string RunAutomationStepControl_ProcessCheckInstance {
+            get {
+                return ResourceManager.GetString("RunAutomationStepControl_ProcessCheckInstance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Check if process already started. 的本地化字符串。
+        /// </summary>
+        public static string RunAutomationStepControl_ProcessCheckInstance_Description {
+            get {
+                return ResourceManager.GetString("RunAutomationStepControl_ProcessCheckInstance_Description", resourceCulture);
             }
         }
         
@@ -5256,38 +7302,147 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Select all 的本地化字符串。
+        ///   查找类似 Code Block 的本地化字符串。
         /// </summary>
-        public static string SelectAll {
+        public static string ScriptConsole_Code_Title {
             get {
-                return ResourceManager.GetString("SelectAll", resourceCulture);
+                return ResourceManager.GetString("ScriptConsole_Code_Title", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   查找类似 Choose one or more quick actions to cycle through 的本地化字符串。
+        ///   查找类似 Output 的本地化字符串。
         /// </summary>
-        public static string SelectSmartKeyPipelinesWindow_List_Description {
+        public static string ScriptConsole_Output_Title {
             get {
-                return ResourceManager.GetString("SelectSmartKeyPipelinesWindow_List_Description", resourceCulture);
+                return ResourceManager.GetString("ScriptConsole_Output_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Elapsed: {0} ms 的本地化字符串。
+        /// </summary>
+        public static string ScriptConsole_Section_Elapsed {
+            get {
+                return ResourceManager.GetString("ScriptConsole_Section_Elapsed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Error 的本地化字符串。
+        /// </summary>
+        public static string ScriptConsole_Section_Error {
+            get {
+                return ResourceManager.GetString("ScriptConsole_Section_Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Return Value 的本地化字符串。
+        /// </summary>
+        public static string ScriptConsole_Section_ReturnValue {
+            get {
+                return ResourceManager.GetString("ScriptConsole_Section_ReturnValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Execution failed: {0} ms 的本地化字符串。
+        /// </summary>
+        public static string ScriptConsole_Status_Error {
+            get {
+                return ResourceManager.GetString("ScriptConsole_Status_Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Execution succeeded: {0} ms 的本地化字符串。
+        /// </summary>
+        public static string ScriptConsole_Status_Ok {
+            get {
+                return ResourceManager.GetString("ScriptConsole_Status_Ok", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Running... 的本地化字符串。
+        /// </summary>
+        public static string ScriptConsole_Status_Running {
+            get {
+                return ResourceManager.GetString("ScriptConsole_Status_Running", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Unexpected error 的本地化字符串。
+        /// </summary>
+        public static string ScriptConsole_Status_UnexpectedError {
+            get {
+                return ResourceManager.GetString("ScriptConsole_Status_UnexpectedError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Script Console 的本地化字符串。
+        /// </summary>
+        public static string ScriptConsole_Title {
+            get {
+                return ResourceManager.GetString("ScriptConsole_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Unexpected Error:
+        ///{0} 的本地化字符串。
+        /// </summary>
+        public static string ScriptConsole_UnexpectedError_Detail {
+            get {
+                return ResourceManager.GetString("ScriptConsole_UnexpectedError_Detail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Intended for advanced debugging. Allows execution of custom C# scripts to interact with the application state. 的本地化字符串。
+        /// </summary>
+        public static string ScriptConsole_Warn_Message {
+            get {
+                return ResourceManager.GetString("ScriptConsole_Warn_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {0}s 的本地化字符串。
+        /// </summary>
+        public static string Seconds {
+            get {
+                return ResourceManager.GetString("Seconds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Configure {0} 的本地化字符串。
+        /// </summary>
+        public static string SelectSpecialKeyPipelinesWindow_Configure_Title {
+            get {
+                return ResourceManager.GetString("SelectSpecialKeyPipelinesWindow_Configure_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Choose one or more quick actions to cycle through. 的本地化字符串。
+        /// </summary>
+        public static string SelectSpecialKeyPipelinesWindow_List_Description {
+            get {
+                return ResourceManager.GetString("SelectSpecialKeyPipelinesWindow_List_Description", resourceCulture);
             }
         }
         
         /// <summary>
         ///   查找类似 No Quick Actions defined. 的本地化字符串。
         /// </summary>
-        public static string SelectSmartKeyPipelinesWindow_List_Empty {
+        public static string SelectSpecialKeyPipelinesWindow_List_Empty {
             get {
-                return ResourceManager.GetString("SelectSmartKeyPipelinesWindow_List_Empty", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Show this app 的本地化字符串。
-        /// </summary>
-        public static string SelectSmartKeyPipelinesWindow_ShowThisApp {
-            get {
-                return ResourceManager.GetString("SelectSmartKeyPipelinesWindow_ShowThisApp", resourceCulture);
+                return ResourceManager.GetString("SelectSpecialKeyPipelinesWindow_List_Empty", resourceCulture);
             }
         }
         
@@ -5346,7 +7501,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 CPU Utilitazion 的本地化字符串。
+        ///   查找类似 CPU Utilization 的本地化字符串。
         /// </summary>
         public static string SensorItem_CpuUtilitzation {
             get {
@@ -5544,20 +7699,29 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Core 的本地化字符串。
+        ///   查找类似 Core Temp 的本地化字符串。
         /// </summary>
-        public static string SensorsControl_GpuCore_Title {
+        public static string SensorsControl_GpuCoreTemperature_Title {
             get {
-                return ResourceManager.GetString("SensorsControl_GpuCore_Title", resourceCulture);
+                return ResourceManager.GetString("SensorsControl_GpuCoreTemperature_Title", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   查找类似 Vram 的本地化字符串。
+        ///   查找类似 VRAM Temp 的本地化字符串。
         /// </summary>
         public static string SensorsControl_GpuMemoryTemperature_Title {
             get {
                 return ResourceManager.GetString("SensorsControl_GpuMemoryTemperature_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 VRAM Utilization 的本地化字符串。
+        /// </summary>
+        public static string SensorsControl_GpuVramUtilization_Title {
+            get {
+                return ResourceManager.GetString("SensorsControl_GpuVramUtilization_Title", resourceCulture);
             }
         }
         
@@ -5571,7 +7735,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Memory 的本地化字符串。
+        ///   查找类似 RAM 的本地化字符串。
         /// </summary>
         public static string SensorsControl_Memory_Title {
             get {
@@ -5616,7 +7780,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Refresh interval 的本地化字符串。
+        ///   查找类似 Refresh Interval 的本地化字符串。
         /// </summary>
         public static string SensorsControl_RefreshInterval {
             get {
@@ -5652,11 +7816,128 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 VR Temperature 的本地化字符串。
+        ///   查找类似 Average Frequency 的本地化字符串。
         /// </summary>
-        public static string SensorsControl_VrTemperature_Title {
+        public static string SensorSettingsPage_Average_Frequency_Title {
             get {
-                return ResourceManager.GetString("SensorsControl_VrTemperature_Title", resourceCulture);
+                return ResourceManager.GetString("SensorSettingsPage_Average_Frequency_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Determine the type of CPU frequency displayed on the Dashboard and Osd. 的本地化字符串。
+        /// </summary>
+        public static string SensorSettingsPage_CPU_Frequency_Message {
+            get {
+                return ResourceManager.GetString("SensorSettingsPage_CPU_Frequency_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 CPU Frequency 的本地化字符串。
+        /// </summary>
+        public static string SensorSettingsPage_CPU_Frequency_Title {
+            get {
+                return ResourceManager.GetString("SensorSettingsPage_CPU_Frequency_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 dGPU 的本地化字符串。
+        /// </summary>
+        public static string SensorSettingsPage_Discrete_GPU_Title {
+            get {
+                return ResourceManager.GetString("SensorSettingsPage_Discrete_GPU_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 iGPU 的本地化字符串。
+        /// </summary>
+        public static string SensorSettingsPage_IGPU_Title {
+            get {
+                return ResourceManager.GetString("SensorSettingsPage_IGPU_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Max Frequency 的本地化字符串。
+        /// </summary>
+        public static string SensorSettingsPage_Max_Frequency_Title {
+            get {
+                return ResourceManager.GetString("SensorSettingsPage_Max_Frequency_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Choose how memory utilization is displayed on the Dashboard and OSD. 的本地化字符串。
+        /// </summary>
+        public static string SensorSettingsPage_Memory_Display_Mode_Message {
+            get {
+                return ResourceManager.GetString("SensorSettingsPage_Memory_Display_Mode_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Memory Display Mode 的本地化字符串。
+        /// </summary>
+        public static string SensorSettingsPage_Memory_Display_Mode_Title {
+            get {
+                return ResourceManager.GetString("SensorSettingsPage_Memory_Display_Mode_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Percentage 的本地化字符串。
+        /// </summary>
+        public static string SensorSettingsPage_Percentage_Title {
+            get {
+                return ResourceManager.GetString("SensorSettingsPage_Percentage_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 When multiple graphics cards are present, the primary device displayed is preferred 的本地化字符串。
+        /// </summary>
+        public static string SensorSettingsPage_Preferred_GPU_Message {
+            get {
+                return ResourceManager.GetString("SensorSettingsPage_Preferred_GPU_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Preferred GPU 的本地化字符串。
+        /// </summary>
+        public static string SensorSettingsPage_Preferred_GPU_Title {
+            get {
+                return ResourceManager.GetString("SensorSettingsPage_Preferred_GPU_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Used/Total Memory (GB) 的本地化字符串。
+        /// </summary>
+        public static string SensorSettingsPage_Used_Memory_GB_Title {
+            get {
+                return ResourceManager.GetString("SensorSettingsPage_Used_Memory_GB_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Serial number 的本地化字符串。
+        /// </summary>
+        public static string SerialNumber {
+            get {
+                return ResourceManager.GetString("SerialNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Series 的本地化字符串。
+        /// </summary>
+        public static string Series {
+            get {
+                return ResourceManager.GetString("Series", resourceCulture);
             }
         }
         
@@ -5688,6 +7969,87 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Back Up 的本地化字符串。
+        /// </summary>
+        public static string SettingsBackupWindow_Backup {
+            get {
+                return ResourceManager.GetString("SettingsBackupWindow_Backup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Backup completed successfully. 的本地化字符串。
+        /// </summary>
+        public static string SettingsBackupWindow_BackupSuccess {
+            get {
+                return ResourceManager.GetString("SettingsBackupWindow_BackupSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 No files selected. 的本地化字符串。
+        /// </summary>
+        public static string SettingsBackupWindow_NoFilesSelected {
+            get {
+                return ResourceManager.GetString("SettingsBackupWindow_NoFilesSelected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 No matching files found in selected folder. 的本地化字符串。
+        /// </summary>
+        public static string SettingsBackupWindow_NoMatchingFiles {
+            get {
+                return ResourceManager.GetString("SettingsBackupWindow_NoMatchingFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Restore 的本地化字符串。
+        /// </summary>
+        public static string SettingsBackupWindow_Restore {
+            get {
+                return ResourceManager.GetString("SettingsBackupWindow_Restore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Restoring settings will overwrite your current configuration and restart the application. Do you want to continue? 的本地化字符串。
+        /// </summary>
+        public static string SettingsBackupWindow_RestoreConfirm {
+            get {
+                return ResourceManager.GetString("SettingsBackupWindow_RestoreConfirm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Restore completed successfully. The application will restart. 的本地化字符串。
+        /// </summary>
+        public static string SettingsBackupWindow_RestoreSuccess {
+            get {
+                return ResourceManager.GetString("SettingsBackupWindow_RestoreSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Select All 的本地化字符串。
+        /// </summary>
+        public static string SettingsBackupWindow_SelectAll {
+            get {
+                return ResourceManager.GetString("SettingsBackupWindow_SelectAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Backup Settings 的本地化字符串。
+        /// </summary>
+        public static string SettingsBackupWindow_Title {
+            get {
+                return ResourceManager.GetString("SettingsBackupWindow_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Change the accent color of the app. 的本地化字符串。
         /// </summary>
         public static string SettingsPage_AccentColor_Description {
@@ -5697,11 +8059,47 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Accent color 的本地化字符串。
+        ///   查找类似 Accent Color 的本地化字符串。
         /// </summary>
         public static string SettingsPage_AccentColor_Title {
             get {
                 return ResourceManager.GetString("SettingsPage_AccentColor_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Keep the app window above all other windows. 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_AlwaysOnTop_Message {
+            get {
+                return ResourceManager.GetString("SettingsPage_AlwaysOnTop_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Pin to Top 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_AlwaysOnTop_Title {
+            get {
+                return ResourceManager.GetString("SettingsPage_AlwaysOnTop_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Modify startup arguments for the app. 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_ArgumentWindow_Message {
+            get {
+                return ResourceManager.GetString("SettingsPage_ArgumentWindow_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Arguments 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_ArgumentWindow_Title {
+            get {
+                return ResourceManager.GetString("SettingsPage_ArgumentWindow_Title", resourceCulture);
             }
         }
         
@@ -5724,6 +8122,33 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Back up or restore application settings. 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_BackupSettings_Message {
+            get {
+                return ResourceManager.GetString("SettingsPage_BackupSettings_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Back Up Settings 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_BackupSettings_Title {
+            get {
+                return ResourceManager.GetString("SettingsPage_BackupSettings_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 This feature modifies the EFI partition. Use with caution. 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_BootLogo_EFIInfo {
+            get {
+                return ResourceManager.GetString("SettingsPage_BootLogo_EFIInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Customize Boot Logo image, visible during system startup. 的本地化字符串。
         /// </summary>
         public static string SettingsPage_BootLogo_Message {
@@ -5738,6 +8163,87 @@ namespace LenovoLegionToolkit.WPF.Resources {
         public static string SettingsPage_BootLogo_Title {
             get {
                 return ResourceManager.GetString("SettingsPage_BootLogo_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 App Behavior 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_Category_AppBehavior {
+            get {
+                return ResourceManager.GetString("SettingsPage_Category_AppBehavior", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Appearance 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_Category_Appearance {
+            get {
+                return ResourceManager.GetString("SettingsPage_Category_Appearance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Display 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_Category_Display {
+            get {
+                return ResourceManager.GetString("SettingsPage_Category_Display", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Integrations 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_Category_Integrations {
+            get {
+                return ResourceManager.GetString("SettingsPage_Category_Integrations", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Power 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_Category_Power {
+            get {
+                return ResourceManager.GetString("SettingsPage_Category_Power", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Smart Keys 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_Category_SmartKeys {
+            get {
+                return ResourceManager.GetString("SettingsPage_Category_SmartKeys", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Software Control 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_Category_SoftwareControl {
+            get {
+                return ResourceManager.GetString("SettingsPage_Category_SoftwareControl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Updates 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_Category_Updates {
+            get {
+                return ResourceManager.GetString("SettingsPage_Category_Updates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Check now for the latest version. 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_CheckUpdates_Message {
+            get {
+                return ResourceManager.GetString("SettingsPage_CheckUpdates_Message", resourceCulture);
             }
         }
         
@@ -5769,29 +8275,11 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Clear current selected image file. 的本地化字符串。
-        /// </summary>
-        public static string SettingsPage_Clear_BackgroundImage_Message {
-            get {
-                return ResourceManager.GetString("SettingsPage_Clear_BackgroundImage_Message", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Clear Image 的本地化字符串。
         /// </summary>
         public static string SettingsPage_Clear_BackgroundImage_Title {
             get {
                 return ResourceManager.GetString("SettingsPage_Clear_BackgroundImage_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Image Cleared 的本地化字符串。
-        /// </summary>
-        public static string SettingsPage_ClearBackgroundImage_Title {
-            get {
-                return ResourceManager.GetString("SettingsPage_ClearBackgroundImage_Title", resourceCulture);
             }
         }
         
@@ -5832,7 +8320,52 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Custom Background Image 的本地化字符串。
+        ///   查找类似 Restart is recommended after changing this option. 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_Common_RestartRecommended {
+            get {
+                return ResourceManager.GetString("SettingsPage_Common_RestartRecommended", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Reduce visual clutter to fit more content on screen. 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_CompactMode_Message {
+            get {
+                return ResourceManager.GetString("SettingsPage_CompactMode_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Compact Mode 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_CompactMode_Title {
+            get {
+                return ResourceManager.GetString("SettingsPage_CompactMode_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Blur 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_Custom_BackgroundImage_Blur {
+            get {
+                return ResourceManager.GetString("SettingsPage_Custom_BackgroundImage_Blur", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Dim 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_Custom_BackgroundImage_Dim {
+            get {
+                return ResourceManager.GetString("SettingsPage_Custom_BackgroundImage_Dim", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Set a custom wallpaper for the app window. 的本地化字符串。
         /// </summary>
         public static string SettingsPage_Custom_BackgroundImage_Message {
             get {
@@ -5841,7 +8374,34 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Custom Background Image 的本地化字符串。
+        ///   查找类似 Crop 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_Custom_BackgroundImage_Stretch_Crop {
+            get {
+                return ResourceManager.GetString("SettingsPage_Custom_BackgroundImage_Stretch_Crop", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Fill 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_Custom_BackgroundImage_Stretch_Fill {
+            get {
+                return ResourceManager.GetString("SettingsPage_Custom_BackgroundImage_Stretch_Fill", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Fit 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_Custom_BackgroundImage_Stretch_Fit {
+            get {
+                return ResourceManager.GetString("SettingsPage_Custom_BackgroundImage_Stretch_Fit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Background Image 的本地化字符串。
         /// </summary>
         public static string SettingsPage_Custom_BackgroundImage_Title {
             get {
@@ -5868,8 +8428,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Disable Legion Space and its service without uninstalling it.
-        ///Restart is recommended after changing this option. 的本地化字符串。
+        ///   查找类似 Disable Legion Space and its service without uninstalling it. 的本地化字符串。
         /// </summary>
         public static string SettingsPage_DisableLegionSpace_Message {
             get {
@@ -5905,8 +8464,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Disable Legion Zone and its service without uninstalling it.
-        ///Restart is recommended after changing this option. 的本地化字符串。
+        ///   查找类似 Disable Legion Zone and its service without uninstalling it. 的本地化字符串。
         /// </summary>
         public static string SettingsPage_DisableLegionZone_Message {
             get {
@@ -5943,8 +8501,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         
         /// <summary>
         ///   查找类似 Disable Lenovo Hotkeys and its service without uninstalling it.
-        ///If disabled, this app will handle Fn shortcuts.
-        ///Restart is recommended after changing this option. 的本地化字符串。
+        ///If disabled, this app will handle Fn shortcuts. 的本地化字符串。
         /// </summary>
         public static string SettingsPage_DisableLenovoHotkeys_Message {
             get {
@@ -5980,8 +8537,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Disable Lenovo Vantage and ImController without uninstalling them.
-        ///Restart is recommended after changing this option. 的本地化字符串。
+        ///   查找类似 Disable Lenovo Vantage and ImController without uninstalling them. 的本地化字符串。
         /// </summary>
         public static string SettingsPage_DisableVantage_Message {
             get {
@@ -6089,7 +8645,16 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 You can exclude refresh rates, to make Fn+R shortcut more useful. 的本地化字符串。
+        ///   查找类似 Excluded Processes 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_ExcludeProcesses_Title {
+            get {
+                return ResourceManager.GetString("SettingsPage_ExcludeProcesses_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Hide specific refresh rates from the Fn+R cycle. 的本地化字符串。
         /// </summary>
         public static string SettingsPage_ExcludeRefreshRates_Message {
             get {
@@ -6107,38 +8672,101 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Floating Gadgets​​ is a floating window that displays real-time sensor information in an overlay style. 的本地化字符串。
+        ///   查找类似 Use hardware acceleration for the user interface. 的本地化字符串。
         /// </summary>
-        public static string SettingsPage_FloatingGadgets_Message {
+        public static string SettingsPage_HardwareAcceleration_Message {
             get {
-                return ResourceManager.GetString("SettingsPage_FloatingGadgets_Message", resourceCulture);
+                return ResourceManager.GetString("SettingsPage_HardwareAcceleration_Message", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   查找类似 Enable Floating Gadget 的本地化字符串。
+        ///   查找类似 Hardware Acceleration 的本地化字符串。
         /// </summary>
-        public static string SettingsPage_FloatingGadgets_Title {
+        public static string SettingsPage_HardwareAcceleration_Title {
             get {
-                return ResourceManager.GetString("SettingsPage_FloatingGadgets_Title", resourceCulture);
+                return ResourceManager.GetString("SettingsPage_HardwareAcceleration_Title", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   查找类似 Controls sensor refresh interval. 的本地化字符串。
+        ///   查找类似 Enabling hardware acceleration may cause flickering or black flashes on some hybrid graphics systems, and may prevent the discrete GPU from being turned off. 的本地化字符串。
         /// </summary>
-        public static string SettingsPage_FloatingGadgets_Tooltip {
+        public static string SettingsPage_HardwareAcceleration_Warning {
             get {
-                return ResourceManager.GetString("SettingsPage_FloatingGadgets_Tooltip", resourceCulture);
+                return ResourceManager.GetString("SettingsPage_HardwareAcceleration_Warning", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   查找类似 Share fan speed, battery temperature etc. with HWiNFO64. You may need to restart HWiNFO64 after changing this option. 的本地化字符串。
+        ///   查找类似 Enable advanced hardware polling to monitor detailed temperatures, frequencies, and power limits. 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_HardwareSensors_Message {
+            get {
+                return ResourceManager.GetString("SettingsPage_HardwareSensors_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 You need to install PawnIO first to use hardware sensors! 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_HardwareSensors_PawnIOWarning {
+            get {
+                return ResourceManager.GetString("SettingsPage_HardwareSensors_PawnIOWarning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Hardware Sensors 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_HardwareSensors_Title {
+            get {
+                return ResourceManager.GetString("SettingsPage_HardwareSensors_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Auto (Let Windows decide) 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_HWA_GPUPreference_Auto {
+            get {
+                return ResourceManager.GetString("SettingsPage_HWA_GPUPreference_Auto", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 High performance (dGPU) 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_HWA_GPUPreference_HighPerformance {
+            get {
+                return ResourceManager.GetString("SettingsPage_HWA_GPUPreference_HighPerformance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Power saving (iGPU) 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_HWA_GPUPreference_PowerSaving {
+            get {
+                return ResourceManager.GetString("SettingsPage_HWA_GPUPreference_PowerSaving", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Share fan speed, battery temperature etc. with HWiNFO64. 的本地化字符串。
         /// </summary>
         public static string SettingsPage_HWiNFO_Message {
             get {
                 return ResourceManager.GetString("SettingsPage_HWiNFO_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 You may need to restart HWiNFO64 after changing this option. 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_HWiNFO_RestartInfo {
+            get {
+                return ResourceManager.GetString("SettingsPage_HWiNFO_RestartInfo", resourceCulture);
             }
         }
         
@@ -6152,16 +8780,25 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Integrations 的本地化字符串。
+        ///   查找类似 Find undefined Fn hotkeys in LLT. 的本地化字符串。
         /// </summary>
-        public static string SettingsPage_Integrations_Title {
+        public static string SettingsPage_Key_Discovery_Message {
             get {
-                return ResourceManager.GetString("SettingsPage_Integrations_Title", resourceCulture);
+                return ResourceManager.GetString("SettingsPage_Key_Discovery_Message", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   查找类似 Select language. 的本地化字符串。
+        ///   查找类似 Key Discovery 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_Key_Discovery_Title {
+            get {
+                return ResourceManager.GetString("SettingsPage_Key_Discovery_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Change the display language of the app. 的本地化字符串。
         /// </summary>
         public static string SettingsPage_Language_Message {
             get {
@@ -6179,7 +8816,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Lock LLT&apos;s window size. To prevent something change it. 的本地化字符串。
+        ///   查找类似 Prevent the window from being resized. 的本地化字符串。
         /// </summary>
         public static string SettingsPage_LockWindowSize_Message {
             get {
@@ -6197,7 +8834,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Always minimize to tray. Close with right click on tray icon. 的本地化字符串。
+        ///   查找类似 Minimize to the system tray instead of closing. 的本地化字符串。
         /// </summary>
         public static string SettingsPage_MinimizeOnClose_Message {
             get {
@@ -6206,7 +8843,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Minimize on close 的本地化字符串。
+        ///   查找类似 Minimize on Close 的本地化字符串。
         /// </summary>
         public static string SettingsPage_MinimizeOnClose_Title {
             get {
@@ -6224,7 +8861,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Minimize to tray 的本地化字符串。
+        ///   查找类似 Minimize to Tray 的本地化字符串。
         /// </summary>
         public static string SettingsPage_MinimizeToTray_Title {
             get {
@@ -6269,11 +8906,29 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Power 的本地化字符串。
+        ///   查找类似 Floating overlay showing live sensor data. 的本地化字符串。
         /// </summary>
-        public static string SettingsPage_Power_Title {
+        public static string SettingsPage_Osd_Message {
             get {
-                return ResourceManager.GetString("SettingsPage_Power_Title", resourceCulture);
+                return ResourceManager.GetString("SettingsPage_Osd_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Enable OSD 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_Osd_Title {
+            get {
+                return ResourceManager.GetString("SettingsPage_Osd_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 ITS Mode natively synchronizes power settings, so overriding it here may cause conflicts. 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_PowerModeMapping_ITSWarning {
+            get {
+                return ResourceManager.GetString("SettingsPage_PowerModeMapping_ITSWarning", resourceCulture);
             }
         }
         
@@ -6292,6 +8947,60 @@ namespace LenovoLegionToolkit.WPF.Resources {
         public static string SettingsPage_PowerModeMapping_Title {
             get {
                 return ResourceManager.GetString("SettingsPage_PowerModeMapping_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Are you sure you want to reset all settings to defaults? This action cannot be undone and the application will restart. 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_ResetSettings_Confirm {
+            get {
+                return ResourceManager.GetString("SettingsPage_ResetSettings_Confirm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Reset all application settings to their defaults. 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_ResetSettings_Message {
+            get {
+                return ResourceManager.GetString("SettingsPage_ResetSettings_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Reset Settings 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_ResetSettings_Title {
+            get {
+                return ResourceManager.GetString("SettingsPage_ResetSettings_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Restart to apply changes. 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_RestartRequired_Message {
+            get {
+                return ResourceManager.GetString("SettingsPage_RestartRequired_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Execute C# scripts in the application runtime. 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_ScriptConsole_Message {
+            get {
+                return ResourceManager.GetString("SettingsPage_ScriptConsole_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Script Console 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_ScriptConsole_Title {
+            get {
+                return ResourceManager.GetString("SettingsPage_ScriptConsole_Title", resourceCulture);
             }
         }
         
@@ -6323,16 +9032,16 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Select Background Image 的本地化字符串。
+        ///   查找类似 Sensor Settings 的本地化字符串。
         /// </summary>
-        public static string SettingsPage_Select_BackgroundImage_Title {
+        public static string SettingsPage_SensorSettings_Title {
             get {
-                return ResourceManager.GetString("SettingsPage_Select_BackgroundImage_Title", resourceCulture);
+                return ResourceManager.GetString("SettingsPage_SensorSettings_Title", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   查找类似 Fn Lock will be temporarily disabled when Alt, Ctrl or Shift key is depressed. 的本地化字符串。
+        ///   查找类似 Temporarily disable Fn Lock while Alt, Ctrl or Shift is held. 的本地化字符串。
         /// </summary>
         public static string SettingsPage_SmartFnLock_Message {
             get {
@@ -6350,43 +9059,25 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Assign Quick Action to Fn+F9 double press. 的本地化字符串。
+        ///   查找类似 Customize the Fn hotkeys. 的本地化字符串。
         /// </summary>
-        public static string SettingsPage_SmartKeyDoublePressAction_Message {
+        public static string SettingsPage_SmartKeys_Message {
             get {
-                return ResourceManager.GetString("SettingsPage_SmartKeyDoublePressAction_Message", resourceCulture);
+                return ResourceManager.GetString("SettingsPage_SmartKeys_Message", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   查找类似 Smart Key Secondary Action 的本地化字符串。
+        ///   查找类似 Smart Keys 的本地化字符串。
         /// </summary>
-        public static string SettingsPage_SmartKeyDoublePressAction_Title {
+        public static string SettingsPage_SmartKeys_Title {
             get {
-                return ResourceManager.GetString("SettingsPage_SmartKeyDoublePressAction_Title", resourceCulture);
+                return ResourceManager.GetString("SettingsPage_SmartKeys_Title", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   查找类似 Assign Quick Action to Fn+F9 single press. 的本地化字符串。
-        /// </summary>
-        public static string SettingsPage_SmartKeySinglePressAction_Message {
-            get {
-                return ResourceManager.GetString("SettingsPage_SmartKeySinglePressAction_Message", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Smart Key Action 的本地化字符串。
-        /// </summary>
-        public static string SettingsPage_SmartKeySinglePressAction_Title {
-            get {
-                return ResourceManager.GetString("SettingsPage_SmartKeySinglePressAction_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 When on, same brightness level will be applied to all Windows power plans whenever you change it. 的本地化字符串。
+        ///   查找类似 Apply the same brightness level across all Windows power plans. 的本地化字符串。
         /// </summary>
         public static string SettingsPage_SynchronizeBrightnessToAllPowerPlans_Message {
             get {
@@ -6422,7 +9113,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Set light theme, dark theme or follow system settings. 的本地化字符串。
+        ///   查找类似 Set light, dark, or system-matched theme. 的本地化字符串。
         /// </summary>
         public static string SettingsPage_Theme_Description {
             get {
@@ -6449,20 +9140,47 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Update 的本地化字符串。
+        ///   查找类似 Choose between stable, beta and dev releases. 的本地化字符串。
         /// </summary>
-        public static string SettingsPage_Update_Title {
+        public static string SettingsPage_UpdateChannel_Message {
             get {
-                return ResourceManager.GetString("SettingsPage_Update_Title", resourceCulture);
+                return ResourceManager.GetString("SettingsPage_UpdateChannel_Message", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   查找类似 Automatically check for updates 的本地化字符串。
+        ///   查找类似 Update Channel 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_UpdateChannel_Title {
+            get {
+                return ResourceManager.GetString("SettingsPage_UpdateChannel_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Choose how often to check for new versions. 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_UpdateCheckFrequency_Message {
+            get {
+                return ResourceManager.GetString("SettingsPage_UpdateCheckFrequency_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Update Frequency 的本地化字符串。
         /// </summary>
         public static string SettingsPage_UpdateCheckFrequency_Title {
             get {
                 return ResourceManager.GetString("SettingsPage_UpdateCheckFrequency_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Choose how updates are downloaded and installed. 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_UpdateMethod_Message {
+            get {
+                return ResourceManager.GetString("SettingsPage_UpdateMethod_Message", resourceCulture);
             }
         }
         
@@ -6476,25 +9194,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Restart to apply changes. 的本地化字符串。
-        /// </summary>
-        public static string SettingsPage_UseNewDashboard_Restart_Message {
-            get {
-                return ResourceManager.GetString("SettingsPage_UseNewDashboard_Restart_Message", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Dashboard changed 的本地化字符串。
-        /// </summary>
-        public static string SettingsPage_UseNewDashboard_Switch_Title {
-            get {
-                return ResourceManager.GetString("SettingsPage_UseNewDashboard_Switch_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Use new sensor dashboard instead of the old one.  的本地化字符串。
+        ///   查找类似 Use new sensor dashboard instead of the old one. 的本地化字符串。
         /// </summary>
         public static string SettingsPage_UseNewSensorDashboard_Message {
             get {
@@ -6503,11 +9203,38 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Use New Sensor Dashboard 的本地化字符串。
+        ///   查找类似 New Sensor Dashboard 的本地化字符串。
         /// </summary>
         public static string SettingsPage_UseNewSensorDashboard_Title {
             get {
                 return ResourceManager.GetString("SettingsPage_UseNewSensorDashboard_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 If you experience visual artifacts on Snackbar Notifications in HDR mode, set this to &quot;None&quot;. 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_WindowBackdropType_Info {
+            get {
+                return ResourceManager.GetString("SettingsPage_WindowBackdropType_Info", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The effect used for the background of the application window. 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_WindowBackdropType_Message {
+            get {
+                return ResourceManager.GetString("SettingsPage_WindowBackdropType_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Window Backdrop 的本地化字符串。
+        /// </summary>
+        public static string SettingsPage_WindowBackdropType_Title {
+            get {
+                return ResourceManager.GetString("SettingsPage_WindowBackdropType_Title", resourceCulture);
             }
         }
         
@@ -6557,6 +9284,60 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Show the Lenovo Legion Toolkit 的本地化字符串。
+        /// </summary>
+        public static string ShowAppAutomationStepControl_Message {
+            get {
+                return ResourceManager.GetString("ShowAppAutomationStepControl_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Show App 的本地化字符串。
+        /// </summary>
+        public static string ShowAppAutomationStepControl_Title {
+            get {
+                return ResourceManager.GetString("ShowAppAutomationStepControl_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Show less 的本地化字符串。
+        /// </summary>
+        public static string ShowLess {
+            get {
+                return ResourceManager.GetString("ShowLess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Show more 的本地化字符串。
+        /// </summary>
+        public static string ShowMore {
+            get {
+                return ResourceManager.GetString("ShowMore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Slot 的本地化字符串。
+        /// </summary>
+        public static string Slot {
+            get {
+                return ResourceManager.GetString("Slot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Settings applied successfully. 的本地化字符串。
+        /// </summary>
+        public static string Snackbar_SettingsApplied_Message {
+            get {
+                return ResourceManager.GetString("Snackbar_SettingsApplied_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 When mute, all active audio output devices will be muted. 的本地化字符串。
         /// </summary>
         public static string SpeakerAutomationStepControl_Message {
@@ -6571,6 +9352,132 @@ namespace LenovoLegionToolkit.WPF.Resources {
         public static string SpeakerAutomationStepControl_Title {
             get {
                 return ResourceManager.GetString("SpeakerAutomationStepControl_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Change the speaker&apos;s volume. 的本地化字符串。
+        /// </summary>
+        public static string SpeakerVolumeAutomationStepControl_Message {
+            get {
+                return ResourceManager.GetString("SpeakerVolumeAutomationStepControl_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Speaker Volume 的本地化字符串。
+        /// </summary>
+        public static string SpeakerVolumeAutomationStepControl_Title {
+            get {
+                return ResourceManager.GetString("SpeakerVolumeAutomationStepControl_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 (Driver) 的本地化字符串。
+        /// </summary>
+        public static string SpecialKey_DriverSuffix {
+            get {
+                return ResourceManager.GetString("SpecialKey_DriverSuffix", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Key {0} 的本地化字符串。
+        /// </summary>
+        public static string SpecialKey_UnknownKey {
+            get {
+                return ResourceManager.GetString("SpecialKey_UnknownKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Label 的本地化字符串。
+        /// </summary>
+        public static string SpecialKeyDetail_Description {
+            get {
+                return ResourceManager.GetString("SpecialKeyDetail_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Mode 的本地化字符串。
+        /// </summary>
+        public static string SpecialKeyDetail_Mode {
+            get {
+                return ResourceManager.GetString("SpecialKeyDetail_Mode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Choose how this key responds when pressed. 的本地化字符串。
+        /// </summary>
+        public static string SpecialKeyDetail_Mode_Description {
+            get {
+                return ResourceManager.GetString("SpecialKeyDetail_Mode_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Key Discovery 的本地化字符串。
+        /// </summary>
+        public static string SpecialKeyDetailWindow_KeyDiscovery {
+            get {
+                return ResourceManager.GetString("SpecialKeyDetailWindow_KeyDiscovery", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Press Fn hotkeys to discover which ones can be added and customized as Smart Keys. 的本地化字符串。
+        /// </summary>
+        public static string SpecialKeyDetailWindow_KeyDiscovery_Message {
+            get {
+                return ResourceManager.GetString("SpecialKeyDetailWindow_KeyDiscovery_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Start 的本地化字符串。
+        /// </summary>
+        public static string SpecialKeyDetailWindow_KeyDiscovery_Start {
+            get {
+                return ResourceManager.GetString("SpecialKeyDetailWindow_KeyDiscovery_Start", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Stop 的本地化字符串。
+        /// </summary>
+        public static string SpecialKeyDetailWindow_KeyDiscovery_Stop {
+            get {
+                return ResourceManager.GetString("SpecialKeyDetailWindow_KeyDiscovery_Stop", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Assign custom Quick Actions to Fn keys. Each key can override its default behavior with a custom pipeline. Right-click any key to hide it from this list. 的本地化字符串。
+        /// </summary>
+        public static string SpecialKeysWindow_Description {
+            get {
+                return ResourceManager.GetString("SpecialKeysWindow_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Hide {0} hidden keys 的本地化字符串。
+        /// </summary>
+        public static string SpecialKeysWindow_HideHiddenKeys {
+            get {
+                return ResourceManager.GetString("SpecialKeysWindow_HideHiddenKeys", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Show {0} hidden keys 的本地化字符串。
+        /// </summary>
+        public static string SpecialKeysWindow_ShowHiddenKeys {
+            get {
+                return ResourceManager.GetString("SpecialKeysWindow_ShowHiddenKeys", resourceCulture);
             }
         }
         
@@ -6818,6 +9725,62 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Vantage Color Boost 的本地化字符串。
+        /// </summary>
+        public static string SpectrumKeyboardBacklightEditEffectWindow_VantageColorBoost_Title {
+            get {
+                return ResourceManager.GetString("SpectrumKeyboardBacklightEditEffectWindow_VantageColorBoost_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Boost Brightness Factor 的本地化字符串。
+        /// </summary>
+        public static string SpectrumKeyboardBacklightEditEffectWindow_VantageColorBoostSettings_BoostBrightnessFactor {
+            get {
+                return ResourceManager.GetString("SpectrumKeyboardBacklightEditEffectWindow_VantageColorBoostSettings_BoostBrightne" +
+                        "ssFactor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Boost Floor 的本地化字符串。
+        /// </summary>
+        public static string SpectrumKeyboardBacklightEditEffectWindow_VantageColorBoostSettings_BoostFloor {
+            get {
+                return ResourceManager.GetString("SpectrumKeyboardBacklightEditEffectWindow_VantageColorBoostSettings_BoostFloor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Boost Target 的本地化字符串。
+        /// </summary>
+        public static string SpectrumKeyboardBacklightEditEffectWindow_VantageColorBoostSettings_BoostTarget {
+            get {
+                return ResourceManager.GetString("SpectrumKeyboardBacklightEditEffectWindow_VantageColorBoostSettings_BoostTarget", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Color Boost Settings 的本地化字符串。
+        /// </summary>
+        public static string SpectrumKeyboardBacklightEditEffectWindow_VantageColorBoostSettings_Title {
+            get {
+                return ResourceManager.GetString("SpectrumKeyboardBacklightEditEffectWindow_VantageColorBoostSettings_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 White Threshold 的本地化字符串。
+        /// </summary>
+        public static string SpectrumKeyboardBacklightEditEffectWindow_VantageColorBoostSettings_WhiteThreshold {
+            get {
+                return ResourceManager.GetString("SpectrumKeyboardBacklightEditEffectWindow_VantageColorBoostSettings_WhiteThreshol" +
+                        "d", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Import and apply backlight configuration to the current profile. 的本地化字符串。
         /// </summary>
         public static string SpectrumKeyboardBacklightImportProfileAutomationStepControl_Message {
@@ -6877,6 +9840,15 @@ namespace LenovoLegionToolkit.WPF.Resources {
         public static string SpectrumKeyboardEffectControl_Description_Zones {
             get {
                 return ResourceManager.GetString("SpectrumKeyboardEffectControl_Description_Zones", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Start date 的本地化字符串。
+        /// </summary>
+        public static string StartDate {
+            get {
+                return ResourceManager.GetString("StartDate", resourceCulture);
             }
         }
         
@@ -6998,11 +9970,38 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Storage 的本地化字符串。
+        /// </summary>
+        public static string Storage {
+            get {
+                return ResourceManager.GetString("Storage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Select icon 的本地化字符串。
         /// </summary>
         public static string SymbolRegularPicker_Title {
             get {
                 return ResourceManager.GetString("SymbolRegularPicker_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Text color 的本地化字符串。
+        /// </summary>
+        public static string TextColor {
+            get {
+                return ResourceManager.GetString("TextColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Threads 的本地化字符串。
+        /// </summary>
+        public static string Threads {
+            get {
+                return ResourceManager.GetString("Threads", resourceCulture);
             }
         }
         
@@ -7034,8 +10033,7 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Allow switching between integrated and discrete GPU.
-        ///Requires restart. 的本地化字符串。
+        ///   查找类似 Allow switching between integrated and discrete GPU. 的本地化字符串。
         /// </summary>
         public static string ToggleHybridModeAutomationStepControl_Message {
             get {
@@ -7181,29 +10179,29 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Turn off Wi-Fi 的本地化字符串。
-        /// </summary>
-        public static string TurnOffWiFiAutomationStepControl_Title {
-            get {
-                return ResourceManager.GetString("TurnOffWiFiAutomationStepControl_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Turn on Wi-Fi 的本地化字符串。
-        /// </summary>
-        public static string TurnOnWiFiAutomationStepControl_Title {
-            get {
-                return ResourceManager.GetString("TurnOnWiFiAutomationStepControl_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Unexpected exception occurred: 的本地化字符串。
         /// </summary>
         public static string UnexpectedException {
             get {
                 return ResourceManager.GetString("UnexpectedException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Unhide 的本地化字符串。
+        /// </summary>
+        public static string Unhide {
+            get {
+                return ResourceManager.GetString("Unhide", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Unknown 的本地化字符串。
+        /// </summary>
+        public static string Unknown {
+            get {
+                return ResourceManager.GetString("Unknown", resourceCulture);
             }
         }
         
@@ -7233,15 +10231,6 @@ namespace LenovoLegionToolkit.WPF.Resources {
         public static string UnsupportedWindow_Disclaimer_GitHub {
             get {
                 return ResourceManager.GetString("UnsupportedWindow_Disclaimer_GitHub", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Logs folder 的本地化字符串。
-        /// </summary>
-        public static string UnsupportedWindow_Disclaimer_Logs {
-            get {
-                return ResourceManager.GetString("UnsupportedWindow_Disclaimer_Logs", resourceCulture);
             }
         }
         
@@ -7300,6 +10289,24 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Update download failed 的本地化字符串。
+        /// </summary>
+        public static string UpdateWindow_DownloadError_Title {
+            get {
+                return ResourceManager.GetString("UpdateWindow_DownloadError_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Failed to verify update 的本地化字符串。
+        /// </summary>
+        public static string UpdateWindow_SecurityError_Title {
+            get {
+                return ResourceManager.GetString("UpdateWindow_SecurityError_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Update available 的本地化字符串。
         /// </summary>
         public static string UpdateWindow_Title {
@@ -7318,11 +10325,47 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Used 的本地化字符串。
+        /// </summary>
+        public static string Used {
+            get {
+                return ResourceManager.GetString("Used", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Valid 的本地化字符串。
+        /// </summary>
+        public static string Valid {
+            get {
+                return ResourceManager.GetString("Valid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Warning 的本地化字符串。
         /// </summary>
         public static string Warning {
             get {
                 return ResourceManager.GetString("Warning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Warranty 的本地化字符串。
+        /// </summary>
+        public static string Warranty {
+            get {
+                return ResourceManager.GetString("Warranty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 W 的本地化字符串。
+        /// </summary>
+        public static string Watt {
+            get {
+                return ResourceManager.GetString("Watt", resourceCulture);
             }
         }
         
@@ -7363,6 +10406,15 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Wi-Fi 的本地化字符串。
+        /// </summary>
+        public static string WiFiAutomationStepControl_Title {
+            get {
+                return ResourceManager.GetString("WiFiAutomationStepControl_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Copy current network name 的本地化字符串。
         /// </summary>
         public static string WiFiConnectedPipelineTriggerTabItemContent_CopyCurrentNetworkName {
@@ -7381,15 +10433,6 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Network name (SSID) 的本地化字符串。
-        /// </summary>
-        public static string WiFiConnectedPipelineTriggerTabItemContent_NetworkName {
-            get {
-                return ResourceManager.GetString("WiFiConnectedPipelineTriggerTabItemContent_NetworkName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Windows Power Modes 的本地化字符串。
         /// </summary>
         public static string WindowsPowerModesWindow_Title {
@@ -7399,11 +10442,47 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
-        ///   查找类似 Default 的本地化字符串。
+        ///   查找类似 Windows Power Plan 的本地化字符串。
+        /// </summary>
+        public static string WindowsPowerPlan_Title {
+            get {
+                return ResourceManager.GetString("WindowsPowerPlan_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 System Default 的本地化字符串。
         /// </summary>
         public static string WindowsPowerPlansWindow_DefaultPowerPlan {
             get {
                 return ResourceManager.GetString("WindowsPowerPlansWindow_DefaultPowerPlan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Plugged in 的本地化字符串。
+        /// </summary>
+        public static string WindowsPowerPlansWindow_PowerMode_AC {
+            get {
+                return ResourceManager.GetString("WindowsPowerPlansWindow_PowerMode_AC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 On battery 的本地化字符串。
+        /// </summary>
+        public static string WindowsPowerPlansWindow_PowerMode_DC {
+            get {
+                return ResourceManager.GetString("WindowsPowerPlansWindow_PowerMode_DC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Power Mode 的本地化字符串。
+        /// </summary>
+        public static string WindowsPowerPlansWindow_PowerMode_Title {
+            get {
+                return ResourceManager.GetString("WindowsPowerPlansWindow_PowerMode_Title", resourceCulture);
             }
         }
         

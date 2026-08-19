@@ -1,9 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Threading;
 using Humanizer;
 using LenovoLegionToolkit.Lib;
 using LenovoLegionToolkit.Lib.Automation;
@@ -12,6 +16,7 @@ using LenovoLegionToolkit.Lib.Automation.Pipeline.Triggers;
 using LenovoLegionToolkit.Lib.Automation.Steps;
 using LenovoLegionToolkit.Lib.Extensions;
 using LenovoLegionToolkit.Lib.Settings;
+using LenovoLegionToolkit.Lib.Station.Services;
 using LenovoLegionToolkit.Lib.Utils;
 using LenovoLegionToolkit.WPF.Controls.Automation.Steps;
 using LenovoLegionToolkit.WPF.Extensions;
@@ -19,6 +24,7 @@ using LenovoLegionToolkit.WPF.Resources;
 using LenovoLegionToolkit.WPF.Utils;
 using LenovoLegionToolkit.WPF.Windows.Automation;
 using Wpf.Ui.Common;
+using Wpf.Ui.Controls;
 using Button = Wpf.Ui.Controls.Button;
 using CardExpander = LenovoLegionToolkit.WPF.Controls.Custom.CardExpander;
 using MenuItem = Wpf.Ui.Controls.MenuItem;
@@ -48,11 +54,19 @@ public class AutomationPipelineControl : UserControl
         Margin = new(0, 16, 0, 0),
         ColumnDefinitions =
         {
+            new() { Width = GridLength.Auto },
             new() { Width = new(1, GridUnitType.Star) },
-            new() { Width = GridLength.Auto },
-            new() { Width = GridLength.Auto },
-            new() { Width = GridLength.Auto },
         }
+    };
+
+    private readonly StackPanel _leftButtonsPanel = new()
+    {
+        Orientation = Orientation.Horizontal,
+    };
+
+    private readonly WrapPanel _rightButtonsPanel = new()
+    {
+        HorizontalAlignment = HorizontalAlignment.Right,
     };
 
     private readonly CheckBox _isExclusiveCheckBox = new()
@@ -60,6 +74,15 @@ public class AutomationPipelineControl : UserControl
         HorizontalAlignment = HorizontalAlignment.Left,
         Content = Resource.AutomationPipelineControl_Exclusive,
         ToolTip = Resource.AutomationPipelineControl_Exclusive_ToolTip,
+        MinWidth = 100,
+        Margin = new(0, 0, 8, 0),
+    };
+
+    private readonly CheckBox _runOnStartupCheckBox = new()
+    {
+        HorizontalAlignment = HorizontalAlignment.Left,
+        Content = Resource.AutomationPipelineControl_RunOnStartup,
+        ToolTip = Resource.AutomationPipelineControl_RunOnStartup_Tooltip,
         MinWidth = 100,
         Margin = new(0, 0, 8, 0),
     };
@@ -85,20 +108,27 @@ public class AutomationPipelineControl : UserControl
     };
 
     private readonly IAutomationStep[] _supportedAutomationSteps;
+    private readonly int _totalAutomationStepsCount;
 
     public AutomationPipeline AutomationPipeline { get; }
 
     public event EventHandler? OnChanged;
     public event EventHandler? OnDelete;
 
+
+
     public Task InitializedTask => _initializedTaskCompletionSource.Task;
 
-    public AutomationPipelineControl(AutomationPipeline automationPipeline, IAutomationStep[] supportedAutomationSteps)
+    public AutomationPipelineControl(AutomationPipeline automationPipeline, IAutomationStep[] supportedAutomationSteps, int totalAutomationStepsCount)
     {
         AutomationPipeline = automationPipeline;
         _supportedAutomationSteps = supportedAutomationSteps;
+        _totalAutomationStepsCount = totalAutomationStepsCount;
+
+
 
         Initialized += AutomationPipelineControl_Initialized;
+        OnChanged += (_, _) => RefreshValidationWarnings();
     }
 
     public AutomationPipeline CreateAutomationPipeline() => new()
@@ -112,6 +142,7 @@ public class AutomationPipelineControl : UserControl
             .Select(s => s.CreateAutomationStep())
             .ToList(),
         IsExclusive = _isExclusiveCheckBox.IsChecked ?? false,
+        RunOnStartup = _runOnStartupCheckBox.IsChecked ?? false,
     };
 
     public string? GetName() => AutomationPipeline.Name;
@@ -126,12 +157,36 @@ public class AutomationPipelineControl : UserControl
         OnChanged?.Invoke(this, EventArgs.Empty);
     }
 
+    private readonly TextBlock _validationWarningTextBlock = new()
+    {
+        Foreground = Brushes.Orange,
+        TextWrapping = TextWrapping.Wrap,
+        Margin = new(16, 0, 16, 8),
+        Visibility = Visibility.Collapsed
+    };
+
     public void SetIcon(SymbolRegular? icon)
     {
         AutomationPipeline.IconName = icon.HasValue ? Enum.GetName(icon.Value) : null;
         _cardExpander.Icon = GenerateIcon();
 
         OnChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void RefreshValidationWarnings()
+    {
+        var pipeline = CreateAutomationPipeline();
+        var warnings = pipeline.GetValidationWarnings().ToList();
+
+        if (warnings.Count > 0)
+        {
+            _validationWarningTextBlock.Text = string.Join("\n", warnings);
+            _validationWarningTextBlock.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            _validationWarningTextBlock.Visibility = Visibility.Collapsed;
+        }
     }
 
     private async void AutomationPipelineControl_Initialized(object? sender, EventArgs e)
@@ -147,11 +202,45 @@ public class AutomationPipelineControl : UserControl
         if (AutomationPipeline.Trigger is not null)
         {
             _isExclusiveCheckBox.IsChecked = AutomationPipeline.IsExclusive;
-            _isExclusiveCheckBox.Checked += (_, _) => OnChanged?.Invoke(this, EventArgs.Empty);
+            _isExclusiveCheckBox.Checked += (_, _) =>
+            {
+                AutomationPipeline.IsExclusive = _isExclusiveCheckBox.IsChecked ?? false;
+                OnChanged?.Invoke(this, EventArgs.Empty);
+            };
+            _isExclusiveCheckBox.Unchecked += (_, _) =>
+            {
+                AutomationPipeline.IsExclusive = _isExclusiveCheckBox.IsChecked ?? false;
+                OnChanged?.Invoke(this, EventArgs.Empty);
+            };
+
+            _runOnStartupCheckBox.IsChecked = AutomationPipeline.RunOnStartup;
+            _runOnStartupCheckBox.Checked += (_, _) =>
+            {
+                AutomationPipeline.RunOnStartup = _runOnStartupCheckBox.IsChecked ?? false;
+                OnChanged?.Invoke(this, EventArgs.Empty);
+            };
+            _runOnStartupCheckBox.Unchecked += (_, _) =>
+            {
+                AutomationPipeline.RunOnStartup = _runOnStartupCheckBox.IsChecked ?? false;
+                OnChanged?.Invoke(this, EventArgs.Empty);
+            };
         }
         else
         {
             _isExclusiveCheckBox.Visibility = Visibility.Hidden;
+            _runOnStartupCheckBox.Visibility = Visibility.Hidden;
+            _leftButtonsPanel.Visibility = Visibility.Collapsed;
+        }
+
+        if (AutomationPipeline.Trigger is GamesAreRunningAutomationPipelineTrigger
+            or ProcessesStopRunningAutomationPipelineTrigger
+            or SessionLockAutomationPipelineTrigger
+            or OnResumeAutomationPipelineTrigger
+            or OnStartupAutomationPipelineTrigger
+            or PeriodicAutomationPipelineTrigger
+            or TimeAutomationPipelineTrigger)
+        {
+            _runOnStartupCheckBox.Visibility = Visibility.Collapsed;
         }
 
         _runNowButton.Click += async (_, _) => await RunAsync();
@@ -162,24 +251,30 @@ public class AutomationPipelineControl : UserControl
             foreach (var step in _supportedAutomationSteps)
                 stepControls.Add(await GenerateStepControlAsync(step));
 
-            var window = new AddAutomationStepWindow(stepControls, AddStep) { Owner = Window.GetWindow(this) };
+            var window = new AddAutomationStepWindow(stepControls, AddStep, _totalAutomationStepsCount) { Owner = Window.GetWindow(this) };
             window.ShowDialog();
         };
 
         _deletePipelineButton.Click += (_, _) => OnDelete?.Invoke(this, EventArgs.Empty);
 
-        Grid.SetColumn(_isExclusiveCheckBox, 0);
-        Grid.SetColumn(_runNowButton, 1);
-        Grid.SetColumn(_addStepButton, 2);
-        Grid.SetColumn(_deletePipelineButton, 3);
 
-        _buttonsStackPanel.Children.Add(_isExclusiveCheckBox);
-        _buttonsStackPanel.Children.Add(_runNowButton);
-        _buttonsStackPanel.Children.Add(_addStepButton);
-        _buttonsStackPanel.Children.Add(_deletePipelineButton);
+        _leftButtonsPanel.Children.Add(_isExclusiveCheckBox);
+        _leftButtonsPanel.Children.Add(_runOnStartupCheckBox);
+
+        _rightButtonsPanel.Children.Add(_runNowButton);
+        _rightButtonsPanel.Children.Add(_addStepButton);
+        _rightButtonsPanel.Children.Add(_deletePipelineButton);
+
+        Grid.SetColumn(_leftButtonsPanel, 0);
+        Grid.SetColumn(_rightButtonsPanel, 1);
+        _buttonsStackPanel.Children.Add(_leftButtonsPanel);
+        _buttonsStackPanel.Children.Add(_rightButtonsPanel);
 
         _stackPanel.Children.Add(_stepsStackPanel);
+        _stackPanel.Children.Add(_validationWarningTextBlock);
         _stackPanel.Children.Add(_buttonsStackPanel);
+
+        RefreshValidationWarnings();
 
         _cardExpander.Icon = GenerateIcon();
         _cardHeaderControl.Title = GenerateHeader();
@@ -187,10 +282,72 @@ public class AutomationPipelineControl : UserControl
         _cardHeaderControl.Accessory = GenerateAccessory();
         _cardHeaderControl.SubtitleToolTip = _cardHeaderControl.Subtitle;
         _cardExpander.Content = _stackPanel;
+        _cardExpander.Header = _cardHeaderControl;
 
         Content = _cardExpander;
 
+        AllowDrop = true;
+        Drop += HandlePipelineDrop;
+        PreviewDragOver += Control_PreviewDragOver;
+        DragLeave += (_, _) => CleanupAdorner();
+
         _initializedTaskCompletionSource.TrySetResult();
+    }
+
+
+
+    private void HandlePipelineDrop(object sender, DragEventArgs e)
+    {
+        CleanupAdorner();
+
+        if (e.Data.GetDataPresent("AutomationStep"))
+        {
+            if (e.Data.GetData("AutomationStep") is not AbstractAutomationStepControl sourceStep ||
+                _stepsStackPanel.Children.Contains(sourceStep))
+            {
+                return;
+            }
+
+            var sourceParent = FindParentAutomationPipelineControl(sourceStep);
+            if (sourceParent == null)
+            {
+                return;
+            }
+
+            sourceParent.DetachStep(sourceStep);
+            _stepsStackPanel.Children.Add(sourceStep);
+            OnChanged?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
+        if (!e.Data.GetDataPresent("AutomationPipeline"))
+        {
+            return;
+        }
+
+        if (e.Data.GetData("AutomationPipeline") is not AutomationPipelineControl sourcePipeline ||
+            sourcePipeline == this)
+        {
+            return;
+        }
+
+        if (VisualTreeHelper.GetParent(this) is not Panel parentPanel ||
+            !parentPanel.Children.Contains(sourcePipeline))
+        {
+            return;
+        }
+
+        var oldIndex = parentPanel.Children.IndexOf(sourcePipeline);
+        var newIndex = parentPanel.Children.IndexOf(this);
+
+        if (oldIndex == -1 || newIndex == -1)
+        {
+            return;
+        }
+
+        parentPanel.Children.RemoveAt(oldIndex);
+        parentPanel.Children.Insert(newIndex, sourcePipeline);
+        OnChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private async Task RunAsync()
@@ -231,10 +388,7 @@ public class AutomationPipelineControl : UserControl
         if (!string.IsNullOrWhiteSpace(AutomationPipeline.Name))
             return AutomationPipeline.Name;
 
-        if (AutomationPipeline.Trigger is not null)
-            return AutomationPipeline.Trigger.DisplayName;
-
-        return Resource.AutomationPipelineControl_Unnamed;
+        return AutomationPipeline.Trigger is not null ? AutomationPipeline.Trigger.DisplayName : Resource.AutomationPipelineControl_Unnamed;
     }
 
     private string GenerateSubtitle()
@@ -250,6 +404,9 @@ public class AutomationPipelineControl : UserControl
 
         if (AutomationPipeline.Trigger is IPowerModeAutomationPipelineTrigger pm)
             result += $" | {Resource.AutomationPipelineControl_SubtitlePart_PowerMode}: {pm.PowerModeState.GetDisplayName()}";
+
+        if (AutomationPipeline.Trigger is IHybridModeAutomationPipelineTrigger hm)
+            result += $" | {Resource.AutomationPipelineControl_SubtitlePart_HybridMode}: {hm.HybridModeState.GetDisplayName()}";
 
         if (AutomationPipeline.Trigger is IGodModePresetChangedAutomationPipelineTrigger gpt)
         {
@@ -271,15 +428,15 @@ public class AutomationPipelineControl : UserControl
                 result += $" | {Resource.AutomationPipelineControl_SubtitlePart_AtSunset}";
             if (tt.Time is not null)
             {
-                var local = DateTimeExtensions.UtcFrom(tt.Time.Value.Hour, tt.Time.Value.Minute).ToLocalTime();
+                var local = DateTimeExtensions.UtcFrom(tt.Time.Value.Hour, tt.Time.Value.Minute, tt.Time.Value.Second).ToLocalTime();
                 if (tt.Days.IsEmpty() || tt.Days.OrderBy(x => x).SequenceEqual(Enum.GetValues<DayOfWeek>()))
                 {
-                    result += $" | {string.Format(Resource.AutomationPipelineControl_SubtitlePart_AtTime, local.Hour, local.Minute)}";
+                    result += $" | {string.Format(Resource.AutomationPipelineControl_SubtitlePart_AtTime, local.Hour, local.Minute, local.Second)}";
                 }
                 else
                 {
                     var localizedDayStrings = tt.Days.Select(day => Resource.Culture.DateTimeFormat.GetDayName(day));
-                    result += $" | {string.Join(", ", localizedDayStrings)} {string.Format(Resource.AutomationPipelineControl_SubtitlePart_AtTime.ToLower(Resource.Culture), local.Hour, local.Minute)}";
+                    result += $" | {string.Join(", ", localizedDayStrings)} {string.Format(Resource.AutomationPipelineControl_SubtitlePart_AtTime.ToLower(Resource.Culture), local.Hour, local.Minute, local.Second)}";
                 }
             }
         }
@@ -291,91 +448,157 @@ public class AutomationPipelineControl : UserControl
             result += $" | {string.Join(",", wt.Ssids)}";
 
         if (AutomationPipeline.Trigger is IPeriodicAutomationPipelineTrigger pet)
-            result += $" | {Resource.PeriodicActionPipelineTriggerTabItemContent_PeriodMinutes}: {pet.Period.TotalMinutes}";
+        {
+            var totalSeconds = pet.Period.TotalSeconds;
+            if (totalSeconds % 60 == 0 && totalSeconds >= 60)
+            {
+                result += $" | {Resource.PeriodicActionPipelineTriggerTabItemContent_Period}: {pet.Period.TotalMinutes} {Resource.PeriodicActionPipelineTriggerTabItemContent_Minutes}";
+            }
+            else
+            {
+                result += $" | {Resource.PeriodicActionPipelineTriggerTabItemContent_Period}: {totalSeconds} {Resource.PeriodicActionPipelineTriggerTabItemContent_Seconds}";
+            }
+        }
 
         if (AutomationPipeline.Trigger is IDeviceAutomationPipelineTrigger dt && dt.InstanceIds.Length != 0)
             result += $" | {Resource.DevicePipelineTriggerTabItemContent_Devices}: {dt.InstanceIds.Length}";
 
+        if (AutomationPipeline.Trigger is IBatteryPercentageAutomationPipelineTrigger bt)
+        {
+            var direction = bt.IsBelow ? Resource.BatteryPercentageAutomationPipelineTriggerTabItemContent_Below : Resource.BatteryPercentageAutomationPipelineTriggerTabItemContent_Above;
+            result += $" | {direction.ToLower()} {bt.Percentage}%";
+        }
+
         return result;
     }
 
-    private Button? GenerateAccessory()
+    private FrameworkElement GenerateAccessory()
     {
+        var accessoryPanel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+
         var triggers = AutomationPipeline.AllTriggers
             .ToArray();
 
-        if (!AutomationPipelineTriggerConfigurationWindow.IsValid(triggers))
-            return null;
-
-        var button = new Button
+        if (AutomationPipelineTriggerConfigurationWindow.IsValid(triggers))
         {
-            Content = Resource.AutomationPipelineControl_Configure,
-            Margin = new(16, 0, 16, 0),
-            MinWidth = 120,
-        };
-        button.Click += (_, _) =>
-        {
-            var window = new AutomationPipelineTriggerConfigurationWindow(triggers) { Owner = Window.GetWindow(this) };
-            window.OnSave += (_, e) =>
+            var button = new Button
             {
-                AutomationPipeline.Trigger = e;
-                _cardHeaderControl.Subtitle = GenerateSubtitle();
-                _cardHeaderControl.Accessory = GenerateAccessory();
-                _cardHeaderControl.SubtitleToolTip = _cardHeaderControl.Subtitle;
-                OnChanged?.Invoke(this, EventArgs.Empty);
+                Content = Resource.AutomationPipelineControl_Configure,
+                Margin = new(16, 0, 0, 0),
+                MinWidth = 120,
             };
-            window.ShowDialog();
+            button.Click += (_, _) =>
+            {
+                var isOr = AutomationPipeline.Trigger is OrAutomationPipelineTrigger;
+                var window = new AutomationPipelineTriggerConfigurationWindow(triggers, isOr) { Owner = Window.GetWindow(this) };
+                window.OnSave += (_, e) =>
+                {
+                    AutomationPipeline.Trigger = e;
+                    _cardHeaderControl.Subtitle = GenerateSubtitle();
+                    _cardHeaderControl.Accessory = GenerateAccessory();
+                    _cardHeaderControl.SubtitleToolTip = _cardHeaderControl.Subtitle;
+                    OnChanged?.Invoke(this, EventArgs.Empty);
+                };
+                window.ShowDialog();
+            };
+            accessoryPanel.Children.Add(button);
+        }
+
+        var dragHandle = new SymbolIcon
+        {
+            Symbol = SymbolRegular.ReOrderDotsVertical24,
+            Margin = new(16, 0, 16, 0),
+            Cursor = Cursors.SizeAll,
+            Opacity = 0.5,
+            VerticalAlignment = VerticalAlignment.Center,
         };
-        return button;
+        dragHandle.MouseLeftButtonDown += (_, e) =>
+        {
+            if (e.ClickCount > 1) return;
+            DragDrop.DoDragDrop(dragHandle, new DataObject("AutomationPipeline", this), DragDropEffects.Move);
+        };
+        accessoryPanel.Children.Add(dragHandle);
+
+        return accessoryPanel;
+    }
+
+    public void DetachStep(AbstractAutomationStepControl step)
+    {
+        _stepsStackPanel.Children.Remove(step);
+        _cardHeaderControl.Subtitle = GenerateSubtitle();
+        _cardHeaderControl.SubtitleToolTip = _cardHeaderControl.Subtitle;
+        OnChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private async Task<AbstractAutomationStepControl> GenerateStepControlAsync(IAutomationStep automationStep)
     {
-        AbstractAutomationStepControl control = automationStep switch
+        AbstractAutomationStepControl control;
+
+        var registry = IoCContainer.Resolve<IAutomationStepRegistry>();
+        var extInfo = registry.Steps.FirstOrDefault(s => s.StepType.IsInstanceOfType(automationStep));
+        if (extInfo is not null)
         {
-            AlwaysOnUsbAutomationStep s => new AlwaysOnUsbAutomationStepControl(s),
-            BatteryAutomationStep s => new BatteryAutomationStepControl(s),
-            BatteryNightChargeAutomationStep s => new BatteryNightChargeAutomationStepControl(s),
-            DeactivateGPUAutomationStep s => new DeactivateGPUAutomationStepControl(s),
-            DelayAutomationStep s => new DelayAutomationStepControl(s),
-            DisplayBrightnessAutomationStep s => new DisplayBrightnessAutomationStepControl(s),
-            DpiScaleAutomationStep s => new DpiScaleAutomationStepControl(s),
-            FlipToStartAutomationStep s => new FlipToStartAutomationStepControl(s),
-            FnLockAutomationStep s => new FnLockAutomationStepControl(s),
-            GodModePresetAutomationStep s => new GodModePresetAutomationStepControl(s),
-            HDRAutomationStep s => new HDRAutomationStepControl(s),
-            HybridModeAutomationStep s => await HybridModeAutomationStepControlFactory.GetControlAsync(s),
-            ITSModeAutomationStep s => new ITSModeAutomationStepControl(s),
-            InstantBootAutomationStep s => new InstantBootAutomationStepControl(s),
-            MacroAutomationStep s => new MacroAutomationStepControl(s),
-            MicrophoneAutomationStep s => new MicrophoneAutomationStepControl(s),
-            NotificationAutomationStep s => new NotificationAutomationStepControl(s),
-            OneLevelWhiteKeyboardBacklightAutomationStep s => new OneLevelWhiteKeyboardBacklightAutomationStepControl(s),
-            OverDriveAutomationStep s => new OverDriveAutomationStepControl(s),
-            OverclockDiscreteGPUAutomationStep s => new OverclockDiscreteGPUAutomationStepControl(s),
-            PanelLogoBacklightAutomationStep s => new PanelLogoBacklightAutomationStepControl(s),
-            PlaySoundAutomationStep s => new PlaySoundAutomationStepControl(s),
-            PortsBacklightAutomationStep s => new PortsBacklightAutomationStepControl(s),
-            PowerModeAutomationStep s => new PowerModeAutomationStepControl(s),
-            QuickActionAutomationStep s => new QuickActionAutomationStepControl(s),
-            RefreshRateAutomationStep s => new RefreshRateAutomationStepControl(s),
-            ResolutionAutomationStep s => new ResolutionAutomationStepControl(s),
-            RGBKeyboardBacklightAutomationStep s => new RGBKeyboardBacklightAutomationStepControl(s),
-            RunAutomationStep s => new RunAutomationStepControl(s),
-            SpeakerAutomationStep s => new SpeakerAutomationStepControl(s),
-            SpectrumKeyboardBacklightBrightnessAutomationStep s => new SpectrumKeyboardBacklightBrightnessAutomationStepControl(s),
-            SpectrumKeyboardBacklightImportProfileAutomationStep s => new SpectrumKeyboardBacklightImportProfileAutomationStepControl(s),
-            SpectrumKeyboardBacklightProfileAutomationStep s => new SpectrumKeyboardBacklightProfileAutomationStepControl(s),
-            TurnOffMonitorsAutomationStep s => new TurnOffMonitorsAutomationStepControl(s),
-            TurnOffWiFiAutomationStep s => new TurnOffWiFiAutomationStepControl(s),
-            TurnOnWiFiAutomationStep s => new TurnOnWiFiAutomationStepControl(s),
-            TouchpadLockAutomationStep s => new TouchpadLockAutomationStepControl(s),
-            WhiteKeyboardBacklightAutomationStep s => new WhiteKeyboardBacklightAutomationStepControl(s),
-            WinKeyAutomationStep s => new WinKeyAutomationStepControl(s),
-            CloseAutomationStep s => new CloseAutomationStepControl(s),
-            FloatingGadgetAutomationStep s => new FloatingGadgetAutomationStepControl(s),
-            _ => throw new InvalidOperationException("Unknown step type"),
-        };
+            control = (AbstractAutomationStepControl)Activator.CreateInstance(extInfo.ControlType, automationStep)!;
+        }
+        else
+        {
+            control = automationStep switch
+            {
+                AlwaysOnUsbAutomationStep s => new AlwaysOnUsbAutomationStepControl(s),
+                BatteryAutomationStep s => new BatteryAutomationStepControl(s),
+                BatteryNightChargeAutomationStep s => new BatteryNightChargeAutomationStepControl(s),
+                DeactivateGPUAutomationStep s => new DeactivateGPUAutomationStepControl(s),
+                DelayAutomationStep s => new DelayAutomationStepControl(s),
+                DisplayBrightnessAutomationStep s => new DisplayBrightnessAutomationStepControl(s),
+                DpiScaleAutomationStep s => new DpiScaleAutomationStepControl(s),
+                FlipToStartAutomationStep s => new FlipToStartAutomationStepControl(s),
+                FnLockAutomationStep s => new FnLockAutomationStepControl(s),
+                CycleGodModePresetAutomationStep s => new CycleGodModePresetAutomationStepControl(s),
+                GodModePresetAutomationStep s => new GodModePresetAutomationStepControl(s),
+                HardwareSensorsAutomationStep s => new HardwareSensorsAutomationStepControl(s),
+                HDRAutomationStep s => new HDRAutomationStepControl(s),
+                HybridModeAutomationStep s => await HybridModeAutomationStepControlFactory.GetControlAsync(s),
+                ITSModeAutomationStep s => new ITSModeAutomationStepControl(s),
+                InstantBootAutomationStep s => new InstantBootAutomationStepControl(s),
+                MacroAutomationStep s => new MacroAutomationStepControl(s),
+                MicrophoneAutomationStep s => new MicrophoneAutomationStepControl(s),
+                NotificationAutomationStep s => new NotificationAutomationStepControl(s),
+                OneLevelWhiteKeyboardBacklightAutomationStep s => new OneLevelWhiteKeyboardBacklightAutomationStepControl(s),
+                OverDriveAutomationStep s => new OverDriveAutomationStepControl(s),
+                OverclockDiscreteGPUAutomationStep s => new OverclockDiscreteGPUAutomationStepControl(s),
+                PanelLogoBacklightAutomationStep s => new PanelLogoBacklightAutomationStepControl(s),
+                PlaySoundAutomationStep s => new PlaySoundAutomationStepControl(s),
+                PortsBacklightAutomationStep s => new PortsBacklightAutomationStepControl(s),
+                PowerModeAutomationStep s => new PowerModeAutomationStepControl(s),
+                QuickActionAutomationStep s => new QuickActionAutomationStepControl(s),
+                RefreshRateAutomationStep s => new RefreshRateAutomationStepControl(s),
+                ResolutionAutomationStep s => new ResolutionAutomationStepControl(s),
+                RGBKeyboardBacklightAutomationStep s => new RGBKeyboardBacklightAutomationStepControl(s),
+                RunAutomationStep s => new RunAutomationStepControl(s),
+                SpeakerAutomationStep s => new SpeakerAutomationStepControl(s),
+                SpeakerVolumeAutomationStep s => new SpeakerVolumeAutomationStepControl(s),
+                SpectrumKeyboardBacklightBrightnessAutomationStep s => new SpectrumKeyboardBacklightBrightnessAutomationStepControl(s),
+                SpectrumKeyboardBacklightImportProfileAutomationStep s => new SpectrumKeyboardBacklightImportProfileAutomationStepControl(s),
+                SpectrumKeyboardBacklightProfileAutomationStep s => new SpectrumKeyboardBacklightProfileAutomationStepControl(s),
+                TurnOffMonitorsAutomationStep s => new TurnOffMonitorsAutomationStepControl(s),
+                WiFiAutomationStep s => new WiFiAutomationStepControl(s),
+                AirplaneModeAutomationStep s => new AirplaneModeAutomationStepControl(s),
+                TouchpadLockAutomationStep s => new TouchpadLockAutomationStepControl(s),
+                WhiteKeyboardBacklightAutomationStep s => new WhiteKeyboardBacklightAutomationStepControl(s),
+                WinKeyAutomationStep s => new WinKeyAutomationStepControl(s),
+                CloseAppAutomationStep s => new CloseAppAutomationStepControl(s),
+                ShowAppAutomationStep s => new ShowAppAutomationStepControl(s),
+                OsdAutomationStep s => new OsdAutomationStepControl(s),
+                OsdLockPositionAutomationStep s => new OsdLockPositionAutomationStepControl(s),
+                FanMaxSpeedAutomationStep s => new FanMaxSpeedAutomationStepControl(s),
+                _ => throw new InvalidOperationException("Unknown step type"),
+            };
+        }
+
         control.MouseRightButtonUp += (_, e) =>
         {
             ShowContextMenu(control);
@@ -390,11 +613,138 @@ public class AutomationPipelineControl : UserControl
             if (s is AbstractAutomationStepControl step)
                 DeleteStep(step);
         };
+        control.DragEnded += (_, _) => CleanupAdorner();
+        control.AllowDrop = true;
+        control.PreviewDragOver += Control_PreviewDragOver;
+        control.Drop += HandleDrop;
+        control.GiveFeedback += Control_GiveFeedback;
         return control;
+    }
+
+    private DragAdorner? _adorner;
+
+    private void Control_PreviewDragOver(object sender, DragEventArgs e)
+    {
+        if (!e.Data.GetDataPresent("AutomationStep") && !e.Data.GetDataPresent("AutomationPipeline"))
+        {
+            return;
+        }
+
+        e.Effects = DragDropEffects.Move;
+        e.Handled = true;
+
+        var position = e.GetPosition(this);
+        if (_adorner == null)
+        {
+            UIElement? source = null;
+            if (e.Data.GetDataPresent("AutomationStep"))
+                source = e.Data.GetData("AutomationStep") as UIElement;
+            else if (e.Data.GetDataPresent("AutomationPipeline"))
+                source = e.Data.GetData("AutomationPipeline") as UIElement;
+
+            if (source != null)
+            {
+                var adornerLayer = AdornerLayer.GetAdornerLayer(this);
+                if (adornerLayer != null)
+                {
+                    var offset = new Point(10, 10);
+                    _adorner = new DragAdorner(this, source, offset);
+                    adornerLayer.Add(_adorner);
+                }
+            }
+        }
+        _adorner?.UpdatePosition(position);
+    }
+
+    private void Control_GiveFeedback(object sender, GiveFeedbackEventArgs e)
+    {
+        if (e.Effects.HasFlag(DragDropEffects.Move))
+        {
+            Mouse.SetCursor(Cursors.SizeAll);
+            e.UseDefaultCursors = false;
+        }
+        else
+        {
+            e.UseDefaultCursors = true;
+        }
+
+        e.Handled = true;
+    }
+
+    private void CleanupAdorner()
+    {
+        if (_adorner == null)
+        {
+            return;
+        }
+
+        var adornerLayer = AdornerLayer.GetAdornerLayer(this);
+        adornerLayer?.Remove(_adorner);
+        _adorner = null;
+    }
+
+    private void HandleDrop(object sender, DragEventArgs e)
+    {
+        CleanupAdorner();
+
+        if (sender is not AbstractAutomationStepControl targetControl ||
+            !e.Data.GetDataPresent("AutomationStep"))
+        {
+            return;
+        }
+
+        var sourceControl = e.Data.GetData("AutomationStep") as AbstractAutomationStepControl;
+        if (sourceControl is null || sourceControl == targetControl)
+            return;
+
+        if (!_stepsStackPanel.Children.Contains(sourceControl))
+        {
+            var sourceParent = FindParentAutomationPipelineControl(sourceControl);
+            if (sourceParent == null)
+            {
+                return;
+            }
+
+            sourceParent.DetachStep(sourceControl);
+            var newIndex = _stepsStackPanel.Children.IndexOf(targetControl);
+            if (newIndex != -1)
+                _stepsStackPanel.Children.Insert(newIndex, sourceControl);
+            else
+                _stepsStackPanel.Children.Add(sourceControl);
+
+            OnChanged?.Invoke(this, EventArgs.Empty);
+        }
+        else
+        {
+            var oldIndex = _stepsStackPanel.Children.IndexOf(sourceControl);
+            var newIndex = _stepsStackPanel.Children.IndexOf(targetControl);
+
+            if (oldIndex == -1 || newIndex == -1)
+            {
+                return;
+            }
+
+            _stepsStackPanel.Children.RemoveAt(oldIndex);
+            _stepsStackPanel.Children.Insert(newIndex, sourceControl);
+            OnChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private static AutomationPipelineControl? FindParentAutomationPipelineControl(DependencyObject child)
+    {
+        var parent = VisualTreeHelper.GetParent(child);
+        while (parent != null)
+        {
+            if (parent is AutomationPipelineControl control)
+                return control;
+            parent = VisualTreeHelper.GetParent(parent);
+        }
+        return null;
     }
 
     private void ShowContextMenu(FrameworkElement control)
     {
+        CleanupAdorner();
         var menuItems = new List<MenuItem>();
 
         var index = _stepsStackPanel.Children.IndexOf(control);

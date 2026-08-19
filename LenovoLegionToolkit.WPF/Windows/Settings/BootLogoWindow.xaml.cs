@@ -1,11 +1,11 @@
-﻿using LenovoLegionToolkit.Lib.System;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
+using LenovoLegionToolkit.Lib.System;
 using LenovoLegionToolkit.Lib.Utils;
 using LenovoLegionToolkit.WPF.Resources;
 using Microsoft.Win32;
-using System;
-using System.Linq;
-using System.Windows;
-using System.Windows.Input;
 
 namespace LenovoLegionToolkit.WPF.Windows.Settings;
 
@@ -33,6 +33,7 @@ public partial class BootLogoWindow
         _customStatus.Visibility = enabled ? Visibility.Visible : Visibility.Collapsed;
         _customizeButton.Visibility = enabled ? Visibility.Collapsed : Visibility.Visible;
         _revertToDefaultButton.Visibility = enabled ? Visibility.Visible : Visibility.Collapsed;
+        _disableAnimationCheckBox.Visibility = enabled ? Visibility.Collapsed : Visibility.Visible;
     }
 
     private async void RevertToDefaultButton_Click(object sender, RoutedEventArgs e)
@@ -42,6 +43,7 @@ public partial class BootLogoWindow
             _revertToDefaultButton.IsEnabled = false;
 
             await BootLogo.DisableAsync();
+            await HandleAnimationAsync();
 
             _resultTextBlock.Text = Resource.BootLogoWindow_SetDefaultSuccess;
 
@@ -81,6 +83,7 @@ public partial class BootLogoWindow
             var file = ofd.FileName;
 
             await BootLogo.EnableAsync(file);
+            await HandleAnimationAsync();
 
             _resultTextBlock.Text = Resource.BootLogoWindow_SetCustomSuccess;
 
@@ -95,6 +98,19 @@ public partial class BootLogoWindow
         finally
         {
             _customizeButton.IsEnabled = true;
+        }
+    }
+
+    private async Task HandleAnimationAsync()
+    {
+        try
+        {
+            var disable = _disableAnimationCheckBox.IsChecked == true;
+            await BootLogo.SetWindowsBootAnimationAsync(disable).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            Log.Instance.Trace($"Failed to set boot animation. [ex={ex.Message}]");
         }
     }
 
